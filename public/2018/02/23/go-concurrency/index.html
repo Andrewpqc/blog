@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="goroutine,channel,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Go语言有两种并发编程的风格：一种是goroutine和通道，它们支持通信顺序进程(Communicating Sequential Process,CSP),CSP是一种并发的模式，可以在不同的执行体(goroutine)之间传递值，但是变量本身局限于单一的执行体。另一种是共享内存多线程的传统模型，它们和在其他的主流语言中使用的线程类似。在这里主要介绍goroutine和通道。 goroutin">
+<meta name="keywords" content="goroutine,channel">
+<meta property="og:type" content="article">
+<meta property="og:title" content="go语言并发编程——goroutine和通道">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/02/23/go-concurrency/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="Go语言有两种并发编程的风格：一种是goroutine和通道，它们支持通信顺序进程(Communicating Sequential Process,CSP),CSP是一种并发的模式，可以在不同的执行体(goroutine)之间传递值，但是变量本身局限于单一的执行体。另一种是共享内存多线程的传统模型，它们和在其他的主流语言中使用的线程类似。在这里主要介绍goroutine和通道。 goroutin">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/go.jpeg">
+<meta property="og:updated_time" content="2018-03-02T12:57:20.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="go语言并发编程——goroutine和通道">
+<meta name="twitter:description" content="Go语言有两种并发编程的风格：一种是goroutine和通道，它们支持通信顺序进程(Communicating Sequential Process,CSP),CSP是一种并发的模式，可以在不同的执行体(goroutine)之间传递值，但是变量本身局限于单一的执行体。另一种是共享内存多线程的传统模型，它们和在其他的主流语言中使用的线程类似。在这里主要介绍goroutine和通道。 goroutin">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/go.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/02/23/go-concurrency/">
+
+
+
+
+
+  <title>go语言并发编程——goroutine和通道 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/02/23/go-concurrency/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">go语言并发编程——goroutine和通道</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-02-23T16:05:26+08:00">
+                2018-02-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/GO/" itemprop="url" rel="index">
+                    <span itemprop="name">GO</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/02/23/go-concurrency/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/02/23/go-concurrency/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="/images/go.jpeg" alt="go"><br>Go语言有两种并发编程的风格：一种是goroutine和通道，它们支持通信顺序进程(Communicating Sequential Process,CSP),CSP是一种并发的模式，可以在不同的执行体(goroutine)之间传递值，但是变量本身局限于单一的执行体。另一种是共享内存多线程的传统模型，它们和在其他的主流语言中使用的线程类似。在这里主要介绍goroutine和通道。</p>
+<h1 id="goroutine"><a href="#goroutine" class="headerlink" title="goroutine"></a>goroutine</h1><h2 id="概念及本质"><a href="#概念及本质" class="headerlink" title="概念及本质"></a>概念及本质</h2><p>在Go语言中每一个并发执行的活动称为goroutine.这一概念初看上去和线程有些相似，但实际上<strong>goroutine并不是线程，它只是对线程的多路复用</strong>。一个goroutine在<strong>启动时只需要一个非常小的栈</strong>，并且这个栈可以按需扩展和缩小(在GO1.4中，goroutine启动时的栈大小仅为2KB)。正是因为<strong>goroutine的轻量级</strong>，所以<strong>goroutine的数量可以比线程的数量多得多</strong>。当一个goroutine被阻塞时，它也会阻塞所复用的操作系统线程，而运行时环境(runtime)则会把位于被阻塞线程上的其他goroutine移动到其他未阻塞的线程上继续运行。</p>
+<h2 id="使用goroutine"><a href="#使用goroutine" class="headerlink" title="使用goroutine"></a>使用goroutine</h2><p>goroutine的用法非常简单:只要把go关键字添加到任意一个具名函数或者匿名函数的前面，该函数就会成为一个goroutine。特殊的，当一个程序启动时，有一个goroutine来调用main函数，称它为主goroutine。其他的新的goroutine都是通过go语句进行创建。go语句本身的执行立即完成，并不会阻塞程序继续向下执行。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">f()   <span class="comment">//调用f();等待它返回</span></span><br><span class="line"><span class="keyword">go</span> f()<span class="comment">//新建一个调用f()的goroutine,不用等待</span></span><br></pre></td></tr></table></figure>
+
+<p>下面是一个使用goroutine的例子:主goroutine中新建了一个goroutine用于指示程序仍然在运行，而主goroutine本身仍然在进行求45个斐波那契数的计算。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">go</span> spinner(<span class="number">100</span> * time.Millisecond)</span><br><span class="line">    fmt.Println(fib(<span class="number">45</span>))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">spinner</span><span class="params">(delay time.Duration)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> _, d := <span class="keyword">range</span> <span class="string">`-\|/`</span> &#123;</span><br><span class="line">            fmt.Printf(<span class="string">"\r%"</span>, d)</span><br><span class="line">            time.Sleep(delay)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fib</span><span class="params">(a <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &lt; <span class="number">2</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> fib(a<span class="number">-1</span>) + fib(a<span class="number">-2</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过运行该程序我们可以发现，提示符在运行的那一刻起就开始了，与此同时程序在进行着计算，几秒钟之后程序打印出第45个斐波那契数，然后主goroutine退出，我们发现主goroutine创建的goroutine也被暴力的直接终结了。</p>
+<h2 id="等待goroutine"><a href="#等待goroutine" class="headerlink" title="等待goroutine"></a>等待goroutine</h2><p>我们来看下面这个并发程序：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">printNumbers</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> i:=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++&#123;</span><br><span class="line">        fmt.Printf(<span class="string">"%d "</span>,i)</span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">printLetters</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> i:=<span class="string">'A'</span>;i&lt;<span class="number">10</span>+<span class="string">'A'</span>;i++&#123;</span><br><span class="line">        fmt.Printf(<span class="string">"% "</span>,i)</span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">go</span> printNumbers()</span><br><span class="line">    <span class="keyword">go</span> printLetters()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们运行程序，发现程序并没有产生任何输出！这是因为在该用例中，主goroutine在它的两个goroutine能够产生输出之前就已经结束了，结束之前还暴力的终结了刚刚创建的两个goroutine。显然，我们需要一种机制使程序可以在确保所有goroutine都已经执行完毕的情况下，再执行下一项工作。</p>
+<p>为此，GO语言在<strong>sync</strong>包中提供了一种名为<strong>等待组</strong>(WaitGroup)的机制，它的运作方式非常简单直接:</p>
+<ul>
+<li>声明一个等待组；</li>
+<li>使用<strong>Add</strong>方法为等待组的计时器设置值;</li>
+<li>当一个goroutine完成它的工作时，使用<strong>Done</strong>方法对等待组的计时器执行减一操作；</li>
+<li>调用<strong>Wait</strong>方法，该方法将一直阻塞，直达等待组计数器的值变为0.</li>
+</ul>
+<p>下面是添加等待的版本:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"sync"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">printNumbers</span><span class="params">(wg *sync.WaitGroup)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> i:=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++&#123;</span><br><span class="line">        fmt.Printf(<span class="string">"%d "</span>,i)</span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println()</span><br><span class="line">    wg.Done()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">printLetters</span><span class="params">(wg *sync.WaitGroup)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> i:=<span class="string">'A'</span>;i&lt;<span class="number">10</span>+<span class="string">'A'</span>;i++&#123;</span><br><span class="line">        fmt.Printf(<span class="string">"% "</span>,i)</span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println()</span><br><span class="line">    g.Done()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">    wg.Add(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">go</span> printNumbers(&amp;wg)</span><br><span class="line">    <span class="keyword">go</span> printLetters(&amp;wg)</span><br><span class="line">    wg.Wait()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出(您的输出可能有所不同):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">A B C D E F G H I J </span><br><span class="line">0 1 2 3 4 5 6 7 8 9</span><br></pre></td></tr></table></figure>
+
+<p>如上，程序产生了我们期望的输出:&gt;)</p>
+<h1 id="通道"><a href="#通道" class="headerlink" title="通道"></a>通道</h1><p>在上面我们已经知道怎样通过go关键字将普通函数转换成goroutine以便让其独立运行，还知道可以设置等待组来同步独立运行的多个goroutine。下面我们将要学习如何使用通道在多个不同的goroutine之间通信。</p>
+<h2 id="基本语法及性质"><a href="#基本语法及性质" class="headerlink" title="基本语法及性质"></a>基本语法及性质</h2><p>通道是一种带有类型的值，它可以让不同的goroutine互相通信。通道用make函数创建，该函数在被调用之后将返回一个指向底层数据结构的引用作为结果值。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">unbufferedChannel:=<span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">bufferChannel:=<span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>, <span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如上，我们创建了两个可以容纳int类型值的通道，一个是<strong>无缓冲通道</strong>，一个是<strong>有缓冲通道</strong>。如果用户在创建通道的时候，向make函数提供了可选的第三个参数，那么make函数将创建出一个带有给定大小缓冲区的缓冲通道;未给定可选参数或者可选参数给定的为0,创建的都是无缓冲通道，也叫做<strong>同步通道</strong>。</p>
+<p>像map一样，通道是一个使用make创建的数据结构的引用，当复制或者作为参数传递到一个函数时，复制的是引用，这样调用者和被调用者都引用同一份数据结构。</p>
+<p>通道有两个主要操作，发送和接收，发送语句从一个goroutine传输一个值到另一个在执行接收表达式的goroutine。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ch &lt;- x <span class="comment">//把x发送到通道ch</span></span><br><span class="line">a:= &lt;-ch <span class="comment">//从通道ch取值赋给变量a</span></span><br><span class="line">&lt;-ch    <span class="comment">//从通道ch取一个值，并丢弃。</span></span><br></pre></td></tr></table></figure>
+
+<p>通道还支持第三个操作：关闭。关闭操作设置一个标志位来指示值当前已经发送完毕，这个通道后面没有值了。针对关闭后的通道的发送操作将导致宕机。在一个已经关闭的通道上进行接收操作，将获取所有已经发送的值，直到通道为空，这时任何接收操作会立即完成，同时获取到一个通道元素对应的零值。关闭通道使用内置的close函数完成：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">close</span>(ch)</span><br></pre></td></tr></table></figure>
+
+<h2 id="无缓冲通道"><a href="#无缓冲通道" class="headerlink" title="无缓冲通道"></a>无缓冲通道</h2><p>无缓冲通道上的发送操作将会阻塞，直到另一个goroutine在对应的通道上执行接收操作，这时值传送完成，两个goroutine都可以继续执行。相反，如果接收操作先执行，接收方goroutine将阻塞，直到另一个goroutine在通道上发送一个值。</p>
+<p>使用无缓冲通道进行通信导致发送和接收goroutine同步化，因此，无缓冲通道才被称为同步通道。</p>
+<p>利用无缓冲通道的同步化特点，我们也可以也可以实现上面等待组实现的功能:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">printNumbers</span><span class="params">(ch <span class="keyword">chan</span> <span class="keyword">int</span>)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> i:=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++&#123;</span><br><span class="line">        fmt.Printf(<span class="string">"%d "</span>,i)</span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println()</span><br><span class="line">    ch&lt;<span class="number">-1</span> </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">printLetters</span><span class="params">(ch <span class="keyword">chan</span> <span class="keyword">int</span>)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> i:=<span class="string">'A'</span>;i&lt;<span class="number">10</span>+<span class="string">'A'</span>;i++&#123;</span><br><span class="line">        fmt.Printf(<span class="string">"% "</span>,i)</span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println()</span><br><span class="line">    ch&lt;<span class="number">-1</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    ch1,ch2:=<span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>),<span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">    <span class="keyword">go</span> printNumbers(ch1)</span><br><span class="line">    <span class="keyword">go</span> printLetters(ch2)</span><br><span class="line">    &lt;-ch1</span><br><span class="line">    &lt;-ch2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="缓冲通道"><a href="#缓冲通道" class="headerlink" title="缓冲通道"></a>缓冲通道</h2><p>缓冲通道有一个元素队列，队列的最大长度在创建的时候通过make的容量参数来设置，如下可以创建一个可以容纳三个字符串的缓冲通道:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ch:=<span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">string</span>, <span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+
+<p>缓冲通道上的发送操作在队列的尾部插入一个元素，接收操作从队列的头部移除一个元素。如果通道满了，发送操作将会阻塞所在goroutine直到另一个goroutine对它进行接收操作来留出可用的空间。反过来，如果通道是空的，执行接收操作的goroutine阻塞，直到另一个goroutine在通道上发送数据。</p>
+<p>通道既不满也不空时，接收操作和发送操作都不会阻塞，通过这种方式，通道的缓冲区将发送和接收操作进行了解耦。</p>
+<p>有时，程序需要知道缓冲通道的缓冲区的容量或者当前存储的元素个数，可以通过内置的<strong>cap</strong>,<strong>len</strong>函数求得：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">n:=<span class="built_in">cap</span>(ch)<span class="comment">//求缓冲通道的容量</span></span><br><span class="line">m:=<span class="built_in">len</span>(ch)<span class="comment">//求缓冲通道当前元素个数</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="管道"><a href="#管道" class="headerlink" title="管道"></a>管道</h2><p>通道可以用来连接goroutine,这样一个输出是另一个的输入。这种情形叫<strong>管道</strong>(pipeline)。下面的程序由三个goroutine组成，它们被两个通道连接起来，从而形成了一个三级管道。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    naturals := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">    squares := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">//counter</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">for</span> x:=<span class="number">0</span>;;x++&#123;</span><br><span class="line">            naturals&lt;-x</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">//squarer</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">for</span>&#123;</span><br><span class="line">            x:=&lt;-naturals</span><br><span class="line">            squares&lt;-x*x</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">//printer(在主goroutine中)</span></span><br><span class="line">    <span class="keyword">for</span>&#123;</span><br><span class="line">        fmt.Printf(<span class="string">"%d "</span>,&lt;-squares)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>counter产生连续的自然数，通过管道传输到squarer进行平方，平方后的结果又通过管道传输到printer打印出来。正如我们所预料的那样，程序输出了无限的平方序列0,1,4,9，…</p>
+<p>如果我们想生成有限的数字怎么办呢？<br>如果发送方知道没有更多的数据需要发送了，告诉接受者所在goroutine可以停止等待是很有用的，这可以通过调用内置的close函数来关闭通道：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">close</span>(ch)</span><br></pre></td></tr></table></figure>
+
+<p>在通道关闭后，任何后续的发送操作将会导致应用崩溃。当被关闭的通道被读完(就是最后一个发送值被接收)后，所有后续的接收操作顺畅进行，只是获取的是对应通道元素类型的零值。</p>
+<p>没有一个直接的方式来判断是否通道已经关闭，但是这里有接收操作的一个变种，它产生两个结果：一个是接收到的通道值，另一个是一个布尔值(通常称之为ok),它为true时代表接收成功，为false代表当前的接收操作在一个关闭并且读完的通道上。利用这一特性我们可以修改squarer:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//sqarer</span></span><br><span class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>&#123;</span><br><span class="line">        x,ok:=&lt;-naturals</span><br><span class="line">        <span class="keyword">if</span> !ok&#123;<span class="comment">//naturals通道已经关闭，并且值接收完成</span></span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">        squares&lt;-x*x</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">close</span>(squares)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的语法比较笨拙，而模式比较通用，所以go语言提供了range循环语法以在通道上迭代。这个语法更方便接收在通道上所有发送值，接受完最后一个值后关闭循环。下面是利用这一特性改写之后的程序：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    naturals := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">    squares := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">//counter</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">for</span> x:=<span class="number">0</span>;x&lt;<span class="number">10</span>;x++&#123;</span><br><span class="line">            naturals&lt;-x</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">close</span>(naturals)</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">//squarer</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">for</span> x:=<span class="keyword">range</span> naturals&#123;</span><br><span class="line">            squares&lt;-x*x</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">close</span>(squares)</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">//printer(在主goroutine中)</span></span><br><span class="line">    <span class="keyword">for</span> m:=<span class="keyword">range</span> squares&#123;</span><br><span class="line">        fmt.Printf(<span class="string">"%d "</span>,m)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结束时关闭每一个通道并不是必需的，只有在通知接收方goroutine所有的数据都发送完毕的时候才需要关闭通道。</p>
+<h2 id="缓冲与无缓冲的选择"><a href="#缓冲与无缓冲的选择" class="headerlink" title="缓冲与无缓冲的选择"></a>缓冲与无缓冲的选择</h2><p>缓冲通道和无缓冲通道的选择、缓冲通道容量的选择都会对程序的正确性产生影响。无缓冲通道提供强同步保障，因为每一次发送都需要和对应的接收同步；对于缓冲通道，这些操作则是解耦的。在通常情况下，如果我们知道要发送的值数量的上限，我们会创建一个容量为此上限的缓冲通道，在接收第一个值之前就完成所有的发送。</p>
+<h1 id="goroutine和通道应用技巧"><a href="#goroutine和通道应用技巧" class="headerlink" title="goroutine和通道应用技巧"></a>goroutine和通道应用技巧</h1><h2 id="通用的并行循环模式"><a href="#通用的并行循环模式" class="headerlink" title="通用的并行循环模式"></a>通用的并行循环模式</h2><p>我们来看看一些通用的并行模式，来并行执行所有的循环迭代。考虑一个生成全尺寸图片缩略图的程序，下面的程序在每一个图像文件名字列表上进行循环，然后给每一个图像产生一副缩略图:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeThumbnails</span><span class="params">(filenames []<span class="keyword">string</span>)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> _,f:=<span class="keyword">range</span> filenames&#123;</span><br><span class="line">        <span class="keyword">if</span> _,err:=thumbnail.ImageFile(f);err!=<span class="literal">nil</span>&#123;</span><br><span class="line">            log.Println(err)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很显然，处理文件的顺序没有关系，因为每一个缩放操作和其他的操作独立。像这样由一些完全独立的子问题组成的问题称为<strong>高度并行</strong>。高度并行的问题是最容易实现并行的，有许多并行机制来实现线性扩展。如下，我们给每一个任务一个go关键字:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeThumbnails2</span><span class="params">(filenames []<span class="keyword">string</span>)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> _,f:=<span class="keyword">range</span> filenames&#123;</span><br><span class="line">        <span class="keyword">go</span> thumbnail.ImageFile(f)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>让这些任务并行去执行。如果我们运行这个函数，会发现它运行的实在是太快了，快的让人不敢相信，并且它也没有按照我们的预期生成缩略图。原因是函数在没有完成想要完成的事情之前就已经返回了。它启动了所有的goroutine,每一个文件一个，但是没有等他们执行完毕。</p>
+<p>要想解决上面的问题，方法就是使用上文中已经提到的<strong>同步通道</strong>或<strong>等待组</strong>。用这两种方法的示例代码如下:<br><strong>使用同步通道</strong>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeThumbnails3</span><span class="params">(filenames []<span class="keyword">string</span>)</span></span>&#123;</span><br><span class="line">    ch:=<span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    for_,f:=<span class="keyword">range</span> filenames&#123;</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(f <span class="keyword">string</span>)</span></span>&#123;</span><br><span class="line">            thumbnail.ImageFile(f)</span><br><span class="line">            ch&lt;-<span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">        &#125;(f)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> <span class="keyword">range</span> filenames&#123;</span><br><span class="line">        &lt;-ch</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用等待组</strong>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeThumbnails3</span><span class="params">(filenames []<span class="keyword">string</span>)</span></span>&#123;</span><br><span class="line">    <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">    for_,f:=<span class="keyword">range</span> filenames&#123;</span><br><span class="line">        wg.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(f <span class="keyword">string</span>)</span></span>&#123;</span><br><span class="line">            <span class="keyword">defer</span> wg.Done()</span><br><span class="line">            thumbnail.ImageFile(f)</span><br><span class="line">        &#125;(f)</span><br><span class="line">    &#125;</span><br><span class="line">    wg.Wait()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="限制并发数量"><a href="#限制并发数量" class="headerlink" title="限制并发数量"></a>限制并发数量</h2><p>我们来看一个简单的网络爬虫,它以广度优先的顺序来探索网页的链接：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">crawl</span><span class="params">(url <span class="keyword">string</span>)</span>[]<span class="title">string</span></span>&#123;</span><br><span class="line">    fmt.Println(url)</span><br><span class="line">    list,err:=links.Extract(url)</span><br><span class="line">    <span class="keyword">if</span> err!=<span class="literal">nil</span>&#123;</span><br><span class="line">        log.Println(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> list</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    worklist:=<span class="built_in">make</span>(<span class="keyword">chan</span> []<span class="keyword">string</span>)</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;worklist&lt;-os.Args[<span class="number">1</span>:]&#125;()</span><br><span class="line"></span><br><span class="line">    seen:=<span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span>)</span><br><span class="line">    <span class="keyword">for</span> list:=<span class="keyword">range</span> worklist&#123;</span><br><span class="line">        <span class="keyword">for</span> _,url:=<span class="keyword">range</span> list&#123;</span><br><span class="line">            <span class="keyword">if</span> !seen[url]&#123;</span><br><span class="line">                seen[url]=<span class="literal">true</span></span><br><span class="line">                <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(u <span class="keyword">string</span>)</span></span>&#123;</span><br><span class="line">                    worklist&lt;-crawl(url)</span><br><span class="line">                &#125;(url)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序首先从命令行收集起始的url，然后并发的爬取这些页面并且从中提取出页面的新url,如果是之前已经爬取的页面则不再爬取，并且将这些新的url发送至通道中，供程序继续爬取。可见我们是通过对crawl的独立调用从而充分的利用了Web上的I/O并行机制。</p>
+<p>这个爬虫高度并发，但是它有两个问题。一个是程序的并行度太高，一下子会创建太多的网络连接，超过程序能打开文件的限制。第二是这个程序永远不会结束。</p>
+<p>无限制的并行通常不是一个好主意，因为系统中总有限制因素。例如对于计算型应用CPU核数，对于磁盘I/O操作磁头和磁盘的个数，下载流所使用的网络带宽，或者Web服务本身的容量等等。解决高并行的方法就是根据资源的可用情况限制并发的个数，以匹配合适的并行度。对于上面的程序我们有一个简单的方法就是确保对于_links.Extract()_的同时调用不超过n个。我们可以使用容量为n的缓冲通道来建立一个并发原语，称为<strong><em>计数信号量</em></strong>。概念上，对于缓冲通道中的n个空闲槽，每一个代表一个令牌，持有者可以执行，通过发送一个值到通道中领取令牌，从通道中接受一个值来释放令牌，创建一个新的空闲槽。这保证了在没有接收操作的时候，最多同时有n个发送。因为通道元素的类型在这里并不重要，所以我们使用struct{},它所占用的空间的大小为0.</p>
+<p>同时，为了让程序终止，当任务列表为空且爬取goroutine都结束以后，需要从主循环退出。基于以上两点我们可以做出如下的改进:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> tokens = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;,<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">crawl</span><span class="params">(url <span class="keyword">string</span>)</span>[]<span class="title">string</span></span>&#123;</span><br><span class="line">    fmt.Println(url)</span><br><span class="line">    tokens&lt;-<span class="keyword">struct</span>&#123;&#125;&#123;&#125;<span class="comment">//获取令牌</span></span><br><span class="line">    list,err:=links.Extract(url)</span><br><span class="line">    &lt;-tokens　　　　　　<span class="comment">//释放令牌</span></span><br><span class="line">    <span class="keyword">if</span> err!=<span class="literal">nil</span>&#123;</span><br><span class="line">        log.Println(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> list</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    worklist:=<span class="built_in">make</span>(<span class="keyword">chan</span> []<span class="keyword">string</span>)</span><br><span class="line">    <span class="keyword">var</span> n <span class="keyword">int</span></span><br><span class="line">    n ++  <span class="comment">//n用来记录任务列表中的任务个数</span></span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span> <span class="params">()</span></span>&#123;worklist&lt;-os.Args[<span class="number">1</span>:]&#125;()</span><br><span class="line">    seen:=<span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span>)</span><br><span class="line">    <span class="keyword">for</span> ;n&gt;<span class="number">0</span>;n--&#123;</span><br><span class="line">        list := &lt;-worklist</span><br><span class="line">        <span class="keyword">for</span> _,link:=<span class="keyword">range</span> list&#123;</span><br><span class="line">            <span class="keyword">if</span> !seen[link]&#123;</span><br><span class="line">                seen[link] = <span class="literal">true</span></span><br><span class="line">                n++</span><br><span class="line">                <span class="keyword">go</span> <span class="function"><span class="keyword">func</span> <span class="params">(link <span class="keyword">string</span>)</span></span>&#123;</span><br><span class="line">                    worklist&lt;-crawl(link)</span><br><span class="line">                &#125;(link)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="节拍器"><a href="#节拍器" class="headerlink" title="节拍器"></a>节拍器</h2><p>在go语言的<strong>time包</strong>中内置了节拍器,time.Tick函数返回一个通道，它定期发送事件，像一个节拍器一样。每个事件的值是一个时间戳，一般我们不关心通道里面的内容，而是把它当做执行定时任务的工具:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    fmt.Println(<span class="string">"Commencing countdown."</span>)</span><br><span class="line">    tick:=time.Tick(<span class="number">1</span>*time.Second)<span class="comment">//时间间隔为１s</span></span><br><span class="line">    <span class="keyword">for</span> countdown:=<span class="number">10</span>;countdown&gt;<span class="number">0</span>;countdown--&#123;</span><br><span class="line">        fmt.Println(countdown)</span><br><span class="line">        &lt;-tick</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上，我们利用节拍器实现了一个倒计时的功能，每一次for循环会被阻塞一秒，这样程序就是一秒输出一个数字。</p>
+<p>Tick函数很方便使用，但是它仅仅在应用的整个生命周期中都需要时才合适，否则我们就需要使用这个模式:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ticker:=time.NewTicker(<span class="number">1</span>*time.Second)</span><br><span class="line">&lt;-ticker.C    <span class="comment">//从ticker的通道里面接收</span></span><br><span class="line">ticker.Stop()　<span class="comment">//当不需要该节拍器之后，可以显式的停止它</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="使用select多路复用"><a href="#使用select多路复用" class="headerlink" title="使用select多路复用"></a>使用select多路复用</h2><p>现在我要给上面的倒计时程序加一个需求，在倒计时的过程中，如果用户按下键盘，则倒计时终止。下面的程序实现了这个需求:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    abort:=<span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span> <span class="params">()</span></span>&#123;</span><br><span class="line">        os.Stdin.Read(<span class="built_in">make</span>([]<span class="keyword">byte</span>,<span class="number">1</span>))</span><br><span class="line">        abort&lt;-<span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println(<span class="string">"Commencing countdown."</span>)</span><br><span class="line">    tick:=time.Tick(<span class="number">1</span>*time.Second)<span class="comment">//时间间隔为１s</span></span><br><span class="line">    <span class="keyword">for</span> countdown:=<span class="number">10</span>;countdown&gt;<span class="number">0</span>;countdown--&#123;</span><br><span class="line">        fmt.Println(countdown)</span><br><span class="line">        <span class="keyword">select</span>&#123;</span><br><span class="line">        <span class="keyword">case</span> &lt;-tick:</span><br><span class="line">            <span class="comment">//什么都不做</span></span><br><span class="line">        <span class="keyword">case</span> &lt;-abort:</span><br><span class="line">            fmt.Println(<span class="string">"abort...!"</span>)</span><br><span class="line">            <span class="keyword">return</span><span class="comment">//返回，终止  </span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每一次倒计时迭代需要等待事件到达两个通道中的一个：计时器通道(前提是一切顺利，即用户没有按键)，中止事件通道(前提是有异常，即用户按键)。<br>如上，我们使用了一个select语句实现了该功能,下面是select语句的通用形式:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span>&#123;</span><br><span class="line"><span class="keyword">case</span> &lt;-ch1:</span><br><span class="line">    <span class="comment">//code block 1</span></span><br><span class="line"><span class="keyword">case</span> z:&lt;-ch2:</span><br><span class="line">    <span class="comment">//code block 2</span></span><br><span class="line"><span class="keyword">case</span> ch3&lt;-data:</span><br><span class="line">    <span class="comment">//code block 3</span></span><br><span class="line"><span class="keyword">default</span>:</span><br><span class="line">    <span class="comment">//code block</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>像switch语句一样，它有一系列的情况和一个可选的默认分支，每一个情况指定一次通信(在一些通信上进行发送或者接收操作)，和相关联的一段代码块。接收表达式操作可能出现在它本身，像第一种情况，或者在一个短变量声明中，像第二种情况，第二种形式可以让你引用你所接收的值。</p>
+<p>select一直等待，直到一次通信来告知有一些情况可以执行。然后，它进行它进行这次通信，执行此情况所对应的语句；其他的通信将不会发生。对于没有对应情况的select语句，它将会永远等待。当有多个情况同时满足的时候，select随机选择一个，这样保证每一个通道有相同的机会被选中。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/goroutine/" rel="tag"># goroutine</a>
+          
+            <a href="/tags/channel/" rel="tag"># channel</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/09/binary-search-tree-avl/" rel="next" title="平衡二叉树(AVL)">
+                <i class="fa fa-chevron-left"></i> 平衡二叉树(AVL)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/04/build-a-blog-with-hexo/" rel="prev" title="木犀后端分享--hexo博客搭建">
+                木犀后端分享--hexo博客搭建 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#goroutine"><span class="nav-number">1.</span> <span class="nav-text">goroutine</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念及本质"><span class="nav-number">1.1.</span> <span class="nav-text">概念及本质</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用goroutine"><span class="nav-number">1.2.</span> <span class="nav-text">使用goroutine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#等待goroutine"><span class="nav-number">1.3.</span> <span class="nav-text">等待goroutine</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#通道"><span class="nav-number">2.</span> <span class="nav-text">通道</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本语法及性质"><span class="nav-number">2.1.</span> <span class="nav-text">基本语法及性质</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无缓冲通道"><span class="nav-number">2.2.</span> <span class="nav-text">无缓冲通道</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓冲通道"><span class="nav-number">2.3.</span> <span class="nav-text">缓冲通道</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#管道"><span class="nav-number">2.4.</span> <span class="nav-text">管道</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓冲与无缓冲的选择"><span class="nav-number">2.5.</span> <span class="nav-text">缓冲与无缓冲的选择</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#goroutine和通道应用技巧"><span class="nav-number">3.</span> <span class="nav-text">goroutine和通道应用技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#通用的并行循环模式"><span class="nav-number">3.1.</span> <span class="nav-text">通用的并行循环模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#限制并发数量"><span class="nav-number">3.2.</span> <span class="nav-text">限制并发数量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#节拍器"><span class="nav-number">3.3.</span> <span class="nav-text">节拍器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用select多路复用"><span class="nav-number">3.4.</span> <span class="nav-text">使用select多路复用</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Socket.io,Express,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="WebSocket协议HTTP协议是无状态的，每次处理完客户端的一个(http/1.0)或几个(http/1.1)请求就会立即断开并且。这就导致很难实现客户端与服务器数据的实时同步。以往大家实现实时通信都是通过ajax长轮询，和long poll长连接两种方式。ajax长轮询就是客户端每隔很短的时间就去访问一次服务器，看服务器那里有没有新的数据，如果有就将数据渲染在页面上，没有就一段时间之后又发起">
+<meta name="keywords" content="Socket.io,Express">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Socket.io和Express的聊天室">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/08/31/a-chatroom-based-on-Express-and-Socketio/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="WebSocket协议HTTP协议是无状态的，每次处理完客户端的一个(http/1.0)或几个(http/1.1)请求就会立即断开并且。这就导致很难实现客户端与服务器数据的实时同步。以往大家实现实时通信都是通过ajax长轮询，和long poll长连接两种方式。ajax长轮询就是客户端每隔很短的时间就去访问一次服务器，看服务器那里有没有新的数据，如果有就将数据渲染在页面上，没有就一段时间之后又发起">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-11-15T00:06:27.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于Socket.io和Express的聊天室">
+<meta name="twitter:description" content="WebSocket协议HTTP协议是无状态的，每次处理完客户端的一个(http/1.0)或几个(http/1.1)请求就会立即断开并且。这就导致很难实现客户端与服务器数据的实时同步。以往大家实现实时通信都是通过ajax长轮询，和long poll长连接两种方式。ajax长轮询就是客户端每隔很短的时间就去访问一次服务器，看服务器那里有没有新的数据，如果有就将数据渲染在页面上，没有就一段时间之后又发起">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/08/31/a-chatroom-based-on-Express-and-Socketio/">
+
+
+
+
+
+  <title>基于Socket.io和Express的聊天室 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/08/31/a-chatroom-based-on-Express-and-Socketio/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于Socket.io和Express的聊天室</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-08-31T08:06:27+08:00">
+                2017-08-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/NodeJS/" itemprop="url" rel="index">
+                    <span itemprop="name">NodeJS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/08/31/a-chatroom-based-on-Express-and-Socketio/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/08/31/a-chatroom-based-on-Express-and-Socketio/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="WebSocket协议"><a href="#WebSocket协议" class="headerlink" title="WebSocket协议"></a>WebSocket协议</h1><p>HTTP协议是无状态的，每次处理完客户端的一个(http/1.0)或几个(http/1.1)请求就会立即断开并且。这就导致很难实现客户端与服务器数据的实时同步。以往大家实现实时通信都是通过ajax长轮询，和long poll长连接两种方式。ajax长轮询就是客户端每隔很短的时间就去访问一次服务器，看服务器那里有没有新的数据，如果有就将数据渲染在页面上，没有就一段时间之后又发起相同的请求。如果发起请求的间隔时间够短，就可以给人造成一种实时通信的错觉。ajax请求是一种非阻塞的请求，渲染消息的时候不用重新加载页面，所以用户体验比较好。但是这样频繁的发请求，并且大多数请求是无用的，这对服务器和客户端都造成了巨大的资源浪费。long poll长连接和ajax轮询其实是差不多的,只不过是采用阻塞的方式，如果服务器现在还没有消息，那么就不返回response给他，导致客户端一直在等待,直到等到了消息才返回，返回后又发起一个http请求，又到服务器哪儿去等着。上面的两种方式其实都是客户端不断的发起http请求，服务器被动的接受请求并处理。他们都不是很好的处理这个问题的方式。这时h5中提出了Websocket协议。Websocket解决了下面的几个问题：<br>１．在客户端与服务器首次连接之后，客户端与服务器的地位就平等了，两者之间可以进行真正的全双工通信。不仅客户端可以发送请求给服务器，服务器也可以主动通知客户端了。也就是说客户端再也不用一次一次的到服务器那里去询问有没有新数据，或者傻傻的到服务器那里去等着，直接在有新数据的时候让服务器通知一下客户端就行了。<br>２．首次连接之后，客户端与服务器之间的通信不需要发送头信息了，提高了信息交换的效率。</p>
+<h2 id="Websocket的细节"><a href="#Websocket的细节" class="headerlink" title="Websocket的细节"></a>Websocket的细节</h2><p>首先是客户端发送一个http请求给服务器，这个请求头中包含转换协议的数据，服务器接受到之后就会在之后本次会话的其他心意转为tcp,之后两者就是以tcp协议来交流的，而不是http.由于websocket的这种设计与原来的通过http协议运作的浏览器与服务器的架构有很大的不同，所以websocket的应用需要浏览器和服务器以及中间可能有的代理服务器的共同的支持。好在现在的主流的高版本的浏览器，和主流的高版本的服务器软件都已经支持了websocket这一协议，并且越来越多的产品都在慢慢的支持websocket.</p>
+<h2 id="socket-IO库"><a href="#socket-IO库" class="headerlink" title="socket.IO库"></a>socket.IO库</h2><p>socket.IO是一个基于websocket的一个实时获取浏览器/客户端数据的库，他能够使开发者不必关心websocket底层的细节，而只需要关心自己的业务逻辑，顶层调用非常简单。并且，它还为不支持websocket协议的浏览器，提供了长轮询的透明模拟机制,它会自动根据浏览器从WebSocket、AJAX长轮询、Iframe流等等各种方式中选择最佳的方式来实现网络实时应用，非常方便和人性化，而且支持的浏览器最低达IE5.5。这使得在大部分情境下，你都能通过socket.io与浏览器保持类似长连接的功能。由于nodejs的单线程，异步I/O,事件驱动的特点，它非常适合编写websocket方面的应用。</p>
+<h1 id="用socket-io和express打造聊天室"><a href="#用socket-io和express打造聊天室" class="headerlink" title="用socket.io和express打造聊天室"></a>用socket.io和express打造聊天室</h1><h2 id="下载socket-io"><a href="#下载socket-io" class="headerlink" title="下载socket.io"></a>下载socket.io</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install socket.io</span><br></pre></td></tr></table></figure>
+
+<h2 id="服务器端代码"><a href="#服务器端代码" class="headerlink" title="服务器端代码"></a>服务器端代码</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//导入express并实例化一个app</span></span><br><span class="line"><span class="keyword">var</span> express=<span class="built_in">require</span>(<span class="string">'express'</span>);</span><br><span class="line"><span class="keyword">var</span> app=express();</span><br><span class="line"><span class="comment">//socket.io需要原生node的http模块的支持</span></span><br><span class="line"><span class="keyword">var</span> http=<span class="built_in">require</span>(<span class="string">'http'</span>);</span><br><span class="line"><span class="keyword">var</span> server = http.createServer(app);</span><br><span class="line"><span class="keyword">var</span> io = <span class="built_in">require</span>(<span class="string">'socket.io'</span>)(server);</span><br><span class="line">server.listen(<span class="number">3000</span>);</span><br><span class="line"><span class="comment">//监听客户端的连接，并将连接传入socket</span></span><br><span class="line">io.on(<span class="string">'connection'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">socket</span>) </span>&#123;</span><br><span class="line">		<span class="comment">//当前连接的socket监听客户端的名为'c2s'的数据发送，并将接收到的数据传入msg</span></span><br><span class="line">        socket.on(<span class="string">'c2s'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">msg</span>)</span>&#123;</span><br><span class="line">        		<span class="comment">//向所有的当前在线的客户端发送一个名为's2c'的广播</span></span><br><span class="line">                io.sockets.emit(<span class="string">'s2c'</span>, msg);</span><br><span class="line">        &#125;)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="客户端代码"><a href="#客户端代码" class="headerlink" title="客户端代码"></a>客户端代码</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>聊天| 聊天室<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">h1</span>&gt;</span>欢迎你，<span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">'username'</span>&gt;</span>&#123;&#123;username&#125;&#125;<span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">name</span>=<span class="string">"content"</span> <span class="attr">id</span>=<span class="string">"content"</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"submit"</span>&gt;</span>发布<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">ul</span> <span class="attr">id</span>=<span class="string">"ul"</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">'/socket.io/socket.io.js'</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span> <span class="attr">src</span>=<span class="string">'/public/javascripts/plugin/jquery-1.12.4.js'</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line"><span class="javascript">        $(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span></span><br><span class="line"><span class="javascript">        	<span class="comment">//创建一个sokeet对象，io()是上面的socket.io.js暴露给我们的一个函数</span></span></span><br><span class="line"><span class="javascript">			<span class="keyword">var</span> socket=io.connect(<span class="string">'http://localhost'</span>);</span></span><br><span class="line"><span class="javascript">			<span class="comment">//点击提交触发事件</span></span></span><br><span class="line"><span class="javascript">            $(<span class="string">"#submit"</span>).click(<span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</span></span><br><span class="line"><span class="javascript">            	<span class="comment">//判断输入框中是否有内容</span></span></span><br><span class="line"><span class="javascript">            	<span class="keyword">if</span>($(<span class="string">'#content'</span>).val())&#123;</span></span><br><span class="line"><span class="javascript">            		<span class="comment">//向服务器发送一个名为'c2s'的消息，后面的一个对象为消息的内容</span></span></span><br><span class="line"><span class="javascript">            		socket.emit(<span class="string">"c2s"</span>,&#123;<span class="attr">user</span>:$(<span class="string">"#username"</span>).text(),<span class="attr">content</span>:$(<span class="string">'#content'</span>).val()&#125;);</span></span><br><span class="line"><span class="javascript">            		<span class="comment">//清空输入框</span></span></span><br><span class="line"><span class="javascript">                	$(<span class="string">"#content"</span>).val(<span class="string">''</span>);</span></span><br><span class="line"><span class="javascript">            	&#125;<span class="keyword">else</span>&#123;</span></span><br><span class="line"><span class="javascript">            		<span class="comment">//如果输入框为空，则什么也不做</span></span></span><br><span class="line">            	&#125; </span><br><span class="line">            &#125;);</span><br><span class="line"><span class="javascript">            <span class="comment">//按下enter键触发事件</span></span></span><br><span class="line"><span class="javascript">            $(<span class="string">"#content"</span>).keydown(<span class="function"><span class="keyword">function</span> (<span class="params">e</span>) </span>&#123;</span></span><br><span class="line"><span class="javascript">                    <span class="keyword">if</span>((e.keyCode===<span class="number">13</span>)&amp;&amp;($(<span class="string">'#content'</span>).val())&#123;</span></span><br><span class="line"><span class="javascript">                            socket.emit(<span class="string">"c2s"</span>,&#123;<span class="attr">user</span>:$(<span class="string">"#username"</span>).text(),<span class="attr">content</span>:$(<span class="string">'#content'</span>).val()&#125;);</span></span><br><span class="line"><span class="javascript">                            $(<span class="string">"#content"</span>).val(<span class="string">" "</span>);</span></span><br><span class="line"><span class="javascript">					&#125;<span class="keyword">else</span>&#123;</span></span><br><span class="line"><span class="javascript">						<span class="comment">//啥也不做</span></span></span><br><span class="line">					&#125;</span><br><span class="line">            &#125;);</span><br><span class="line"><span class="javascript">            <span class="comment">//监听服务器发出的's2c'消息，消息内容传入msg        	</span></span></span><br><span class="line"><span class="javascript">            socket.on(<span class="string">'s2c'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">msg</span>)</span>&#123;</span></span><br><span class="line"><span class="javascript">            	<span class="comment">//利用jQuery将消息渲染到页面上</span></span></span><br><span class="line"><span class="javascript">                  $(<span class="string">"#ul"</span>).prepend(<span class="string">"&lt;li&gt;&lt;b&gt;"</span>+msg.user+<span class="string">"&lt;/b&gt;说"</span>+msg.content+<span class="string">"&lt;/li&gt;"</span>)</span></span><br><span class="line">            &#125;);</span><br><span class="line">   		 &#125;);</span><br><span class="line">	<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>当我们的服务器跑起来之后,我们可以直接在浏览器中访问这样一个地址：127.0.0.1:3000/socket.io/socket.io.js,这时我们会发现这一个url已经被劫持了，页面中出现了一个js脚本。我们再回头看一看我们的项目文件夹中，并没有出现socket.io.js这样一个脚本。这个js文件实际放在了服务器端的node_modules文件夹中，在请求这个文件时会重定向，因此不要诧异服务器端不存在这个文件但为什么还能正常工作。其实你可以把服务器端的socket.io.js这个文件拷贝到本地，使它成为客户端的js文件，这样就不用每次都向服务器请求这个js文件，以增强稳定性。无论如何我们必须在客户端引用这个脚本才能使用socket.io的功能。从上面的代码看，群聊聊天室的原理是:某一个客户端需要发言，他就把自己的发言内容先发送到聊天室的服务器，然后由服务器对所有连接到服务器的客户端进行广播，这样其他用户就可以看到你的消息，这也就实现了群聊。</p>
+<h2 id="socket-IO的使用"><a href="#socket-IO的使用" class="headerlink" title="socket.IO的使用"></a>socket.IO的使用</h2><p>从上面的聊天室的例子就可以发现，socket.io在使用上的核心其实就是两个函数emit()和on().</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">emit()</span><br></pre></td></tr></table></figure>
+
+<p>用来发射一个事件或者说触发一个事件，第一个参数为事件名，第二个参数为要发送的数据，第三个参数为回调函数（一般省略，如需对方接受到信息后立即得到确认时，则需要用到回调函数）。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">on()</span><br></pre></td></tr></table></figure>
+
+<p>用来监听一个 emit 发射的事件，第一个参数为要监听的事件名，第二个参数为一个匿名函数用来接收对方发来的数据，该匿名函数的第一个参数为接收的数据，若有第二个参数，则为要返回的函数。</p>
+<h3 id="服务器端"><a href="#服务器端" class="headerlink" title="服务器端"></a>服务器端</h3><h4 id="监听客户端的链接与断开"><a href="#监听客户端的链接与断开" class="headerlink" title="监听客户端的链接与断开"></a>监听客户端的链接与断开</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//监听客户端连接,回调函数会传递本次连接的socket</span></span><br><span class="line">io.on(‘connection’,<span class="function"><span class="keyword">function</span>(<span class="params">socket</span>));</span></span><br><span class="line"><span class="function">//监听客户端的断开连接,这里会传入"<span class="title">transport</span> <span class="title">close</span>"这个字符串到<span class="title">c</span>这个形参中</span></span><br><span class="line"><span class="function"><span class="title">socket</span>.<span class="title">on</span>(<span class="params"><span class="string">'disconnect'</span>,function(c</span>))</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="发送消息"><a href="#发送消息" class="headerlink" title="发送消息"></a>发送消息</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//给所有的客户端广播消息(包含发送消息过来触发这个函数的那个客户端)</span></span><br><span class="line">io.sockets.emit(‘<span class="built_in">String</span>’,data);</span><br><span class="line">或　io.emit(<span class="string">'String'</span>,data);</span><br><span class="line"><span class="comment">//给客户端广播消息(除了该socket所属于的那个客户端)</span></span><br><span class="line">socket.boradcast.emit(<span class="string">'String'</span>,data)</span><br><span class="line"><span class="comment">//给指定的客户端发送消息</span></span><br><span class="line">io.sockets.socket(socketid).emit(‘<span class="built_in">String</span>’, data);</span><br><span class="line"><span class="comment">//给该socket的客户端发送消息</span></span><br><span class="line">socket.emit(‘<span class="built_in">String</span>’, data);</span><br></pre></td></tr></table></figure>
+
+<h4 id="监听客户端的事件"><a href="#监听客户端的事件" class="headerlink" title="监听客户端的事件"></a>监听客户端的事件</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//监听该socket所属于的客户端的String消息，这里的String是自定义的消息名称</span></span><br><span class="line">socket.on(<span class="string">'String'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">data</span>))</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="分组"><a href="#分组" class="headerlink" title="分组"></a>分组</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">io.on(<span class="string">'connection'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">socket</span>)</span>&#123;</span><br><span class="line">	socket.on(<span class="string">'group1'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">	socket.join(<span class="string">'group1'</span>)</span><br><span class="line">	&#125;);</span><br><span class="line">	socket.on(<span class="string">'group2'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">	socket.join(<span class="string">'group2'</span>)</span><br><span class="line">	&#125;);	</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>如上面的代码，当一个客户端链接进来之后，并且发送了一个名为group1的事件消息，那么在服务器端，它与服务器的socket就通过socket.join(‘group1’)加入了一个名为group1的分组中，客户端的代码可以这样写：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=<span class="string">'text/javascript'</span> src=<span class="string">'/socket.io/socket.io.js'</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">*创建与服务器的连接，并且返回一个socket对象，这里由于是服务器和客户端到是在本地</span></span><br><span class="line"><span class="comment">*所以在connect()中可以不用传递值，如果是在生产环境这里就需要传值，如：</span></span><br><span class="line"><span class="comment">* socket.connect('localhost:3000')</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">var</span> socket=io.connect();</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">*发送一个名为group1的消息，就可以在服务器的处理中被加入group1组</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">socket.emit(<span class="string">'group1'</span>,&#123;&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>一个用户可以存在与多个分组中</p>
+<h4 id="踢出分组"><a href="#踢出分组" class="headerlink" title="踢出分组"></a>踢出分组</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socket.leave(data.room)</span><br></pre></td></tr></table></figure>
+
+<h4 id="向一个组广播消息"><a href="#向一个组广播消息" class="headerlink" title="向一个组广播消息"></a>向一个组广播消息</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//向一个组广播消息(发送者无法收到消息)，并且这一方法允许当前socket不在这一分组中</span></span><br><span class="line">socket.broadcast.to(<span class="string">'your group name'</span>).emit(<span class="string">'broadcast group message'</span>);</span><br><span class="line"><span class="comment">//向一个组广播消息(包括发送者都能收到消息),发送者必须在分组中</span></span><br><span class="line">io.sockets.in(<span class="string">'your group name'</span>).emit(<span class="string">'broadcast romm message'</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="获取连接的客户端socket"><a href="#获取连接的客户端socket" class="headerlink" title="获取连接的客户端socket"></a>获取连接的客户端socket</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">io.sockets.clients().forEach(<span class="function"><span class="keyword">function</span>(<span class="params">socket</span>)</span>&#123;</span><br><span class="line">	<span class="comment">//可以对其进行操作</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="获取分组信息"><a href="#获取分组信息" class="headerlink" title="获取分组信息"></a>获取分组信息</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取所有的组别信息</span></span><br><span class="line">io.sockets.manager.rooms</span><br><span class="line"><span class="comment">//获取此socketid进入的组别信息</span></span><br><span class="line">io.sockets.manager.roomClients[socket.id]</span><br><span class="line"><span class="comment">//获取某一个房间中的客户端，返回所有在此房间的socket实例</span></span><br><span class="line">io.sockets.clients(<span class="string">'某组名'</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h3><h4 id="建立socket链接"><a href="#建立socket链接" class="headerlink" title="建立socket链接"></a>建立socket链接</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> socket=io(<span class="string">'http://&lt;hostname&gt;:&lt;port&gt;'</span>);</span><br><span class="line">或者</span><br><span class="line"><span class="keyword">var</span> socket=io.connect(<span class="string">'http://&lt;hostname&gt;:&lt;port&gt;'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果是在本机做测试，客户端，服务器都在同一台主机上，则上面两个连接方式<br>的括号中可以不用写东西</p>
+<h4 id="监听服务器的消息"><a href="#监听服务器的消息" class="headerlink" title="监听服务器的消息"></a>监听服务器的消息</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">socket.on(<span class="string">'msg'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(data);</span><br><span class="line">	<span class="comment">//向服务器发送消息</span></span><br><span class="line">	socket.emit(<span class="string">'msg_c2s'</span>,&#123;&#125;);</span><br><span class="line">&#125;)；</span><br></pre></td></tr></table></figure>
+
+<h4 id="监听socket断开与重连"><a href="#监听socket断开与重连" class="headerlink" title="监听socket断开与重连"></a>监听socket断开与重连</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">socket.on(<span class="string">'disconnect'</span>,<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">'与服务器断开链接'</span>)；</span><br><span class="line">&#125;);</span><br><span class="line">socket.on(<span class="string">'reconnect'</span>,<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">'重新链接到服务器'</span>)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>上述的’disconnect’,’reconnect’是socket.io默认支持的可以被客户端监听的事件，像这样的事件有：<br>connect：连接成功<br>connecting：正在连接<br>disconnect：断开连接<br>connect_failed：连接失败<br>error：错误发生，并且无法被其他事件类型所处理<br>message：同服务器端message事件<br>anything：同服务器端anything事件<br>reconnect_failed：重连失败<br>reconnect：成功重连<br>reconnecting：正在重连<br>当第一次连接时，事件触发顺序为：connecting-&gt;connect；当失去连接时，事件触发顺序为：disconnect-&gt;reconnecting（可能进行多次）-&gt;connecting-&gt;reconnect-&gt;connect</p>
+<h1 id="我的demo"><a href="#我的demo" class="headerlink" title="我的demo"></a>我的demo</h1><p><a href="https://github.com/Andrewpqc/simpleChatroom" target="_blank" rel="noopener">demo</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Socket-io/" rel="tag"># Socket.io</a>
+          
+            <a href="/tags/Express/" rel="tag"># Express</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/25/Docker-container-operation/" rel="next" title="Docker容器操作">
+                <i class="fa fa-chevron-left"></i> Docker容器操作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/01/a-fake-ssh-based-on-python/" rel="prev" title="Python的Socket练习——伪SSH">
+                Python的Socket练习——伪SSH <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WebSocket协议"><span class="nav-number">1.</span> <span class="nav-text">WebSocket协议</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Websocket的细节"><span class="nav-number">1.1.</span> <span class="nav-text">Websocket的细节</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#socket-IO库"><span class="nav-number">1.2.</span> <span class="nav-text">socket.IO库</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#用socket-io和express打造聊天室"><span class="nav-number">2.</span> <span class="nav-text">用socket.io和express打造聊天室</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#下载socket-io"><span class="nav-number">2.1.</span> <span class="nav-text">下载socket.io</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器端代码"><span class="nav-number">2.2.</span> <span class="nav-text">服务器端代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端代码"><span class="nav-number">2.3.</span> <span class="nav-text">客户端代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#socket-IO的使用"><span class="nav-number">2.4.</span> <span class="nav-text">socket.IO的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务器端"><span class="nav-number">2.4.1.</span> <span class="nav-text">服务器端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#监听客户端的链接与断开"><span class="nav-number">2.4.1.1.</span> <span class="nav-text">监听客户端的链接与断开</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#发送消息"><span class="nav-number">2.4.1.2.</span> <span class="nav-text">发送消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#监听客户端的事件"><span class="nav-number">2.4.1.3.</span> <span class="nav-text">监听客户端的事件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分组"><span class="nav-number">2.4.1.4.</span> <span class="nav-text">分组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#踢出分组"><span class="nav-number">2.4.1.5.</span> <span class="nav-text">踢出分组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#向一个组广播消息"><span class="nav-number">2.4.1.6.</span> <span class="nav-text">向一个组广播消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取连接的客户端socket"><span class="nav-number">2.4.1.7.</span> <span class="nav-text">获取连接的客户端socket</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取分组信息"><span class="nav-number">2.4.1.8.</span> <span class="nav-text">获取分组信息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端"><span class="nav-number">2.4.2.</span> <span class="nav-text">客户端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#建立socket链接"><span class="nav-number">2.4.2.1.</span> <span class="nav-text">建立socket链接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#监听服务器的消息"><span class="nav-number">2.4.2.2.</span> <span class="nav-text">监听服务器的消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#监听socket断开与重连"><span class="nav-number">2.4.2.3.</span> <span class="nav-text">监听socket断开与重连</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#我的demo"><span class="nav-number">3.</span> <span class="nav-text">我的demo</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

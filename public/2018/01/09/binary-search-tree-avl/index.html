@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="algorithm,data structure,binary search tree,AVL,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="上文中谈到朴素的二叉搜索树在进行插入节点，删除节点等动态操作的时候会影响到树的形态，可能致使树走向低效，影响后续操作的效率。今天就介绍一下二叉搜索树的一个变种——平衡二叉树(AVL)。AVL树是一种自平衡的二叉搜索树，在进行动态操作时可以维持自身形态的平衡，从而保证基本操作的时间复杂度维持在O(logn)。下图为一个低效的二叉查找树的示意图，它已经退化成了链表，完全失去了二叉查找树的优势。 什么是">
+<meta name="keywords" content="algorithm,data structure,binary search tree,AVL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="平衡二叉树(AVL)">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/01/09/binary-search-tree-avl/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="上文中谈到朴素的二叉搜索树在进行插入节点，删除节点等动态操作的时候会影响到树的形态，可能致使树走向低效，影响后续操作的效率。今天就介绍一下二叉搜索树的一个变种——平衡二叉树(AVL)。AVL树是一种自平衡的二叉搜索树，在进行动态操作时可以维持自身形态的平衡，从而保证基本操作的时间复杂度维持在O(logn)。下图为一个低效的二叉查找树的示意图，它已经退化成了链表，完全失去了二叉查找树的优势。 什么是">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/loweffective.gif">
+<meta property="og:image" content="http://andrewpqc.github.io/images/ll.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/ll2.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/ll3.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/rr.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/lr.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/all_avl.png">
+<meta property="og:updated_time" content="2018-01-09T13:31:27.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="平衡二叉树(AVL)">
+<meta name="twitter:description" content="上文中谈到朴素的二叉搜索树在进行插入节点，删除节点等动态操作的时候会影响到树的形态，可能致使树走向低效，影响后续操作的效率。今天就介绍一下二叉搜索树的一个变种——平衡二叉树(AVL)。AVL树是一种自平衡的二叉搜索树，在进行动态操作时可以维持自身形态的平衡，从而保证基本操作的时间复杂度维持在O(logn)。下图为一个低效的二叉查找树的示意图，它已经退化成了链表，完全失去了二叉查找树的优势。 什么是">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/loweffective.gif">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/01/09/binary-search-tree-avl/">
+
+
+
+
+
+  <title>平衡二叉树(AVL) | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/01/09/binary-search-tree-avl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">平衡二叉树(AVL)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T21:31:27+08:00">
+                2018-01-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Algorithm/" itemprop="url" rel="index">
+                    <span itemprop="name">Algorithm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/09/binary-search-tree-avl/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/01/09/binary-search-tree-avl/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上文中谈到朴素的二叉搜索树在进行插入节点，删除节点等动态操作的时候会影响到树的形态，可能致使树走向低效，影响后续操作的效率。今天就介绍一下二叉搜索树的一个变种——平衡二叉树(AVL)。AVL树是一种自平衡的二叉搜索树，在进行动态操作时可以维持自身形态的平衡，从而保证基本操作的时间复杂度维持在O(logn)。<br>下图为一个低效的二叉查找树的示意图，它已经退化成了链表，完全失去了二叉查找树的优势。<br><img src="/images/loweffective.gif" alt="低效的二叉查找树示意图"></p>
+<h1 id="什么是平衡二叉树？"><a href="#什么是平衡二叉树？" class="headerlink" title="什么是平衡二叉树？"></a>什么是平衡二叉树？</h1><p>1962年，Adelson-Velsikii和Landis提出了一种结点在高度上相对平衡的二叉查找树，又称为AVL树。其平均和最坏情况下的查找时间都是O(logn)。同时，插入和删除的时间复杂性也会保持O(logn)。平衡二叉树的定义如下:</p>
+<ul>
+<li>它或者是一棵空二叉树。</li>
+<li>或者是具有如下性质的二叉查找树：其左子树和右子树都是高度平衡的二叉树，且左子树和右子树的高度之差的绝对值不超过1。</li>
+</ul>
+<p>如果将二叉树上结点的<strong>平衡因子</strong>BF（Balanced Factor）定义为<strong>该结点的左子树与右子树的高度之差</strong>，根据AVL树的定义，AVL树中的任意结点的平衡因子只可能是-1（右子树高于左子树）、0或者1（左子树高于右子树）。</p>
+<p>AVL树通过为每个节点设置并维护一个height(当前节点的高度)属性并且在执行动态操作的时候监控平衡因子BF的值，来监控自身的形态变化，从而实现<strong>自平衡</strong>。在动态操作执行后，如果某一个节点的BF值不在正常范围内(-1,0,1)时,AVL树自身可以通过<strong>旋转</strong>来调整子树的高度，使不符合AVL定义的部分重新符合定义。</p>
+<h1 id="平衡二叉树的基本操作"><a href="#平衡二叉树的基本操作" class="headerlink" title="平衡二叉树的基本操作"></a>平衡二叉树的基本操作</h1><p>平衡二叉树本质上还是一棵二叉搜索树，所以在大多数的操作上两者是几乎相同的。唯一不同的是平衡二叉树在插入节点和删除节点等动态操作上增加了自平衡的操作(通过旋转)。以免和上一篇文章重复，在这里我们只讨论平衡二叉树的插入和删除操作。</p>
+<p>要想实现平衡二叉树的带自平衡功能的插入和删除操作，我们首先要来研究一下AVL实现自平衡的机制－－<strong>旋转</strong>。</p>
+<p>首先定义平衡二叉树节点结构体和几个功能宏函数：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> HEIGHT(n) (((n) == NULL) ? 0 : (n)-&gt;h)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX(a, b) ((a) &lt; (b) ? (b) : (a))</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">avl_node</span>&#123;</span></span><br><span class="line">    <span class="keyword">int</span> key;</span><br><span class="line">    <span class="keyword">int</span> h;　<span class="comment">//这里增加了h的属性，用来记录当前节点的高度</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">avl_node</span> *<span class="title">right</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">avl_node</span> *<span class="title">left</span>;</span></span><br><span class="line">&#125; node, *avl_node_ptr;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_bf</span><span class="params">(avl_node_ptr node)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(node==<span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> HEIGHT(node-&gt;left)-HEIGHT(node-&gt;right);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="旋转"><a href="#旋转" class="headerlink" title="旋转"></a>旋转</h2><p>在AVL树的平衡化操作中，存在两种基本旋转操作，左旋和右旋。在一次平衡化操作中，左旋和右旋这两个基本旋转操作可能被执行一次或多次。并且是从<strong>最小不平衡二叉树</strong>的根节点开始的。(即从离插入节点最近的，平衡因子超过1的祖先节点开始)</p>
+<h3 id="单旋转"><a href="#单旋转" class="headerlink" title="单旋转"></a>单旋转</h3><p>1.右旋操作(LL_right_rotate)<br><img src="/images/ll.png" alt="右旋示意图"><br>如上图，新插入了节点1,我们从新插入的节点开始向上寻找它的祖先节点，发现了第一个失衡节点3。也就找到了这里的最小不平衡二叉树就是以3为根节点的那棵树。也就是<strong>新插入的节点出现在失衡节点的左孩子的左子树上</strong>,此时我们需要对他们进行右旋操作(LL_right_rotate)。如上图，将根节点的左孩子2提升为新的根节点,而旧的根节点3则作为新根节点2的右孩子存在。</p>
+<p>下面看一个复杂一些的需要右旋的情况：<br><img src="/images/ll2.png" alt="右旋示意图"><br>新插入的节点为1,同样的，我们从1开始依次向上检查其祖先节点，第一个找到了5是不平衡的节点。由于新插入的节点1出现在失衡节点5的左孩子的左子树上，我们需要对其进行右旋操作(LL_right_rotate)。但这种情况似乎与上面那种简单情形不同。具体的旋转细节如下:<br><img src="/images/ll3.png" alt="右旋示意图"><br>我们仍然是将失衡节点5的左孩子3提升为新的根节点，旧的根节点5则作为3的右孩子，所增加的是:还需要将新根节点3原本的右孩子作为旧根节点5的左孩子。</p>
+<p>仔细分析发现，复杂情况中所增加的操作在简单情况中就是将NULL挂到NULL上，也就是说上面的简单的情形和复杂的情形的本质是统一的，我们可以将这两种情况总结成下面的代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//root为最小不平衡二叉树的根节点，插入的节点插在root的左孩子的左子树上</span></span><br><span class="line"><span class="comment">//需要将root的左孩子作为新的根节点,右旋</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> avl_node_ptr <span class="title">LL_right_rotate</span><span class="params">(avl_node_ptr root)</span></span>&#123;</span><br><span class="line">    avl_node_ptr new_root = root-&gt;left;</span><br><span class="line">    root-&gt;left = new_root-&gt;right;</span><br><span class="line">    new_root-&gt;right = root;</span><br><span class="line">    new_root-&gt;h = MAX(HEIGHT(new_root-&gt;left), HEIGHT(new_root-&gt;right)) + <span class="number">1</span>;</span><br><span class="line">    root-&gt;h = MAX(HEIGHT(root-&gt;left), HEIGHT(root-&gt;right)) + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span> new_root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2.左旋操作(RR_left_rotate)<br>左旋和右旋是镜像对称的,当<strong>插入的节点位于离他最近的失衡节点的右孩子的右子树上</strong>时，我们就需要对其进行左旋操作(RR_left_rotate),示意图如下:<br><img src="/images/rr.png" alt="左旋示意图"><br>实现如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//插入的节点位于root的右孩子的右子树上，root的右孩子作为新的根节点，左旋</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> avl_node_ptr <span class="title">RR_left_rotate</span><span class="params">(avl_node_ptr root)</span></span>&#123;</span><br><span class="line">    avl_node_ptr new_root = root-&gt;right;</span><br><span class="line">    root-&gt;right = new_root-&gt;left;</span><br><span class="line">    new_root-&gt;left = root;</span><br><span class="line">    new_root-&gt;h = MAX(HEIGHT(new_root-&gt;left), HEIGHT(new_root-&gt;right)) + <span class="number">1</span>;</span><br><span class="line">    root-&gt;h = MAX(HEIGHT(root-&gt;left), HEIGHT(root-&gt;right)) + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span> new_root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="复合旋转"><a href="#复合旋转" class="headerlink" title="复合旋转"></a>复合旋转</h3><p>1.先左旋再右旋(LR_left_right_rotate)<br><img src="/images/lr.png" alt><br>如上图所示，我们在树上插入了节点5,然后从5开始依次向上寻找失衡节点，找到失衡节点8,观察新插入的节点与该失衡节点的位置关系我们可以发现，<strong>新插入的节点位于其最近的失衡节点的左孩子的右子树上</strong>。这不是我们刚才讨论的单旋转中的任何一种情况，我们怎样才能将这种情况的树调整会平衡状态呢?如图，要调整这种情形，我们要<strong>首先将失衡节点的左子树进行左旋，然后对以失衡节点为根节点的树进行右旋</strong><br>代码如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//新插入的节点位于root的左孩子rootl的右子树上，</span></span><br><span class="line"><span class="comment">//那么首先需要先对以rootl为根节点的子树进行左旋(RR_left_rotate)</span></span><br><span class="line"><span class="comment">//然后对以root为根节点的子树进行右旋(LL_right_rotate)</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> avl_node_ptr <span class="title">LR_left_right_rotate</span><span class="params">(avl_node_ptr root)</span></span>&#123;</span><br><span class="line">    root-&gt;left = RR_left_rotate(root-&gt;left);</span><br><span class="line">    <span class="keyword">return</span> LL_right_rotate(root);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2.先右旋再左旋(RL_right_left_rotate)<br>下面的这种情况是<strong>插入节点出现在离他最近的失衡节点的右孩子的左子树上</strong>,和上面的情况是对称的，这里直接给出代码:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//同上</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> avl_node_ptr <span class="title">RL_right_left_rotate</span><span class="params">(avl_node_ptr root)</span></span>&#123;</span><br><span class="line">    root-&gt;right = LL_right_rotate(root-&gt;right);</span><br><span class="line">    <span class="keyword">return</span> RR_left_rotate(root);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="再平衡"><a href="#再平衡" class="headerlink" title="再平衡"></a>再平衡</h2><p>上面在讨论旋转时讨论了四种失衡的场景以及每种场景对应的平衡调整方法，下面我们做个小小的总结:在代码中我们应该如何判定对应的失衡场景，又该如何调整呢？<strong>根据当前破坏平衡的结点的平衡因子，以及其孩子结点的平衡因子来判定，通过旋转来调整。</strong></p>
+<p><img src="/images/all_avl.png" alt></p>
+<table>
+<thead>
+<tr>
+<th align="center">失衡场景</th>
+<th align="center">判定准则</th>
+<th align="center">调整方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">LL型失衡</td>
+<td align="center">current.bf&gt;1 &amp;&amp; current.left.bf&gt;0</td>
+<td align="center">LL_right_rotate</td>
+</tr>
+<tr>
+<td align="center">LR型失衡</td>
+<td align="center">current.bf&gt;1 &amp;&amp; current.left.bf&lt;0</td>
+<td align="center">LR_left_right_rotate</td>
+</tr>
+<tr>
+<td align="center">RR型失衡</td>
+<td align="center">current.bf&lt;-1 &amp;&amp; current.right.bf&lt;0</td>
+<td align="center">RR_left_rotate</td>
+</tr>
+<tr>
+<td align="center">RL型失衡</td>
+<td align="center">current.bf&lt;-1 &amp;&amp; current.right.bf&gt;0</td>
+<td align="center">RL_right_left_rotate</td>
+</tr>
+<tr>
+<td align="center">由上，我们可以得出调整失衡的函数如下:</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//node为当前失衡节点</span></span><br><span class="line"><span class="function">avl_node_ptr <span class="title">re_balance</span><span class="params">(avl_node_ptr node)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!node)</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">    <span class="keyword">int</span> bf=get_bf(node);</span><br><span class="line">    <span class="keyword">int</span> bf_l=get_bf(node-&gt;left);</span><br><span class="line">    <span class="keyword">int</span> bf_r=get_bf(node-&gt;right);</span><br><span class="line">    <span class="keyword">if</span>(bf&gt;<span class="number">1</span> &amp;&amp; bf_l&gt;<span class="number">0</span>)</span><br><span class="line">        node=LL_right_rotate(node);</span><br><span class="line">    <span class="keyword">if</span>(bf&gt;<span class="number">1</span> &amp;&amp; bf_l&lt;<span class="number">0</span>&gt;)</span><br><span class="line">        node=LR_left_right_rotate(node);</span><br><span class="line">    <span class="keyword">if</span>(bf&lt;<span class="number">-1</span> &amp;&amp; bf_r&lt;<span class="number">0</span>)</span><br><span class="line">        node=RR_left_rotate(node);</span><br><span class="line">    <span class="keyword">if</span>(bf&lt;<span class="number">-1</span> &amp;&amp; bf_r&gt;<span class="number">0</span>)</span><br><span class="line">        node=RL_right_left_rotate(node);</span><br><span class="line">    <span class="keyword">return</span> node;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<p>有了上面的一些工具函数和平衡调整函数并且利用递归我们可以非常容易的实现插入和删除操作。</p>
+<h2 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h2><iframe width="640" height="360" src="https://www.youtube.com/embed/ygZMI2YIcvk" frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen></iframe>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">avl_node_ptr <span class="title">avl_insert</span><span class="params">(avl_node_ptr node,<span class="keyword">int</span> k)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(!node)&#123;</span><br><span class="line">        node=<span class="keyword">new</span> avl_node;</span><br><span class="line">        node-&gt;key=k;</span><br><span class="line">        node-&gt;height=<span class="number">1</span>;</span><br><span class="line">        node-&gt;left=<span class="literal">NULL</span>;</span><br><span class="line">        node-&gt;right=<span class="literal">NULL</span>;</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(k&lt;node-&gt;key)</span><br><span class="line">        node-&gt;left=avl_insert(node-&gt;left,k);</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(k&gt;node-&gt;key)</span><br><span class="line">        node-&gt;right=avl_insert(node-&gt;right,k);</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">cout</span>&lt;&lt;<span class="string">"can't insert a key that already esixt!"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//先调整高度，然后再平衡</span></span><br><span class="line">    node-&gt;height=max(get_height(node-&gt;left),get_height(node-&gt;right))+<span class="number">1</span>;</span><br><span class="line">    node=re_balance(node);</span><br><span class="line">    <span class="keyword">return</span> node;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h2><iframe width="623" height="374" src="https://www.youtube.com/embed/4zQV3j2X9mU" frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen></iframe>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">avl_node_ptr  <span class="title">avl_delete</span><span class="params">(avl_node_ptr node,<span class="keyword">int</span> k)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(!node)</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">    <span class="keyword">if</span>(k&lt;node-&gt;key)</span><br><span class="line">        node-&gt;left=avl_delete(node-&gt;left,k);</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(k&gt;node-&gt;key)</span><br><span class="line">        node-&gt;right=avl_delete(node-&gt;right,k);</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">//找到需要删除的节点</span></span><br><span class="line">        <span class="keyword">if</span>(node-&gt;left==<span class="literal">NULL</span>||node-&gt;right==<span class="literal">NULL</span>)&#123;</span><br><span class="line">            <span class="comment">//删除的节点只有一个孩子或者没有孩子</span></span><br><span class="line">            avl_node_ptr temp=(node-&gt;left==<span class="literal">NULL</span>)?node-&gt;right:node-&gt;right;</span><br><span class="line">            <span class="keyword">if</span>(temp==<span class="literal">NULL</span>)&#123;</span><br><span class="line">                <span class="comment">//没有孩子的情况</span></span><br><span class="line">                temp=node;</span><br><span class="line">                node=<span class="literal">NULL</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span>&#123;<span class="comment">//一个孩子</span></span><br><span class="line">                node=temp;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">delete</span> temp;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="comment">//删除的节点有两个孩子</span></span><br><span class="line">            avl_node_ptr temp=node-&gt;right;</span><br><span class="line">            <span class="keyword">while</span>(temp-&gt;left!=<span class="literal">NULL</span>)<span class="comment">//找到node的右子树的最小关键字节点</span></span><br><span class="line">                temp=temp-&gt;left;</span><br><span class="line">            node-&gt;key=temp-&gt;key;</span><br><span class="line">            node-&gt;right=avl_delete(node-&gt;right,temp-&gt;key);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(node==<span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">    node-&gt;height=max(get_height(node-&gt;left),get_height(node-&gt;right))+<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span> re_balance(node);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://www.geeksforgeeks.org/?p=17679" target="_blank" rel="noopener">GeeksforGeeks</a><br><a href="http://btechsmartclass.com/DS/U5_T2.html" target="_blank" rel="noopener">btechsmartclass</a><br><a href="http://www.cnblogs.com/penghuwan/p/8166133.html" target="_blank" rel="noopener">【算法】论平衡二叉树（AVL）的正确种植方法</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/algorithm/" rel="tag"># algorithm</a>
+          
+            <a href="/tags/data-structure/" rel="tag"># data structure</a>
+          
+            <a href="/tags/binary-search-tree/" rel="tag"># binary search tree</a>
+          
+            <a href="/tags/AVL/" rel="tag"># AVL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/07/binary-search-tree/" rel="next" title="二叉搜索树">
+                <i class="fa fa-chevron-left"></i> 二叉搜索树
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/23/go-concurrency/" rel="prev" title="go语言并发编程——goroutine和通道">
+                go语言并发编程——goroutine和通道 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是平衡二叉树？"><span class="nav-number">1.</span> <span class="nav-text">什么是平衡二叉树？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#平衡二叉树的基本操作"><span class="nav-number">2.</span> <span class="nav-text">平衡二叉树的基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#旋转"><span class="nav-number">2.1.</span> <span class="nav-text">旋转</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#单旋转"><span class="nav-number">2.1.1.</span> <span class="nav-text">单旋转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#复合旋转"><span class="nav-number">2.1.2.</span> <span class="nav-text">复合旋转</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#再平衡"><span class="nav-number">2.2.</span> <span class="nav-text">再平衡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入"><span class="nav-number">2.3.</span> <span class="nav-text">插入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除"><span class="nav-number">2.4.</span> <span class="nav-text">删除</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

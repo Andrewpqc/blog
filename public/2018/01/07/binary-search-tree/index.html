@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="algorithm,data structure,binary search tree,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="二叉搜索树(binary search tree)支持许多动态集合操作，包括插入节点构建树，查找(最大值，最小值，前驱，后继，指定值)节点，遍历(前中后序遍历)树，删除节点等。在树上进行的操作所花费的时间与树的高度成正比，对于有n的节点的一个完全二叉树，这些操作的最坏运行时间为Θ(lg n).但是如果这棵树是一个n个节点连接而成的线性链，那么同样的操作的最坏运行时间就为Θ(n).为了尽量避免这种低">
+<meta name="keywords" content="algorithm,data structure,binary search tree">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二叉搜索树">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/01/07/binary-search-tree/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="二叉搜索树(binary search tree)支持许多动态集合操作，包括插入节点构建树，查找(最大值，最小值，前驱，后继，指定值)节点，遍历(前中后序遍历)树，删除节点等。在树上进行的操作所花费的时间与树的高度成正比，对于有n的节点的一个完全二叉树，这些操作的最坏运行时间为Θ(lg n).但是如果这棵树是一个n个节点连接而成的线性链，那么同样的操作的最坏运行时间就为Θ(n).为了尽量避免这种低">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/bst.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/bst_successor1.gif">
+<meta property="og:image" content="http://andrewpqc.github.io/images/bst_successor2.gif">
+<meta property="og:image" content="http://andrewpqc.github.io/images/delete0.gif">
+<meta property="og:image" content="http://andrewpqc.github.io/images/delete1.gif">
+<meta property="og:image" content="http://andrewpqc.github.io/images/delete21.gif">
+<meta property="og:image" content="http://andrewpqc.github.io/images/delete22.gif">
+<meta property="og:updated_time" content="2018-01-07T07:28:51.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="二叉搜索树">
+<meta name="twitter:description" content="二叉搜索树(binary search tree)支持许多动态集合操作，包括插入节点构建树，查找(最大值，最小值，前驱，后继，指定值)节点，遍历(前中后序遍历)树，删除节点等。在树上进行的操作所花费的时间与树的高度成正比，对于有n的节点的一个完全二叉树，这些操作的最坏运行时间为Θ(lg n).但是如果这棵树是一个n个节点连接而成的线性链，那么同样的操作的最坏运行时间就为Θ(n).为了尽量避免这种低">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/bst.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/01/07/binary-search-tree/">
+
+
+
+
+
+  <title>二叉搜索树 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/01/07/binary-search-tree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">二叉搜索树</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-07T15:28:51+08:00">
+                2018-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Algorithm/" itemprop="url" rel="index">
+                    <span itemprop="name">Algorithm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/07/binary-search-tree/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/01/07/binary-search-tree/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>二叉搜索树</code>(binary search tree)支持许多动态集合操作，包括插入节点构建树，查找(最大值，最小值，前驱，后继，指定值)节点，遍历(前中后序遍历)树，删除节点等。在树上进行的操作所花费的时间与树的高度成正比，对于有n的节点的一个完全二叉树，这些操作的最坏运行时间为Θ(lg n).但是如果这棵树是一个n个节点连接而成的线性链，那么同样的操作的最坏运行时间就为Θ(n).为了尽量避免这种低效的二叉树，可以在构造树时采用随机构造的方式。随机构造的二叉树的期望高度O(lg n),因此在这样的一棵二叉树上的操作的平均运行时间就为Θ(lg n).但实际上，随机化的构造树的方式也不能完全杜绝最坏情况的出现，所以还有一些二叉搜索树的变种，如红黑树，B树等，他们可以保证基本操作具有好的最坏情况性能。<br>在本文中，不讨论红黑树和B树，我们只讨论二叉搜索树的各种操作。</p>
+<h1 id="什么是二叉搜索树"><a href="#什么是二叉搜索树" class="headerlink" title="什么是二叉搜索树?"></a>什么是二叉搜索树?</h1><p>一棵二叉搜索树就是以一个二叉树来组织的，树上的每一个节点就是一个对象，对象中除了key和卫星数据之外，还有用于维护二叉树结构的三个属性left,right,parent(在c语言中他们是三个指针),他们分别指向节点的左孩子，右孩子和父节点。其中key被称为节点的关键字，它是二叉搜索树中确定节点之间大小关系的关键属性，一般可以设置为整型类型。如果某一个节点的没有左孩子，右孩子或父节点，那么就将对应的属性指针置空即可。该树的根节点是整棵树中唯一一个parent属性为空的节点。这些置空的指针通常被用来确定树的边界。二叉搜索树之所以可以具有灵活高效的操作，是因为它具有如下的性质：</p>
+<ul>
+<li>如果节点的左子树不空，则左子树上所有结点的值均小于等于它的根结点的值；</li>
+<li>如果节点的右子树不空，则右子树上所有结点的值均大于等于它的根结点的值；</li>
+<li>任意节点的左、右子树也分别为二叉搜索树</li>
+</ul>
+<p><img src="/images/bst.png" alt="二叉搜索树示意图"></p>
+<h1 id="二叉搜索树的基本操作"><a href="#二叉搜索树的基本操作" class="headerlink" title="二叉搜索树的基本操作"></a>二叉搜索树的基本操作</h1><p>本文重点讨论的就是二叉搜索树上的操作，下面我们来逐一的讨论。首先声明:为了减少讨论的复杂度，<code>假设树上的所有节点的关键字均不相同</code>，下面我的代码也基于此，对于节点关键字有重复的情况，调整代码即可。下面我们先定义节点的数据结构：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">node</span>&#123;</span></span><br><span class="line">    <span class="keyword">int</span> key;<span class="comment">//节点数据,同时也是节点的关键字</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//下面的为二叉搜索树的维护数据</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">node</span>* <span class="title">parent</span>=<span class="title">NULL</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">node</span>* <span class="title">left</span>=<span class="title">NULL</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">node</span>* <span class="title">right</span>=<span class="title">NULL</span>;</span></span><br><span class="line">&#125;BST,*BST_p;</span><br></pre></td></tr></table></figure>
+
+<h2 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h2><p>我们想要实现在二叉搜索树上的操作，那么首先我们就需要构建出一棵二叉搜索树.我们可以从一个数组中构建二叉搜索树，逐个的从数组中读取数据，然后以插入的方式将数据插入到树中，即我们需要一个将数据插入到树中的操作。</p>
+<h3 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h3><h4 id="递归插入"><a href="#递归插入" class="headerlink" title="递归插入"></a>递归插入</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 递归构造搜索二叉树</span></span><br><span class="line"><span class="comment"> * root：指向树的根节点的指针</span></span><br><span class="line"><span class="comment"> * k:待插入的key</span></span><br><span class="line"><span class="comment"> * parent:父节点的指针</span></span><br><span class="line"><span class="comment"> **/</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">bst_insert</span><span class="params">(BST_p&amp; root,<span class="keyword">int</span> k,BST_p parent=<span class="literal">NULL</span>)</span></span>&#123;</span><br><span class="line">    <span class="comment">//如果当前二叉搜索树为空，则当前的待插入的值就为根节点中存放的值</span></span><br><span class="line">    <span class="keyword">if</span>(root==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        root=<span class="keyword">new</span> BST;</span><br><span class="line">        root-&gt;key=k;</span><br><span class="line">        root-&gt;left=<span class="literal">NULL</span>;</span><br><span class="line">        root-&gt;right=<span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//根节点没有父节点</span></span><br><span class="line">        root-&gt;parent=parent;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">//关键字比root节点中存放的关键字大，那么该节点应该被存放在root节点的右子树</span></span><br><span class="line">        <span class="keyword">if</span>(k&gt;root-&gt;key)</span><br><span class="line">            bst_insert(root-&gt;right,k,root);</span><br><span class="line">        <span class="comment">//关键字比root节点中存放的关键字小，那么该节点应该被存放在root节点的左子树</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            bst_insert(root-&gt;left,k,root); </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="非递归插入"><a href="#非递归插入" class="headerlink" title="非递归插入"></a>非递归插入</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 非递归插入操作</span></span><br><span class="line"><span class="comment"> **/</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">bst_insert_nonRecur</span><span class="params">(BST_p&amp; root,<span class="keyword">int</span> k)</span></span>&#123;</span><br><span class="line">    BST_p pre=<span class="literal">NULL</span>;<span class="comment">//记录上一个节点</span></span><br><span class="line">    BST_p t=root;<span class="comment">//不能直接使用root操作，这里的root为主函数中的全局root的引用，对他的更改会影响全局的root</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//按照规则找到key应该插入的位置，并用pre记录该位置的上一个节点</span></span><br><span class="line">    <span class="keyword">while</span>(t != <span class="literal">NULL</span>)&#123;</span><br><span class="line">        pre = t;</span><br><span class="line">        <span class="keyword">if</span>(k &lt; t-&gt;key)&#123;</span><br><span class="line">            t = t-&gt;left;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">            t = t-&gt;right;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    BST_p node = <span class="keyword">new</span> BST;</span><br><span class="line">    node-&gt;key = k;</span><br><span class="line">    node-&gt;left = <span class="literal">NULL</span>;</span><br><span class="line">    node-&gt;right = <span class="literal">NULL</span>;</span><br><span class="line">    node-&gt;parent = pre;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//将node连接到树上</span></span><br><span class="line">    <span class="keyword">if</span>(pre == <span class="literal">NULL</span>)<span class="comment">//若为空树，node即为根节点</span></span><br><span class="line">        root = node;</span><br><span class="line">    <span class="keyword">else</span>&#123;<span class="comment">//树非空，则判断node应该被连接到pre的左子树还是右子树</span></span><br><span class="line">        <span class="keyword">if</span>(k &lt; pre-&gt;key)&#123;</span><br><span class="line">            pre-&gt;left = node;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">            pre-&gt;right = node;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="构建二叉查找树"><a href="#构建二叉查找树" class="headerlink" title="构建二叉查找树"></a>构建二叉查找树</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init_bst</span><span class="params">(BST_p&amp; root,<span class="keyword">int</span> * a ,<span class="keyword">size_t</span> size)</span></span>&#123;</span><br><span class="line">     <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;size;i++)&#123;</span><br><span class="line">        <span class="comment">// bst_insert(root,a[i]);</span></span><br><span class="line">        bst_insert_nonRecur(root,a[i]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有了上面的这几个函数，我们就可以像下面这样来构建一个二叉搜索树：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span> <span class="params">(<span class="keyword">void</span>)</span></span>&#123;</span><br><span class="line">    BST_p root=<span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">int</span> a[<span class="number">4</span>]=&#123;<span class="number">2</span>,<span class="number">5</span>,<span class="number">3</span>,<span class="number">6</span>&#125;;</span><br><span class="line">    init_bst(root,a,<span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//some operating</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h2><p>二叉搜索树的性质允许我们通过一个简单的递归算法来按序输出二叉搜索树中的所有关键字，这种算法称之为<strong>中序遍历</strong>(inorder walk tree),这样命名的原因是输出的子树根的关键字位于其左子树的递归调用语句和右子树的递归调用语句之间。类似的<strong>先序遍历</strong>，<strong>后续遍历</strong>也是根据关键字输出语句与其左右子树递归调用语句之间的先后关系确定的。<br>下面是三种遍历的代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 中序遍历二叉搜索树</span></span><br><span class="line"><span class="comment"> **/</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">inorder_tree_walk</span><span class="params">(BST_p root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root!=<span class="literal">NULL</span>)&#123;</span><br><span class="line">        inorder_tree_walk(root-&gt;left);</span><br><span class="line">        <span class="built_in">cout</span>&lt;&lt;root-&gt;key&lt;&lt;<span class="string">" "</span>;</span><br><span class="line">        inorder_tree_walk(root-&gt;right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 前序遍历二叉树</span></span><br><span class="line"><span class="comment"> **/</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">preorder_tree_walk</span><span class="params">(BST_p root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root!=<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="built_in">cout</span>&lt;&lt;root-&gt;key&lt;&lt;<span class="string">" "</span>;</span><br><span class="line">        preorder_tree_walk(root-&gt;left);</span><br><span class="line">        preorder_tree_walk(root-&gt;right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 后序遍历二叉树</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">postorder_tree_walk</span><span class="params">(BST_p root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root!=<span class="literal">NULL</span>)&#123;</span><br><span class="line">        postorder_tree_walk(root-&gt;left);</span><br><span class="line">        postorder_tree_walk(root-&gt;right);</span><br><span class="line">        <span class="built_in">cout</span>&lt;&lt;root-&gt;key&lt;&lt;<span class="string">" "</span>;        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码中的中序遍历可以按照从小到大的顺序依次输出树中所有节点的关键字。</p>
+<h2 id="查找"><a href="#查找" class="headerlink" title="查找"></a>查找</h2><p>在二叉查找树中可以快速的查找元素，下面我们就来看看在二叉查找树中各种查找操作都是如何进行的。</p>
+<h3 id="查找最大值与最小值"><a href="#查找最大值与最小值" class="headerlink" title="查找最大值与最小值"></a>查找最大值与最小值</h3><p>找具有最值关键字的节点在二叉查找树中非常的直接。比如要找具有最小关键字的节点，我们可以从根节点一直向左查找，如果一个节点具有左孩子，那么它的左孩子的关键字一定比它本身的关键字小，这时就可以迭代的去查看其左孩子，直到某一节点的左孩子为空，这样就是找到了树中最左边的节点，也就具有最小关键字的节点。上述寻找最小值的代码如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 找最小值，一直向左找，直到找到最左边的一个节点</span></span><br><span class="line"><span class="comment"> **/</span> </span><br><span class="line"><span class="function">BST_p <span class="title">minimum</span><span class="params">(BST_p&amp; root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="built_in">cout</span>&lt;&lt;<span class="string">"该树为空，没有最小值!"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="built_in">exit</span>(EXIT_SUCCESS);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        BST_p t=root;<span class="comment">//不能用root直接操作</span></span><br><span class="line">        <span class="comment">//找到最左边的那个节点</span></span><br><span class="line">        <span class="keyword">while</span>(t-&gt;left!=<span class="literal">NULL</span>)</span><br><span class="line">            t=t-&gt;left;</span><br><span class="line">        <span class="keyword">return</span> t;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>同理，找最大值的代码如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 找最大值,一直向右找，直到找到最右边的一个节点</span></span><br><span class="line"><span class="comment"> **/</span> </span><br><span class="line"><span class="function">BST_p <span class="title">maximum</span><span class="params">(BST_p&amp; root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="built_in">cout</span>&lt;&lt;<span class="string">"该树为空，没有最大值"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        BST_p t=root;<span class="comment">//不能用root直接操作</span></span><br><span class="line">        <span class="comment">//找到最右边的那个节点</span></span><br><span class="line">        <span class="keyword">while</span>(t-&gt;right!=<span class="literal">NULL</span>)</span><br><span class="line">            t=t-&gt;right;</span><br><span class="line">        <span class="keyword">return</span> t;</span><br><span class="line">    &#125;         </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查找前驱与后继"><a href="#查找前驱与后继" class="headerlink" title="查找前驱与后继"></a>查找前驱与后继</h3><p>给定一棵二叉搜索树中的节点，有时需要按照<strong>中序遍历</strong>的次序(从小到大)查找它的<strong>后继</strong>(successor)或<strong>前驱</strong>(predecessor)。找前驱和后继在逻辑上是对称的，我们这里以找一个节点的后继节点作为例子讲解。按照定义我们可以知道，找节点a的后继节点就是找树中关键字比a的关键字大的所有节点中的最小关键字节点(虽然很绕，但就是这个道理:)。如何才能找到它呢？我们需要分两种情况讨论:</p>
+<ul>
+<li><p>给定的节点a具有右孩子<br>在这种情况下，a的后继节点必定存在于a的右子树中，并且为右子树中的关键字最小节点。</p>
+</li>
+<li><p>给定的节点a没有右孩子<br>在这种情况下，a的后继节点在哪里呢？为了找到a的后继节点，我们就要从a节点开始追根溯源，向上找它的祖先，直到找到第一个这样的祖先s:s的左孩子s’也是ａ的祖先，那么节点s就是这种情况下a的后继节点。</p>
+</li>
+</ul>
+<p>下面是上述两种找后继节点的示意图。声明:<code>这两张图片借自别人的博客</code>(读书人的东西怎么能叫偷呢:)!<br><img src="/images/bst_successor1.gif" alt="找后继1"><br><img src="/images/bst_successor2.gif" alt="找后继2"></p>
+<p>下面是找后继节点的代码:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">BST_p <span class="title">successor</span><span class="params">(BST_p node)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(node-&gt;right!=<span class="literal">NULL</span>)</span><br><span class="line">    <span class="comment">//有右孩子，直接返回指向右子树的最小关键字节点的指针</span></span><br><span class="line">        <span class="keyword">return</span> minimum(node-&gt;right);</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">//没有右孩子</span></span><br><span class="line">        BST_p p=node-&gt;parent;</span><br><span class="line">        <span class="keyword">while</span>(p!=<span class="literal">NULL</span>&amp;&amp;node!=p-&gt;left)&#123;</span><br><span class="line">            node=node-&gt;parent;</span><br><span class="line">            p=p-&gt;parent;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> p;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>找前驱节点的代码:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">BST_p <span class="title">perdecessor</span><span class="params">(BST_p node)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(node-&gt;left!=<span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span> maximum(node-&gt;left);</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        BST_p p=node-&gt;parent;</span><br><span class="line">        <span class="keyword">while</span>(p!=<span class="literal">NULL</span>&amp;&amp;node!=p-&gt;right)&#123;</span><br><span class="line">            node=node-&gt;parent;</span><br><span class="line">            p=p-&gt;parent;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> p;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查找具有指定关键字的节点"><a href="#查找具有指定关键字的节点" class="headerlink" title="查找具有指定关键字的节点"></a>查找具有指定关键字的节点</h3><p>给定一个节点和一个关键字的值，找到树中关键字的值与给定值相等的节点。这个可以用递归和非递归两种方式实现。</p>
+<h4 id="递归"><a href="#递归" class="headerlink" title="递归"></a>递归</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 查找包含关键字k的节点，并返回指向该节点的指针</span></span><br><span class="line"><span class="comment"> * 这里假设树中的key不重复</span></span><br><span class="line"><span class="comment"> **/</span> </span><br><span class="line"><span class="function">BST_p <span class="title">bst_search</span><span class="params">(BST_p&amp; root,<span class="keyword">int</span> k)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root==<span class="literal">NULL</span> || k==root-&gt;key)</span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(k&lt;root-&gt;key)</span><br><span class="line">            <span class="keyword">return</span> bst_search(root-&gt;left,k);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">return</span> bst_search(root-&gt;right,k);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="非递归"><a href="#非递归" class="headerlink" title="非递归"></a>非递归</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 非递归查找</span></span><br><span class="line"><span class="comment"> **/</span> </span><br><span class="line"><span class="function">BST_p <span class="title">bst_search_nonRecur</span><span class="params">(BST_p&amp; root,<span class="keyword">int</span> k)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root==<span class="literal">NULL</span>)<span class="comment">//为空时，直接返回NULL</span></span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    <span class="comment">//不为空</span></span><br><span class="line">    BST_p t=root;</span><br><span class="line">    <span class="keyword">while</span>(k!=t-&gt;key)&#123;<span class="comment">//依次遍历，直到k与t指向的key相等</span></span><br><span class="line">        <span class="keyword">if</span>(k&lt;t-&gt;key)<span class="comment">//如果k小于当前节点的key，那么就需要到当前节点的左子树中去找</span></span><br><span class="line">            t=t-&gt;left;</span><br><span class="line">        <span class="keyword">else</span><span class="comment">//如果k大于当前节点的key，那么就需要到当前节点的右子树中去找</span></span><br><span class="line">            t=t-&gt;right;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h2><p>给定一个树中的节点a，要求删除该节点并且保持二叉搜索树的结构。删除这一操作根据给定节点a的情况的不同，可分成一下三种情况讨论:</p>
+<ul>
+<li>节点a没有孩子节点<br>对于节点a没有孩子节点的情况，我们只需要做以下操作：通过比较a节点的关键字与其父结点的关键字大小从而确定a节点是其父结点的左孩子还是右孩子，然后将a的父节点的对应指针置空，并且释放a所指向节点所占用的内存。<br><img src="/images/delete0.gif" alt="示意图"></li>
+<li>节点a只有一个孩子节点<br>对这种情况，首先要确定a是其父结点的左孩子还是右孩子，然后根据此信息将a的父节点的对应指针指向a的那个唯一的孩子节点，并且将a的孩子节点的父指针指向a的父节点，最后释放a所指向的节点占用的内存。<br><img src="/images/delete1.gif" alt="示意图"></li>
+<li>节点a有两个孩子节点<br>首先找到节点a的后继节点b，然后根据b是否是a的右孩子分两种情况讨论：</li>
+</ul>
+<p>1.b是a的右孩子<br>如果b是a的右孩子，将b提升到a节点的位置，并且将原来a节点的左子树，连接到b节点的左支上(b节点的左支初始时为空)，最后释放a所指向的节点的内存。<br><img src="/images/delete21.gif" alt="示意图"><br>2.b不是a的右孩子<br>首先将b节点的右孩子提升到b的位置，即将b的右孩子连接到b的父节点的左支上(想一想为什么一定是左支上呢?因为b是a的后继节点，而且现在的讨论又是在b不是a的右孩子的基础上)。然后将原来a节点的左子树连接到b节点的左支上(该支初始时为空)，最后将b提升到a的位置，并且释放a节点占用的内存。<br><img src="/images/delete22.gif" alt="示意图"></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 二叉查找树删除node指向的节点</span></span><br><span class="line"><span class="comment"> **/</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">bst_delete</span><span class="params">(BST_p node)</span></span>&#123;</span><br><span class="line">    <span class="comment">//node没有孩子节点</span></span><br><span class="line">    <span class="keyword">if</span>(node-&gt;left==<span class="literal">NULL</span>&amp;&amp;node-&gt;right==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        BST_p p=node-&gt;parent;</span><br><span class="line">        <span class="keyword">if</span>(node-&gt;key&lt;p-&gt;key)<span class="comment">//这里说明node节点是其父节点的左节点</span></span><br><span class="line">            p-&gt;left=<span class="literal">NULL</span>;<span class="comment">//置空左指针</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            p-&gt;right=<span class="literal">NULL</span>;<span class="comment">//置空右指针</span></span><br><span class="line">        <span class="comment">//释放node指向的内存块的内存</span></span><br><span class="line">        <span class="keyword">delete</span> node;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//node只有一个孩子节点</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(node-&gt;left==<span class="literal">NULL</span> || node-&gt;right==<span class="literal">NULL</span>)&#123;</span><br><span class="line">        BST_p p=node-&gt;parent;</span><br><span class="line">        <span class="keyword">if</span>(node-&gt;key&gt;p-&gt;key)&#123;<span class="comment">//node是p的右孩子</span></span><br><span class="line">            <span class="keyword">if</span>(node-&gt;right==<span class="literal">NULL</span>)&#123;</span><br><span class="line">                p-&gt;right=node-&gt;left;</span><br><span class="line">                node-&gt;left-&gt;parent=p;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                p-&gt;right=node-&gt;right;</span><br><span class="line">                node-&gt;right-&gt;parent=p;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(node-&gt;right==<span class="literal">NULL</span>)&#123;</span><br><span class="line">                p-&gt;left=node-&gt;left;</span><br><span class="line">                node-&gt;left-&gt;parent=p;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                p-&gt;left=node-&gt;right;</span><br><span class="line">                node-&gt;right-&gt;parent=p;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">delete</span> node;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//node有两个孩子节点</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(node-&gt;left!=<span class="literal">NULL</span>&amp;&amp; node-&gt;right!=<span class="literal">NULL</span>)&#123;</span><br><span class="line">        BST_p left=node-&gt;left;<span class="comment">//左子树的根节点</span></span><br><span class="line">        BST_p right=node-&gt;right;<span class="comment">//右子树的根节点</span></span><br><span class="line">        BST_p parent=node-&gt;parent;<span class="comment">//父节点</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//node节点的后继节点,由于存在右子树，所以这里直接使用了求右子树的最小节点的函数</span></span><br><span class="line">        BST_p successor=minimum(right);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//后继节点就是node的右孩子，这里假设树中不存在key值相同的节点</span></span><br><span class="line">        <span class="keyword">if</span>(successor-&gt;key==right-&gt;key)&#123;</span><br><span class="line">            <span class="comment">//将node的左支连接到后继节点的左孩子上(初始时该节点为空)</span></span><br><span class="line">            successor-&gt;left=left;</span><br><span class="line">            left-&gt;parent=successor;</span><br><span class="line">            <span class="comment">//将后继节点提升到node的位置</span></span><br><span class="line">            <span class="comment">//这里首先需要判断node是其父节点的左孩子还是右孩子</span></span><br><span class="line">            <span class="keyword">if</span>(node-&gt;key&gt;parent-&gt;key)&#123;</span><br><span class="line">                <span class="comment">//node是其父节点的右节点</span></span><br><span class="line">                parent-&gt;right=successor;</span><br><span class="line">                successor-&gt;parent=parent;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                 <span class="comment">//node是其父节点的左节点</span></span><br><span class="line">                parent-&gt;left=successor;</span><br><span class="line">                successor-&gt;parent=parent;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="comment">//后继节点successor不是node的右孩子</span></span><br><span class="line">            <span class="comment">//首先将successor的右节点提升到successor的位置，然后将node的左支连接到</span></span><br><span class="line">            <span class="comment">//successor的左支上(初始为空支)，然后将successor提升到node的位置</span></span><br><span class="line"></span><br><span class="line">            BST_p succ_parent=successor-&gt;parent;<span class="comment">//后继节点的父节点</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment">//这里后继节点一定位于其父节点的左支，所以直接将后继节点的右节点连接到</span></span><br><span class="line">            <span class="comment">//后继节点的父节点的左支上</span></span><br><span class="line">            succ_parent-&gt;left=successor-&gt;right;</span><br><span class="line">            successor-&gt;right-&gt;parent=succ_parent;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//将node的左子树连接到后继节点的左支上(该支初始时为空)</span></span><br><span class="line">            successor-&gt;left=left;</span><br><span class="line">            left-&gt;parent=successor;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//将successor提升到node的位置，同样的需要判断node位于其父结点的左还是右</span></span><br><span class="line">            <span class="keyword">if</span>(node-&gt;key&gt;parent-&gt;key)&#123;</span><br><span class="line">                <span class="comment">//node是其父节点的右节点</span></span><br><span class="line">                parent-&gt;right=successor;</span><br><span class="line">                successor-&gt;parent=parent;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                 <span class="comment">//node是其父节点的左节点</span></span><br><span class="line">                parent-&gt;left=successor;</span><br><span class="line">                successor-&gt;parent=parent;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">delete</span> node;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="随机构建"><a href="#随机构建" class="headerlink" title="随机构建"></a>随机构建</h1><p>在文章开头介绍了，如果一棵二叉树是一个n个节点连接而成的线性链，那么该二叉树的效率就极其的低下，它就与链表无异了，无法发挥出搜索二叉树的威力。就拿我们上面的<code>init_bst</code>函数为例吧，我们是以用户提供的数组来初始化我们的二叉搜索树的，假如用户提供了这样的一个数组{1,2,3,4,5},或者是这样的{9,8,6,4,3,2}，大家想想我们给构造出来的是一什么样的二叉树呢？第一个数组构造出来的二叉搜索树的每个节点只有右孩子没有左孩子，而第二个构造出来的二叉搜索树的每个节点则只有左孩子没有右孩子。这就是极其低效的二叉树。怎样去避免这样的问题呢？</p>
+<p>显然，我们不应该对用户的输入做任何限制，那么我们就只能改变自己来适应用户了:)。我们可以在用户提供的数组中通过不重复无遗漏的随机取元素的方法来构造一个随机序列，然后用该序列来构造一个随机二叉搜索树。代码如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span> &amp;a, <span class="keyword">int</span> &amp;b)</span>  </span>&#123;  </span><br><span class="line">	<span class="keyword">int</span> tmp = a;  </span><br><span class="line">	a = b;  </span><br><span class="line">	b = tmp;  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">random_init_bst</span><span class="params">(BST_p&amp; root,<span class="keyword">int</span> * a ,<span class="keyword">size_t</span> size)</span></span>&#123;</span><br><span class="line">    srand(time(<span class="literal">NULL</span>));</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=size<span class="number">-1</span>;i&gt;=<span class="number">0</span>;i--)&#123;</span><br><span class="line">        <span class="keyword">int</span> j = rand() % (i+<span class="number">1</span>);	</span><br><span class="line">        bst_insert_nonRecur(root,a[j]);<span class="comment">//插入</span></span><br><span class="line">        swap(arr[j], arr[i]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述随机构建二叉搜索树的方法，在初始化构建树的时候，确实可以降低因用户给定的数组有序而创建低效二叉搜索树的情况，但是它无法做出保证。并且我们在对二叉搜索树这一动态集合进行插入删除等动态操作时，搜索二叉树的形态仍然可能走向低效。前面的动态操作会降低后面操作的效率。怎么办呢?这就要看其他的一些二叉搜索树的变体了！</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p>Introduction to Algorithm (Third Edition)<br><a href="https://lufficc.com/blog/binary-search-tree" target="_blank" rel="noopener">多动态图详细讲解二叉搜索树聪聪的个人网站</a><br><a href="https://songlee24.github.io/2015/01/13/binary-search-tree/" target="_blank" rel="noopener">二叉查找树（BST） | 神奕的博客</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/algorithm/" rel="tag"># algorithm</a>
+          
+            <a href="/tags/data-structure/" rel="tag"># data structure</a>
+          
+            <a href="/tags/binary-search-tree/" rel="tag"># binary search tree</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/26/Web-Crawler/" rel="next" title="木犀后端分享——网络爬虫">
+                <i class="fa fa-chevron-left"></i> 木犀后端分享——网络爬虫
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/09/binary-search-tree-avl/" rel="prev" title="平衡二叉树(AVL)">
+                平衡二叉树(AVL) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是二叉搜索树"><span class="nav-number">1.</span> <span class="nav-text">什么是二叉搜索树?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二叉搜索树的基本操作"><span class="nav-number">2.</span> <span class="nav-text">二叉搜索树的基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#构建"><span class="nav-number">2.1.</span> <span class="nav-text">构建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#插入"><span class="nav-number">2.1.1.</span> <span class="nav-text">插入</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#递归插入"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">递归插入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非递归插入"><span class="nav-number">2.1.1.2.</span> <span class="nav-text">非递归插入</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构建二叉查找树"><span class="nav-number">2.1.2.</span> <span class="nav-text">构建二叉查找树</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#遍历"><span class="nav-number">2.2.</span> <span class="nav-text">遍历</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查找"><span class="nav-number">2.3.</span> <span class="nav-text">查找</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查找最大值与最小值"><span class="nav-number">2.3.1.</span> <span class="nav-text">查找最大值与最小值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查找前驱与后继"><span class="nav-number">2.3.2.</span> <span class="nav-text">查找前驱与后继</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查找具有指定关键字的节点"><span class="nav-number">2.3.3.</span> <span class="nav-text">查找具有指定关键字的节点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#递归"><span class="nav-number">2.3.3.1.</span> <span class="nav-text">递归</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非递归"><span class="nav-number">2.3.3.2.</span> <span class="nav-text">非递归</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除"><span class="nav-number">2.4.</span> <span class="nav-text">删除</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#随机构建"><span class="nav-number">3.</span> <span class="nav-text">随机构建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

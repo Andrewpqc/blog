@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="python,database,sqlalchemy,flask-sqlalchemy,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="基本概念数据库(DataBase, DB）：是存放数据的仓库，只不过这些数据存在一定的关联，并按一定的格式存放在计算机上。 数据库管理系统(DataBase Management System, DBMS):是管理数据库的系统，它按一定的数据模型组织数据。DBMS应提供如下功能：（1）数据定义功能可定义数据库中的数据对象。（2）数据操纵功能可对数据库表进行基本操作，如插入、删除、修改、查询。（3）">
+<meta name="keywords" content="python,database,sqlalchemy,flask-sqlalchemy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="木犀后端分享——关系型数据库">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/10/30/something-about-database/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="基本概念数据库(DataBase, DB）：是存放数据的仓库，只不过这些数据存在一定的关联，并按一定的格式存放在计算机上。 数据库管理系统(DataBase Management System, DBMS):是管理数据库的系统，它按一定的数据模型组织数据。DBMS应提供如下功能：（1）数据定义功能可定义数据库中的数据对象。（2）数据操纵功能可对数据库表进行基本操作，如插入、删除、修改、查询。（3）">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/db.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/db2.jpg">
+<meta property="og:image" content="http://andrewpqc.github.io/images/orm.jpeg">
+<meta property="og:image" content="http://andrewpqc.github.io/images/m2m.jpg">
+<meta property="og:image" content="http://andrewpqc.github.io/images/rela.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/m2m2.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/zyy.png">
+<meta property="og:updated_time" content="2017-11-16T07:53:25.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="木犀后端分享——关系型数据库">
+<meta name="twitter:description" content="基本概念数据库(DataBase, DB）：是存放数据的仓库，只不过这些数据存在一定的关联，并按一定的格式存放在计算机上。 数据库管理系统(DataBase Management System, DBMS):是管理数据库的系统，它按一定的数据模型组织数据。DBMS应提供如下功能：（1）数据定义功能可定义数据库中的数据对象。（2）数据操纵功能可对数据库表进行基本操作，如插入、删除、修改、查询。（3）">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/db.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/10/30/something-about-database/">
+
+
+
+
+
+  <title>木犀后端分享——关系型数据库 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/10/30/something-about-database/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">木犀后端分享——关系型数据库</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-30T15:53:25+08:00">
+                2017-10-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Database/" itemprop="url" rel="index">
+                    <span itemprop="name">Database</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/10/30/something-about-database/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/10/30/something-about-database/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p><code>数据库(DataBase, DB）</code>：是存放数据的仓库，只不过这些数据存在一定的关联，并按一定的格式存放在计算机上。</p>
+<p><code>数据库管理系统(DataBase Management System, DBMS)</code>:是管理数据库的系统，它按一定的数据模型组织数据。DBMS应提供如下功能：<br>（1）数据定义功能可定义数据库中的数据对象。<br>（2）数据操纵功能可对数据库表进行基本操作，如插入、删除、修改、查询。<br>（3）数据的完整性检查功能保证用户输入的数据应满足相应的约束条件。<br>（4）数据库的安全保护功能保证只有赋予权限的用户才能访问数据库中的数据。<br>（5）数据库的并发控制功能使多个应用程序可在同一时刻并发地访问数据库的数据。<br>（6）数据库系统的故障恢复功能使数据库运行出现故障时进行数据库恢复，以保证数据库可靠运行。<br>（7）在网络环境下访问数据库的功能。<br>（8）方便、有效地存取数据库信息的接口和工具。编程人员通过程序开发工具与数据库的接口编写数据库应用程序。<code>数据库管理员（DataBase　Adminitrator，DBA）</code>通过提供的工具对数据库进行管理。</p>
+<p><code>数据库系统(Database System,DBS)</code>:数据、数据库、数据库管理系统与操作数据库的应用程序，加上支撑它们的硬件平台、软件平台和与数据库有关的人员一起构成了一个完整的数据库系统.</p>
+<p><img src="/images/db.png" alt="数据库系统"></p>
+<p>从上面的这些概念中，我们可以知道平时我们讲的SQL Server、Oracle、MySQL、DB2、SyBase等，本身并不是数据库，他们是数据库管理系统。我们通过这个数据库管理系统创建的那个可以存储表的东西才是数据库。数据库中存储这一个或多个表，表之间存在着特定的关系。一个表由行和列组成，每一列代表一个字段(Field),每一行则代表着一条具有某种特别意义的记录。</p>
+<p><img src="/images/db2.jpg" alt="表的结构"></p>
+<p>作为程序员，我们所要知道的就是要怎样使用数据库管理系统？怎样通过数据库管理系统去创建和删除数据库？怎样在数据库中创建和删除表，怎样在表中实现数据的增删改查？下面我就以mysql这一个关系型数据库管理系统为例来讲解这些操作。</p>
+<h1 id="mysql客户端工具基本操作"><a href="#mysql客户端工具基本操作" class="headerlink" title="mysql客户端工具基本操作"></a>mysql客户端工具基本操作</h1><h2 id="连接并登录"><a href="#连接并登录" class="headerlink" title="连接并登录"></a>连接并登录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ mysql -u &lt;NAME&gt; -h &lt;HOSTNAME&gt; -P &lt;PORT&gt; -p</span><br><span class="line">$ mysql -u &lt;NAME&gt; -p</span><br><span class="line"><span class="comment">#不指明主机和端口，则默认访问本地的3306端口</span></span><br></pre></td></tr></table></figure>
+
+<p>在终端中输入上述命令，接着输入密码即可连接并登录指定主机指定端口的mysql服务器。(注意密码不回显)</p>
+<h2 id="编码的修改"><a href="#编码的修改" class="headerlink" title="编码的修改"></a>编码的修改</h2><p>在Mac或Linux上，需要编辑MySQL的配置文件，把数据库默认的编码全部改为UTF-8。MySQL的配置文件默认存放在/etc/my.cnf或者/etc/mysql/my.cnf：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[client]</span><br><span class="line">default-character-set = utf8</span><br><span class="line">[mysqld]</span><br><span class="line">default-storage-engine = INNODB</span><br><span class="line">character-set-server = utf8</span><br><span class="line">collation-server = utf8_general_ci</span><br></pre></td></tr></table></figure>
+
+<p><code>重启MySQL</code>后，可以通过MySQL的客户端命令行检查编码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ mysql -u root -p</span><br><span class="line">Enter password: </span><br><span class="line">Welcome to the MySQL monitor...</span><br><span class="line">...</span><br><span class="line">mysql&gt; show variables like <span class="string">'%char%'</span>;</span><br><span class="line">+--------------------------+--------------------------------------------------------+</span><br><span class="line">| Variable_name            | Value                                                  |</span><br><span class="line">+--------------------------+--------------------------------------------------------+</span><br><span class="line">| character_set_client     | utf8                                                   |</span><br><span class="line">| character_set_connection | utf8                                                   |</span><br><span class="line">| character_set_database   | utf8                                                   |</span><br><span class="line">| character_set_filesystem | binary                                                 |</span><br><span class="line">| character_set_results    | utf8                                                   |</span><br><span class="line">| character_set_server     | utf8                                                   |</span><br><span class="line">| character_set_system     | utf8                                                   |</span><br><span class="line">| character_sets_dir       | /usr/<span class="built_in">local</span>/mysql-5.1.65-osx10.6-x86_64/share/charsets/ |</span><br><span class="line">+--------------------------+--------------------------------------------------------+</span><br><span class="line">8 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p>看到utf8字样就表示编码设置正确。</p>
+<h2 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h2><h3 id="查看当前所有的数据库："><a href="#查看当前所有的数据库：" class="headerlink" title="查看当前所有的数据库："></a>查看当前所有的数据库：</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">show</span> <span class="keyword">databases</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="切换数据库："><a href="#切换数据库：" class="headerlink" title="切换数据库："></a>切换数据库：</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">use</span> &lt;DB <span class="keyword">NAME</span>&gt;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建数据库："><a href="#创建数据库：" class="headerlink" title="创建数据库："></a>创建数据库：</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> 数据库名;</span><br></pre></td></tr></table></figure>
+
+<h3 id="建立数据表："><a href="#建立数据表：" class="headerlink" title="建立数据表："></a>建立数据表：</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">USE</span> 库名;</span><br><span class="line">$ <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> 表名 (字段名 <span class="built_in">VARCHAR</span>(<span class="number">20</span>), 字段名 <span class="built_in">CHAR</span>(<span class="number">1</span>));</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除数据库："><a href="#删除数据库：" class="headerlink" title="删除数据库："></a>删除数据库：</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">DROP</span> <span class="keyword">DATABASE</span> 库名;</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除数据表："><a href="#删除数据表：" class="headerlink" title="删除数据表："></a>删除数据表：</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">DROP</span> <span class="keyword">TABLE</span> 表名;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看当前数据库的所有的表："><a href="#查看当前数据库的所有的表：" class="headerlink" title="查看当前数据库的所有的表："></a>查看当前数据库的所有的表：</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">show</span> <span class="keyword">tables</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看某一个表的结构："><a href="#查看某一个表的结构：" class="headerlink" title="查看某一个表的结构："></a>查看某一个表的结构：</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ desc &lt;Table name&gt;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看某一张表的前10条数据："><a href="#查看某一张表的前10条数据：" class="headerlink" title="查看某一张表的前10条数据："></a>查看某一张表的前10条数据：</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">select</span> * <span class="keyword">from</span> &lt;<span class="keyword">Table</span> <span class="keyword">name</span>&gt; <span class="keyword">limit</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<p>基本上上面的几条命令会是大家以后在mysql客户端中使用的最多的命令了。</p>
+<h3 id="创建和管理用户"><a href="#创建和管理用户" class="headerlink" title="创建和管理用户"></a>创建和管理用户</h3><p>mysql支持数据库的多用户管理，并且可以对每个用户的权限进行管理。下面我们来看看怎样创建用户和管理用户的权限。</p>
+<h4 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h4><p>命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">'username'</span>@<span class="string">'host'</span> <span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'password'</span>;</span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ul>
+<li>username：你将创建的用户名</li>
+<li>host：指定该用户在哪个主机上可以登陆，如果是本地用户可用localhost，如果想让该用户可以从任意远程主机登陆，可以使用通配符%</li>
+<li>password：该用户的登陆密码，密码可以为空，如果为空则该用户可以不需要密码登陆服务器</li>
+</ul>
+<p>例子：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">'dog'</span>@<span class="string">'localhost'</span> <span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'123456'</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">'pig'</span>@<span class="string">'192.168.1.101_'</span> IDENDIFIED <span class="keyword">BY</span> <span class="string">'123456'</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">'pig'</span>@<span class="string">'%'</span> <span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'123456'</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">'pig'</span>@<span class="string">'%'</span> <span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">''</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">'pig'</span>@<span class="string">'%'</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="授权"><a href="#授权" class="headerlink" title="授权"></a>授权</h4><p>命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">GRANT</span> <span class="keyword">privileges</span> <span class="keyword">ON</span> databasename.tablename <span class="keyword">TO</span> <span class="string">'username'</span>@<span class="string">'host'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span>,<span class="keyword">INSERT</span>,<span class="keyword">UPDATE</span>,<span class="keyword">DELETE</span>,<span class="keyword">CREATE</span>,<span class="keyword">DROP</span>,<span class="keyword">ALTER</span>  <span class="keyword">ON</span> 数据库名.* <span class="keyword">TO</span> 用户名@localhost <span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'密码'</span>;</span><br></pre></td></tr></table></figure>
+
+<p>说明：</p>
+<ul>
+<li>privileges：用户的操作权限，如SELECT，INSERT，UPDATE等，如果要授予所的权限则使用ALL</li>
+<li>databasename：数据库名</li>
+<li>tablename：表名，如果要授予该用户对所有数据库和表的相应操作权限则可用<em>表示，如</em>.*<br>例子：<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">GRANT</span> <span class="keyword">SELECT</span>, <span class="keyword">INSERT</span> <span class="keyword">ON</span> test.user <span class="keyword">TO</span> <span class="string">'pig'</span>@<span class="string">'%'</span>;</span><br><span class="line">$ <span class="keyword">GRANT</span> <span class="keyword">ALL</span> <span class="keyword">ON</span> *.* <span class="keyword">TO</span> <span class="string">'pig'</span>@<span class="string">'%'</span>;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>注意：<br>用以上命令授权的用户不能给其它用户授权，如果想让该用户可以授权，用以下命令:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">GRANT</span> <span class="keyword">privileges</span> <span class="keyword">ON</span> databasename.tablename <span class="keyword">TO</span> <span class="string">'username'</span>@<span class="string">'host'</span> <span class="keyword">WITH</span> <span class="keyword">GRANT</span> <span class="keyword">OPTION</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置和更改用户密码"><a href="#设置和更改用户密码" class="headerlink" title="设置和更改用户密码"></a>设置和更改用户密码</h4><p>命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">SET</span> <span class="keyword">PASSWORD</span> <span class="keyword">FOR</span> <span class="string">'username'</span>@<span class="string">'host'</span> = <span class="keyword">PASSWORD</span>(<span class="string">'newpassword'</span>);</span><br><span class="line">如果是当前登陆用户用:</span><br><span class="line">$ <span class="keyword">SET</span> <span class="keyword">PASSWORD</span> = <span class="keyword">PASSWORD</span>(<span class="string">"newpassword"</span>);</span><br></pre></td></tr></table></figure>
+
+<p>例子：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">SET</span> <span class="keyword">PASSWORD</span> <span class="keyword">FOR</span> <span class="string">'pig'</span>@<span class="string">'%'</span> = <span class="keyword">PASSWORD</span>(<span class="string">"123456"</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="插销用户权限"><a href="#插销用户权限" class="headerlink" title="插销用户权限"></a>插销用户权限</h4><p>命令:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">REVOKE</span> privilege <span class="keyword">ON</span> databasename.tablename <span class="keyword">FROM</span> <span class="string">'username'</span>@<span class="string">'host'</span>;</span><br></pre></td></tr></table></figure>
+
+<p>说明:<br>privilege, databasename, tablename：同授权部分</p>
+<p>例子:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">REVOKE</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> *.* <span class="keyword">FROM</span> <span class="string">'pig'</span>@<span class="string">'%'</span>;</span><br></pre></td></tr></table></figure>
+
+<p>注意：<br>假如你在给用户‘pig’@’%’授权的时候是这样的（或类似的）：GRANT SELECT ON test.user TO ‘pig’@’%’，则在使用REVOKE SELECT ON <em>.</em> FROM ‘pig’@’%’;命令并不能撤销该用户对test数据库中user表的SELECT 操作。相反，如果授权使用的是GRANT SELECT ON <em>.</em> TO ‘pig’@’%’;则REVOKE SELECT ON test.user FROM ‘pig’@’%’;命令也不能撤销该用户对test数据库中user表的Select权限。</p>
+<h4 id="删除用户"><a href="#删除用户" class="headerlink" title="删除用户"></a>删除用户</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">DROP</span> <span class="keyword">USER</span> <span class="string">'username'</span>@<span class="string">'host'</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="SQL"><a href="#SQL" class="headerlink" title="SQL"></a>SQL</h1><p>SQL 是一门 ANSI 的标准计算机语言，用来访问和操作数据库系统。SQL 语句用于取回和更新数据库中的数据。SQL 可与数据库程序协同工作。虽然是一门标准的语言，不幸地是，存在着很多不同版本的 SQL 语言，但是为了与 ANSI 标准相兼容，它们必须以相似的方式共同地来支持一些主要的关键词（比如 SELECT、UPDATE、DELETE、INSERT、WHERE 等等）。</p>
+<h2 id="select"><a href="#select" class="headerlink" title="select"></a>select</h2><p>语法：SELECT 列名称 FROM 表名称;<br>SELECT 语句用于从表中选取数据。结果被存储在一个结果表中（称为结果集）。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> LastName,FirstName <span class="keyword">FROM</span> Persons;</span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Persons;</span><br></pre></td></tr></table></figure>
+
+<h2 id="distinct"><a href="#distinct" class="headerlink" title="distinct"></a>distinct</h2><p>语法：SELECT DISTINCT 列名称 FROM 表名称;<br>在表中，可能会包含重复值。这并不成问题，不过，有时您也许希望仅仅列出不同（distinct）的值。<br>关键词 DISTINCT 用于返回唯一不同的值</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> LastName <span class="keyword">FROM</span> Persons;</span><br></pre></td></tr></table></figure>
+
+<h2 id="where"><a href="#where" class="headerlink" title="where"></a>where</h2><p>语法：SELECT 列名称 FROM 表名称 WHERE 列 运算符 值;<br>如需有条件地从表中选取数据，可将 WHERE 子句添加到 SELECT 语句。<br>下面的运算符可以在where子句中使用：</p>
+<table>
+<thead>
+<tr>
+<th align="center">操作符</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">=</td>
+<td align="center">等于</td>
+</tr>
+<tr>
+<td align="center">&lt;&gt;</td>
+<td align="center">不等于</td>
+</tr>
+<tr>
+<td align="center">&gt;</td>
+<td align="center">大于</td>
+</tr>
+<tr>
+<td align="center">&lt;</td>
+<td align="center">小于</td>
+</tr>
+<tr>
+<td align="center">&gt;=</td>
+<td align="center">大于等于</td>
+</tr>
+<tr>
+<td align="center">&lt;=</td>
+<td align="center">小于等于</td>
+</tr>
+<tr>
+<td align="center">BETWEEN</td>
+<td align="center">在某个范围内</td>
+</tr>
+<tr>
+<td align="center">LIKE</td>
+<td align="center">搜索某种模式</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Persons <span class="keyword">WHERE</span> City=<span class="string">'Beijing'</span>;</span><br><span class="line">请注意，我们在例子中的条件值周围使用的是单引号。</span><br><span class="line">SQL 使用单引号来环绕文本值（大部分数据库系统也接受双引号）。如果是数值，请不要使用引号。</span><br><span class="line">这是正确的：</span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Persons <span class="keyword">WHERE</span> FirstName=<span class="string">'Bush'</span>;</span><br><span class="line">这是错误的：</span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Persons <span class="keyword">WHERE</span> FirstName=Bush;</span><br><span class="line">这是正确的：</span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Persons <span class="keyword">WHERE</span> <span class="keyword">Year</span>&gt;<span class="number">1965</span>;</span><br><span class="line">这是错误的：</span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Persons <span class="keyword">WHERE</span> <span class="keyword">Year</span>&gt;<span class="string">'1965'</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="and-amp-or"><a href="#and-amp-or" class="headerlink" title="and &amp; or"></a>and &amp; or</h2><p>语法：AND 和 OR 可在 WHERE 子语句中把两个或多个条件结合起来。如果第一个条件和第二个条件都成立，则 AND 运算符显示一条记录。如果第一个条件和第二个条件中只要有一个成立，则 OR 运算符显示一条记录。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Persons <span class="keyword">WHERE</span> FirstName=<span class="string">'Thomas'</span> <span class="keyword">AND</span> LastName=<span class="string">'Carter'</span>;</span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Persons <span class="keyword">WHERE</span> firstname=<span class="string">'Thomas'</span> <span class="keyword">OR</span> lastname=<span class="string">'Carter'</span>;</span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Persons <span class="keyword">WHERE</span> (FirstName=<span class="string">'Thomas'</span> <span class="keyword">OR</span> FirstName=<span class="string">'William'</span>) <span class="keyword">AND</span> LastName=<span class="string">'Carter'</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="order-by"><a href="#order-by" class="headerlink" title="order by"></a>order by</h2><p>语法：ORDER BY 语句用于根据指定的列对结果集进行排序。ORDER BY 语句默认按照升序对记录进行排序。如果您希望按照降序对记录进行排序，可以使用 DESC 关键字。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">以字母顺序显示公司名称：</span><br><span class="line"><span class="keyword">SELECT</span> Company, OrderNumber <span class="keyword">FROM</span> Orders <span class="keyword">ORDER</span> <span class="keyword">BY</span> Company;</span><br><span class="line">以字母顺序显示公司名称（Company），并以数字顺序显示顺序号（OrderNumber）：</span><br><span class="line"><span class="keyword">SELECT</span> Company, OrderNumber <span class="keyword">FROM</span> Orders <span class="keyword">ORDER</span> <span class="keyword">BY</span> Company, OrderNumber;</span><br><span class="line">以逆字母顺序显示公司名称：</span><br><span class="line"><span class="keyword">SELECT</span> Company, OrderNumber <span class="keyword">FROM</span> Orders <span class="keyword">ORDER</span> <span class="keyword">BY</span> Company <span class="keyword">DESC</span>;</span><br><span class="line">以逆字母顺序显示公司名称，并以数字顺序显示顺序号：</span><br><span class="line"><span class="keyword">SELECT</span> Company, OrderNumber <span class="keyword">FROM</span> Orders <span class="keyword">ORDER</span> <span class="keyword">BY</span> Company <span class="keyword">DESC</span>, OrderNumber <span class="keyword">ASC</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="insert-into"><a href="#insert-into" class="headerlink" title="insert into"></a>insert into</h2><p>语法：INSERT INTO 表名称 VALUES (值1, 值2,….);<br>我们也可以指定所要插入数据的列：INSERT INTO table_name (列1, 列2,…) VALUES (值1, 值2,….);</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> Persons <span class="keyword">VALUES</span> (<span class="string">'Gates'</span>, <span class="string">'Bill'</span>, <span class="string">'Xuanwumen 10'</span>, <span class="string">'Beijing'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> Persons (LastName, Address) <span class="keyword">VALUES</span> (<span class="string">'Wilson'</span>, <span class="string">'Champs-Elysees'</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="update"><a href="#update" class="headerlink" title="update"></a>update</h2><p>语法：UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值;<br>Update 语句用于修改表中的数据。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> Person <span class="keyword">SET</span> FirstName = <span class="string">'Fred'</span> <span class="keyword">WHERE</span> LastName = <span class="string">'Wilson'</span> ;</span><br><span class="line"><span class="keyword">UPDATE</span> Person <span class="keyword">SET</span> Address = <span class="string">'Zhongshan 23'</span>, City = <span class="string">'Nanjing'</span> <span class="keyword">WHERE</span> LastName = <span class="string">'Wilson'</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h2><p>DELETE 语句用于删除表中的行。<br>语法：DELETE FROM 表名称 WHERE 列名称 = 值;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> Person <span class="keyword">WHERE</span> LastName = <span class="string">'Wilson'</span> ;</span><br><span class="line">可以在不删除表的情况下删除所有的行。这意味着表的结构、属性和索引都是完整的：</span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> table_name</span><br><span class="line">或者：</span><br><span class="line"><span class="keyword">DELETE</span> * <span class="keyword">FROM</span> table_name</span><br></pre></td></tr></table></figure>
+
+<h2 id="原生SQL在python代码中的使用"><a href="#原生SQL在python代码中的使用" class="headerlink" title="原生SQL在python代码中的使用"></a>原生SQL在python代码中的使用</h2><p>要想在你的python代码中操作mysql，那么据需要使用python链接mysql的驱动程序。MysqlDB是最常用的mysql驱动，但是至今没有支持python3.下表列出了python3中链接mysql的几个驱动程序：</p>
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">安装</th>
+<th align="center">导入</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><a href="https://dev.mysql.com/doc/connector-python/en/" target="_blank" rel="noopener">MYSQL Connector</a></td>
+<td align="center">pip install mysql-connector-python</td>
+<td align="center">mysql.connctor</td>
+</tr>
+<tr>
+<td align="center"><a href="https://github.com/PyMySQL/PyMySQL" target="_blank" rel="noopener">PYMYSQL</a></td>
+<td align="center">pip install pymysql</td>
+<td align="center">pymysql</td>
+</tr>
+</tbody></table>
+<p>下面以MySQL Connector为例讲解：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> mysql.connector</span><br><span class="line"><span class="comment"># conn = mysql.connector.connect(user='root', password='password', database='mydb')</span></span><br><span class="line">conn = mysql.connector.connect(user=<span class="string">'root'</span>, password=<span class="string">'password'</span>,</span><br><span class="line">                               database=<span class="string">'mydb'</span>,host=<span class="string">"120.220.235.23"</span>,port=<span class="number">32777</span>)</span><br><span class="line">cursor = conn.cursor()</span><br><span class="line"><span class="comment"># 创建user表:</span></span><br><span class="line">cursor.execute(<span class="string">'create table user (id varchar(20) primary key, name varchar(20))'</span>)</span><br><span class="line"><span class="comment"># 插入一行记录，注意MySQL的占位符是%s:</span></span><br><span class="line">cursor.execute(<span class="string">'insert into user (id, name) values (%s, %s)'</span>, [<span class="string">'1'</span>, <span class="string">'Michael'</span>])</span><br><span class="line">print(cursor.rowcount)</span><br><span class="line"><span class="comment"># 输出　1</span></span><br><span class="line"><span class="comment"># 提交事务:</span></span><br><span class="line">conn.commit()</span><br><span class="line">cursor.close()</span><br><span class="line"><span class="comment"># 运行查询:</span></span><br><span class="line">cursor = conn.cursor()</span><br><span class="line">cursor.execute(<span class="string">'select * from user where id = %s'</span>, (<span class="string">'1'</span>,))</span><br><span class="line">values = cursor.fetchall()</span><br><span class="line"><span class="comment"># 输出：[('1', 'Michael')]</span></span><br><span class="line"><span class="comment"># 关闭Cursor和Connection:</span></span><br><span class="line">cursor.close()</span><br><span class="line">conn.close()</span><br></pre></td></tr></table></figure>
+
+<h1 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h1><p>SQLAlchemy是Python编程语言下的一款ORM框架，该框架建立在数据库API之上，使用关系对象映射进行数据库操作，简言之便是：将对象转换成SQL，然后使用数据库API执行SQL并获取执行结果。这是分了三层，上层和下面两层。ORM是用类来封装的，SQLALCHEMY Core 是用函数封装的，是核心层，不是执行数据库语句，是把写成的类，翻译成sql语句。DBAPI执行SQL从而获取执行结果或将数据持久化进磁盘。</p>
+<p><img src="/images/orm.jpeg" alt="ORM"></p>
+<p>SQLAlchemy本身无法操作数据库，其必须依赖pymysql，mysql-connector等第三方插件.Dialect用于和数据库API进行交流，根据配置文件的不同调用不同的数据库API，从而实现对数据库的操作。SQLAlchemy为我们屏蔽了SQL语句的繁琐，统一了各种不同数据库的操作，极大的方便了数据库应用的开发。</p>
+<h2 id="SQLAlchemy的基本使用"><a href="#SQLAlchemy的基本使用" class="headerlink" title="SQLAlchemy的基本使用"></a>SQLAlchemy的基本使用</h2><h3 id="连接配置"><a href="#连接配置" class="headerlink" title="连接配置"></a>连接配置</h3><p><code>dialect+driver://user:password@host:port/dbname</code><br>不同数据库和驱动条件下的连接配置：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MySQL-Python</span><br><span class="line">    mysql+mysqldb://&lt;user&gt;:&lt;password&gt;@&lt;host&gt;[:&lt;port&gt;]/&lt;dbname&gt;</span><br><span class="line">pymysql</span><br><span class="line">    mysql+pymysql://&lt;username&gt;:&lt;password&gt;@&lt;host&gt;/&lt;dbname&gt;[?&lt;options&gt;]</span><br><span class="line">MySQL-Connector</span><br><span class="line">    mysql+mysqlconnector://&lt;user&gt;:&lt;password&gt;@&lt;host&gt;[:&lt;port&gt;]/&lt;dbname&gt;</span><br><span class="line">cx_Oracle</span><br><span class="line">    oracle+cx_oracle://user:pass@host:port/dbname[?key=value&amp;key=value...]</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建表"><a href="#创建表" class="headerlink" title="创建表"></a>创建表</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sqlalchemy</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column, Integer, String</span><br><span class="line"><span class="comment"># 创建实例，并连接test库，echo=True 显示SQL语句</span></span><br><span class="line">engine = create_engine(<span class="string">"mysql+pymysql://root:123456@localhost/test"</span>,</span><br><span class="line">                                    encoding=<span class="string">'utf-8'</span>, echo=<span class="literal">True</span>)</span><br><span class="line"><span class="comment">#create_engine方法返回一个Engine实例，Engine实例只有直到触发数据库事件时才真正去连接数据库。#echo=True是回显命令，sqlalchemy与数据库通信的命令都将打印出来</span></span><br><span class="line">Base = declarative_base()  <span class="comment"># 生成orm基类</span></span><br><span class="line"><span class="comment">#declarative_base类维持了一个从类到表的关系，通常一个应用使用一个base实例，</span></span><br><span class="line"><span class="comment">#所有实体类都应该继承此类对象</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'users'</span>  <span class="comment"># 表名</span></span><br><span class="line">    __table_args__ = &#123;<span class="string">"mysql_charset"</span>: <span class="string">"utf8"</span>&#125;</span><br><span class="line">    id = Column(Integer, primary_key=<span class="literal">True</span>,autoincrement=<span class="literal">True</span>)<span class="comment">#主键，自增id</span></span><br><span class="line">    name = Column(String(<span class="number">32</span>))</span><br><span class="line">    password = Column(String(<span class="number">64</span>))</span><br><span class="line">Base.metadata.create_all(engine) <span class="comment">#创建表结构 （这里是父类调子类）</span></span><br><span class="line"><span class="comment">#Base.metadata返回sqlalchemy.schema.MetaData对象，它是所有Table对象的集合，</span></span><br><span class="line"><span class="comment">#调用create_all()该对象会触发CREATE TABLE语句，如果数据库还不存在这些表的话。</span></span><br></pre></td></tr></table></figure>
+
+<p>除了上面的创建方法之外，还有一种创建方式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Table, MetaData, Column, Integer, String</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> mapper</span><br><span class="line">metadata = MetaData()</span><br><span class="line">user = Table(<span class="string">'user'</span>, metadata,</span><br><span class="line">            Column(<span class="string">'id'</span>, Integer, primary_key=<span class="literal">True</span>,autoincrement=<span class="literal">True</span>),</span><br><span class="line">            Column(<span class="string">'name'</span>, String(<span class="number">50</span>)),</span><br><span class="line">            Column(<span class="string">'fullname'</span>, String(<span class="number">50</span>)),</span><br><span class="line">            Column(<span class="string">'password'</span>, String(<span class="number">12</span>))</span><br><span class="line">        )</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name, fullname, password)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.fullname = fullname</span><br><span class="line">        self.password = password</span><br><span class="line">mapper(User, user)  <span class="comment"># 类User 和 user关联起来</span></span><br><span class="line"><span class="comment"># the table metadata is created separately with the Table construct, </span></span><br><span class="line"><span class="comment"># then associated with the User class via the mapper() function</span></span><br><span class="line"><span class="comment"># 如果数据库里有，就不会创建了。</span></span><br></pre></td></tr></table></figure>
+
+<p>在使用的时候建议使用第一种创建方式。</p>
+<h3 id="Column构造函数常用参数"><a href="#Column构造函数常用参数" class="headerlink" title="Column构造函数常用参数"></a>Column构造函数常用参数</h3><table>
+<thead>
+<tr>
+<th align="center">参数</th>
+<th align="center">含义</th>
+<th align="center">可选值</th>
+<th align="center">默认值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">autoincrement</td>
+<td align="center">是否自增</td>
+<td align="center">Ture,False</td>
+<td align="center">False</td>
+</tr>
+<tr>
+<td align="center">primary_key</td>
+<td align="center">主键</td>
+<td align="center">Ture,False</td>
+<td align="center">False</td>
+</tr>
+<tr>
+<td align="center">default</td>
+<td align="center">指定默认值</td>
+<td align="center">自定义值</td>
+<td align="center">无</td>
+</tr>
+<tr>
+<td align="center">index</td>
+<td align="center">是否建索引</td>
+<td align="center">True,False</td>
+<td align="center">False</td>
+</tr>
+<tr>
+<td align="center">nullable</td>
+<td align="center">字段可否可空</td>
+<td align="center">Ture,False</td>
+<td align="center">False</td>
+</tr>
+</tbody></table>
+<h3 id="插入一条数据"><a href="#插入一条数据" class="headerlink" title="插入一条数据"></a>插入一条数据</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Table, MetaData, Column, Integer, String</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> mapper, sessionmaker</span><br><span class="line"><span class="comment"># 创建实例，并连接test库</span></span><br><span class="line">engine = create_engine(<span class="string">"mysql+pymysql://root:123456@localhost/test"</span>,</span><br><span class="line">                                    encoding=<span class="string">'utf-8'</span>, echo=<span class="literal">True</span>)</span><br><span class="line">metadata = MetaData()</span><br><span class="line">user = Table(<span class="string">'user'</span>, metadata,</span><br><span class="line">            Column(<span class="string">'id'</span>, Integer, primary_key=<span class="literal">True</span>,autoincrement=<span class="literal">True</span>),</span><br><span class="line">            Column(<span class="string">'name'</span>, String(<span class="number">50</span>)),</span><br><span class="line">            Column(<span class="string">'password'</span>, String(<span class="number">12</span>))</span><br><span class="line">        )</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name,  password)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.password = password</span><br><span class="line"><span class="comment"># the table metadata is created separately with the Table construct, then associated with the User class via the mapper() function</span></span><br><span class="line">mapper(User, user)</span><br><span class="line"><span class="comment"># 创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例.</span></span><br><span class="line">Session_class = sessionmaker(bind=engine)  <span class="comment"># 实例和engine绑定</span></span><br><span class="line">Session = Session_class()  <span class="comment"># 生成session实例，相当于游标</span></span><br><span class="line"><span class="comment">#Session是真正与数据库通信的handler，你还可以把他理解一个容器，add就是往容器中添加对象</span></span><br><span class="line">user_obj = User(name=<span class="string">"fgf"</span>,password=<span class="string">"123456"</span>)  <span class="comment"># 生成你要创建的数据对象</span></span><br><span class="line">print(user_obj.name,user_obj.id)  <span class="comment"># 此时还没创建对象呢，不信你打印一下id发现还是None</span></span><br><span class="line">Session.add(user_obj)  <span class="comment"># 把要创建的数据对象添加到这个session里， 一会统一创建</span></span><br><span class="line"><span class="comment"># Session.add_all([user1,user2,use3]) #add_all()添加多个对象，效率高</span></span><br><span class="line">print(user_obj.name,user_obj.id) <span class="comment">#此时也依然还没创建，id仍然为None</span></span><br><span class="line">Session.commit() <span class="comment">#现此才统一提交，创建数据</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="对象状态"><a href="#对象状态" class="headerlink" title="对象状态"></a>对象状态</h3><p>对象实例有四种状态，分别是：</p>
+<ul>
+<li>Transient（瞬时的)：这个状态的对象还不在session中，也不会保存到数据库中，主键为None（不是绝对的，如果Persistent对象rollback后虽然主键id有值，但还是Transient状态的）。</li>
+<li>Pending（挂起的）：调用session.add()后，Transient对象就会变成Pending，这个时候它还是不会保存到数据库中，只有等到触发了flush动作才会存在数据库，比如query操作就可以出发flush。同样这个时候的实例的主键一样为None</li>
+<li>Persistent（持久的）：session中，数据库中都有对应的一条记录存在，主键有值了。</li>
+<li>Detached（游离的）：数据库中有记录，但是session中不存在，对这个状态的对象进行操作时，不会触发任何SQL语句。</li>
+</ul>
+<h3 id="Session对象缓存清理"><a href="#Session对象缓存清理" class="headerlink" title="Session对象缓存清理"></a>Session对象缓存清理</h3><p>Session对象在commit()方法调用时,在执行查询时和显式调用session的flush方法时清理缓存，从而保证查询结果能反映对象的最新状态。</p>
+<p>Session是真正与数据库通信的handler，你还可以把他理解一个容器，add就是往容器中添加对象<br>执行完add方法后，ed_user对象处于pending状态，不会触发INSERT语句，当然ed_uesr.id也为None，如果在add方后有查询(session.query)，那么会flush一下，把数据刷一遍，把所有的pending信息先flush再执行query。</p>
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">my_user = Session.query(User).filter_by(name=<span class="string">"fgf"</span>).first()  <span class="comment"># 查询</span></span><br><span class="line">print(my_user) <span class="comment">#输出 &lt;__main__.User object at 0x7f0a5a3dea20&gt;</span></span><br><span class="line">print(my_user.id,my_user.name,my_user.password)</span><br><span class="line"><span class="comment"># 输出 1 fgf 123456</span></span><br></pre></td></tr></table></figure>
+
+<p>不过刚才显示的内存对象对址没办法分清返回的是什么数据的，除非打印具体字段看一下，如果想让它变的可读，只需在定义表的类下面加上这样的代码:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">"&lt;User(name='%s',  password='%s')&gt;"</span> % ( self.name, self.password)</span><br></pre></td></tr></table></figure>
+
+<p>完整的查询代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Table, MetaData, Column, Integer, String</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> mapper, sessionmaker</span><br><span class="line"><span class="comment"># 创建实例，并连接test库</span></span><br><span class="line">engine = create_engine(<span class="string">"mysql+pymysql://root:123456@localhost/test"</span>,</span><br><span class="line">                                    encoding=<span class="string">'utf-8'</span>, echo=<span class="literal">True</span>)</span><br><span class="line">metadata = MetaData()</span><br><span class="line">user = Table(<span class="string">'user'</span>, metadata,</span><br><span class="line">            Column(<span class="string">'id'</span>, Integer, primary_key=<span class="literal">True</span>,autoincrement=<span class="literal">True</span>),</span><br><span class="line">            Column(<span class="string">'name'</span>, String(<span class="number">50</span>)),</span><br><span class="line">            Column(<span class="string">'password'</span>, String(<span class="number">12</span>))</span><br><span class="line">        )</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name, id, password)</span>:</span></span><br><span class="line">        self.id = id</span><br><span class="line">        self.name = name</span><br><span class="line">        self.password = password</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"&lt;User(name='%s',  password='%s')&gt;"</span> % (self.name, self.password)</span><br><span class="line">mapper(User, user)</span><br><span class="line"><span class="comment"># 创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例</span></span><br><span class="line">Session_class = sessionmaker(bind=engine)</span><br><span class="line">Session = Session_class()  <span class="comment"># 生成session实例</span></span><br><span class="line">my_user = Session.query(User).filter_by(name=<span class="string">"fgf"</span>).first()  <span class="comment"># 查询第一个</span></span><br><span class="line"><span class="comment"># my_user = Session.query(User).filter_by().all()  # 查询所有</span></span><br><span class="line">print(my_user)</span><br><span class="line"><span class="comment"># print(my_user.id,my_user.name,my_user.password)</span></span><br><span class="line"><span class="comment"># Session.commit()  #查询不需要commit</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="多条件查询"><a href="#多条件查询" class="headerlink" title="多条件查询"></a>多条件查询</h3><p>filter_by与filter</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">my_user1 = Session.query(User).filter(User.id&gt;<span class="number">2</span>).all()</span><br><span class="line">my_user2 = Session.query(User).filter_by(id=<span class="number">27</span>).all()  <span class="comment"># filter_by相等用‘=’</span></span><br><span class="line">my_user3 = Session.query(User).filter(User.id==<span class="number">27</span>).all()  <span class="comment"># filter相等用‘==’</span></span><br><span class="line">objs = Session.query(User).filter(User.id&gt;<span class="number">0</span>).filter(User.id&lt;<span class="number">7</span>).all()</span><br><span class="line">print(my_user1,<span class="string">'\n'</span>,my_user2,<span class="string">'\n'</span>,my_user3,<span class="string">'\n'</span>,objs)</span><br></pre></td></tr></table></figure>
+
+<p>建立在SQLAlchemy上的几种常见的SQL查询实例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">几种常见sqlalchemy查询：</span><br><span class="line"><span class="comment">#简单查询    </span></span><br><span class="line">print(session.query(User).all())</span><br><span class="line">print(session.query(User.name, User.fullname).all())    </span><br><span class="line">print(session.query(User, User.name).all())        </span><br><span class="line"><span class="comment">#带条件查询    </span></span><br><span class="line">print(session.query(User).filter_by(name=<span class="string">'user1'</span>).all())    </span><br><span class="line">print(session.query(User).filter(User.name == <span class="string">"user"</span>).all())    </span><br><span class="line">print(session.query(User).filter(User.name.like(<span class="string">"user%"</span>)).all())      </span><br><span class="line"><span class="comment">#多条件查询  </span></span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> and_,or_  </span><br><span class="line">print(session.query(User).filter(and_(User.name.like(<span class="string">"user%"</span>), User.fullname.like(<span class="string">"first%"</span>))).all())    </span><br><span class="line">print(session.query(User).filter(or_(User.name.like(<span class="string">"user%"</span>), User.password != <span class="literal">None</span>)).all())        </span><br><span class="line"><span class="comment">#sql过滤    </span></span><br><span class="line">print(session.query(User).filter(<span class="string">"id&gt;:id"</span>).params(id=<span class="number">1</span>).all())        </span><br><span class="line"><span class="comment">#关联查询     </span></span><br><span class="line">print(session.query(User, Address).filter(User.id == Address.user_id).all())    </span><br><span class="line">print(session.query(User).join(User.addresses).all())    </span><br><span class="line">print(session.query(User).outerjoin(User.addresses).all())        </span><br><span class="line"><span class="comment">#聚合查询    </span></span><br><span class="line">print(session.query(User.name, func.count(<span class="string">'*'</span>).label(<span class="string">"user_count"</span>)).group_by(User.name).all())    </span><br><span class="line">print(session.query(User.name, func.sum(User.id).label(<span class="string">"user_id_sum"</span>)).group_by(User.name).all())        </span><br><span class="line"><span class="comment">#子查询    </span></span><br><span class="line">stmt = session.query(Address.user_id, func.count(<span class="string">'*'</span>).label(<span class="string">"address_count"</span>)).group_by(Address.user_id).subquery()    </span><br><span class="line">print(session.query(User, stmt.c.address_count).outerjoin((stmt, User.id == stmt.c.user_id)).order_by(User.id).all())     </span><br><span class="line">   </span><br><span class="line"><span class="comment">#exists    </span></span><br><span class="line">print(session.query(User).filter(exists().where(Address.user_id == User.id)))    </span><br><span class="line">print(session.query(User).filter(User.addresses.any()))</span><br><span class="line">限制返回字段查询</span><br><span class="line">person = session.query(Person.name, Person.created_at,Person.updated_at).filter_by(name=<span class="string">"zhongwei"</span>).order_by(Person.created_at).first()</span><br><span class="line">记录总数查询：</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> func</span><br><span class="line"><span class="comment"># count User records, without</span></span><br><span class="line"><span class="comment"># using a subquery.</span></span><br><span class="line">session.query(func.count(User.id))</span><br><span class="line"><span class="comment"># return count of user "id" grouped</span></span><br><span class="line"><span class="comment"># by "name"</span></span><br><span class="line">session.query(func.count(User.id)).\</span><br><span class="line">        group_by(User.name)</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> distinct</span><br><span class="line"><span class="comment"># count distinct "name" values</span></span><br><span class="line">session.query(func.count(distinct(User.name)))</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">my_user = Session.query(User).filter_by(name=<span class="string">"fgf"</span>).first()</span><br><span class="line">my_user.name = <span class="string">"fenggf"</span>  <span class="comment"># 查询出来之后直接赋值修改</span></span><br><span class="line">my_user.passwork = <span class="string">"123qwe"</span></span><br><span class="line">Session.commit() <span class="comment">#注意提交</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">query = Session.query(User).filter_by(name=<span class="string">"hhh"</span>).delete()</span><br><span class="line">Session.commit()</span><br></pre></td></tr></table></figure>
+
+<h3 id="回滚"><a href="#回滚" class="headerlink" title="回滚"></a>回滚</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">my_user = Session.query(User).filter_by(id=<span class="number">1</span>).first()</span><br><span class="line">my_user.name = <span class="string">"Jack"</span></span><br><span class="line">fake_user = User(name=<span class="string">'Rain'</span>, password=<span class="string">'12345'</span>)</span><br><span class="line">Session.add(fake_user)</span><br><span class="line">print(Session.query(User).filter(User.name.in_([<span class="string">'Jack'</span>,<span class="string">'rain'</span>])).all() )  <span class="comment">#这时看session里有你刚添加和修改的数据</span></span><br><span class="line">Session.rollback() <span class="comment">#此时你rollback一下</span></span><br><span class="line">print(Session.query(User).filter(User.name.in_([<span class="string">'Jack'</span>,<span class="string">'rain'</span>])).all() ) <span class="comment">#再查就发现刚才添加的数据没有了。</span></span><br><span class="line"><span class="comment"># Session</span></span><br><span class="line"><span class="comment"># Session.commit()</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="表与表之间的关系"><a href="#表与表之间的关系" class="headerlink" title="表与表之间的关系"></a>表与表之间的关系</h3><p>SQLAlchemy中的映射关系有四种,分别是一对一,一对多,多对一,多对多。</p>
+<h3 id="一对多和多对一"><a href="#一对多和多对一" class="headerlink" title="一对多和多对一"></a>一对多和多对一</h3><p>因为外键(ForeignKey)始终定义在多的一方.如果relationship定义在多的一方,那就是多对一,一对多与多对一的区别在于其关联(relationship)的属性在多的一方还是一的一方，如果relationship定义在一的一方那就是一对多.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column, Enum,DATE,Integer, String,ForeignKey</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> sessionmaker,relationship</span><br><span class="line">engine = create_engine(<span class="string">"mysql+pymysql://root:123456@localhost/test"</span>,</span><br><span class="line">                                    encoding=<span class="string">'utf-8'</span>)</span><br><span class="line">Base = declarative_base()  <span class="comment"># 生成orm基类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Stu2</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">"stu2"</span></span><br><span class="line">    id = Column(Integer, primary_key=<span class="literal">True</span>,autoincrement=<span class="literal">True</span>)</span><br><span class="line">    name = Column(String(<span class="number">32</span>),nullable=<span class="literal">False</span>)</span><br><span class="line">    register_date = Column(DATE,nullable=<span class="literal">False</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"&lt;%s name:%s&gt;"</span> % (self.id, self.name)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">StudyRecord</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">"study_record"</span></span><br><span class="line">    id = Column(Integer, primary_key=<span class="literal">True</span>,autoincrement=<span class="literal">True</span>)</span><br><span class="line">    day = Column(Integer,nullable=<span class="literal">False</span>)</span><br><span class="line">    status = Column(String(<span class="number">32</span>),nullable=<span class="literal">False</span>)</span><br><span class="line">    stu_id = Column(Integer,ForeignKey(<span class="string">"stu2.id"</span>))  <span class="comment">#------外键关联------</span></span><br><span class="line">    <span class="comment">#这个nb，允许你在user表里通过backref字段反向查出所有它在stu2表里的关联项数据</span></span><br><span class="line">    stu2 = relationship(<span class="string">"Stu2"</span>, backref=<span class="string">"my_study_record"</span>)  <span class="comment"># 添加关系，反查（在内存里）</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"&lt;%s day:%s status:%s&gt;"</span> % (self.stu2.name, self.day,self.status)</span><br><span class="line">Base.metadata.create_all(engine)  <span class="comment"># 创建表结构</span></span><br><span class="line">Session_class = sessionmaker(bind=engine)  <span class="comment"># 创建与数据库的会话session class ,注意,这里返回给session的是个class,不是实例</span></span><br><span class="line">session = Session_class()  <span class="comment"># 生成session实例 #cursor</span></span><br><span class="line">s1 = Stu2(name=<span class="string">"A"</span>,register_date=<span class="string">"2014-05-21"</span>)</span><br><span class="line">s2 = Stu2(name=<span class="string">"J"</span>,register_date=<span class="string">"2014-03-21"</span>)</span><br><span class="line">s3 = Stu2(name=<span class="string">"R"</span>,register_date=<span class="string">"2014-02-21"</span>)</span><br><span class="line">s4 = Stu2(name=<span class="string">"E"</span>,register_date=<span class="string">"2013-01-21"</span>)</span><br><span class="line">study_obj1 = StudyRecord(day=<span class="number">1</span>,status=<span class="string">"YES"</span>, stu_id=<span class="number">1</span>)</span><br><span class="line">study_obj2 = StudyRecord(day=<span class="number">2</span>,status=<span class="string">"NO"</span>, stu_id=<span class="number">1</span>)</span><br><span class="line">study_obj3 = StudyRecord(day=<span class="number">3</span>,status=<span class="string">"YES"</span>, stu_id=<span class="number">1</span>)</span><br><span class="line">study_obj4 = StudyRecord(day=<span class="number">1</span>,status=<span class="string">"YES"</span>, stu_id=<span class="number">2</span>)</span><br><span class="line">session.add_all([s1,s2,s3,s4,study_obj1,study_obj2,study_obj3,study_obj4])  <span class="comment"># 创建</span></span><br><span class="line">session.commit()</span><br><span class="line">stu_obj = session.query(Stu2).filter(Stu2.name==<span class="string">"a"</span>).first()  <span class="comment"># 查询</span></span><br><span class="line"><span class="comment"># 在stu2表，查到StudyRecord表的记录</span></span><br><span class="line">print(stu_obj.my_study_record)  <span class="comment"># 查询A一共上了几节课</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="多对多关系"><a href="#多对多关系" class="headerlink" title="多对多关系"></a>多对多关系</h3><p>多对多关系需要一个中间关联表,通过参数secondary来指定,这个中间关联表只需要创建即可，不需要操作它，SQLAlchemy自己会管理这张表。<br><img src="/images/m2m.jpg" alt="多对多"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">post_keywords = Table(<span class="string">'student_class'</span>,Base.metadata,</span><br><span class="line">        Column(<span class="string">'student_id'</span>,Integer,ForeignKey(<span class="string">'students.id'</span>)),</span><br><span class="line">        Column(<span class="string">'class_id'</span>,Integer,ForeignKey(<span class="string">'classes.id'</span>))</span><br><span class="line">)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Student</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'students'</span></span><br><span class="line">    id = Column(Integer,primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(String(<span class="number">20</span>))</span><br><span class="line">    age = Column(Integer)</span><br><span class="line">    keywords = relationship(<span class="string">'Class'</span>,secondary=student_class,backref=<span class="string">'students'</span>)</span><br><span class="line">    <span class="comment"># keywords = relationship('Class',secondary=student_class,backref=backref('students,lazy="dynamic"),lazy="dynamic")</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Class</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'classes'</span></span><br><span class="line">    id = Column(Integer,primary_key = <span class="literal">True</span>)</span><br><span class="line">    classname = Column(String(<span class="number">50</span>),nullable=<span class="literal">False</span>,unique=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Integer, ForeignKey, String, Column</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> relationship</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line">Base = declarative_base()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Customer</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'customer'</span></span><br><span class="line">    id = Column(Integer, primary_key=<span class="literal">True</span>,autoincrement=<span class="literal">True</span>)</span><br><span class="line">    name = Column(String(<span class="number">64</span>))</span><br><span class="line">    <span class="comment"># 账单地址和邮寄地址, 都关联同一个地址表</span></span><br><span class="line">    billing_address_id = Column(Integer, ForeignKey(<span class="string">"address.id"</span>))</span><br><span class="line">    shipping_address_id = Column(Integer, ForeignKey(<span class="string">"address.id"</span>))</span><br><span class="line">    billing_address = relationship(<span class="string">"Address"</span>, foreign_keys=[billing_address_id])</span><br><span class="line">    shipping_address = relationship(<span class="string">"Address"</span>, foreign_keys=[shipping_address_id])</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'address'</span></span><br><span class="line">    id = Column(Integer, primary_key=<span class="literal">True</span>,autoincrement=<span class="literal">True</span>)</span><br><span class="line">    street = Column(String(<span class="number">64</span>))</span><br><span class="line">    city = Column(String(<span class="number">64</span>))</span><br><span class="line">    state = Column(String(<span class="number">64</span>))</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.street</span><br><span class="line">engine = create_engine(<span class="string">"mysql+pymysql://root:123456@localhost/test"</span>,</span><br><span class="line">                                    encoding=<span class="string">'utf-8'</span>)</span><br><span class="line">Base.metadata.create_all(engine)  <span class="comment"># 创建表结构</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Flask-SQLAlchemy的使用"><a href="#Flask-SQLAlchemy的使用" class="headerlink" title="Flask-SQLAlchemy的使用"></a>Flask-SQLAlchemy的使用</h2><p>Flask-SQLAlchemy 在 SQLAlchemy 的基础上，提供了一些常用的工具，并预设了一些默认值，帮助你更轻松地完成常见任务。flask-sqlalchemy 用起来比直接用 sqlalchemy 方便、省事，不过有些高级一点的功能如果不了解 sqlalchemy 的话会用不好。</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pip install flask-sqlalchemy</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置数据库"><a href="#配置数据库" class="headerlink" title="配置数据库"></a>配置数据库</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask_sqlalchemy <span class="keyword">import</span> SQLAlchemy</span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask</span><br><span class="line">app = Flask(__name__)</span><br><span class="line">app.config[<span class="string">"SQLALCHEMY_DATABASE_URI"</span>]=<span class="string">"mysql+pymysql://root:pqc19960320@120.77.220.239:32777/mydb"</span></span><br><span class="line">app.config[<span class="string">"SQLALCHEMY_TRACK_MODIFICATIONS"</span>]=<span class="literal">True</span></span><br><span class="line">db=SQLAlchemy(app)</span><br></pre></td></tr></table></figure>
+
+<p>db对象是SQLAlchemy类的实例，表示程序使用的数据库，同时还获得了Flask-SQLAlchemy提供的所有功能。</p>
+<h3 id="定义模型"><a href="#定义模型" class="headerlink" title="定义模型"></a>定义模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Role</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">    __tablename__=<span class="string">"roles"</span></span><br><span class="line">    id=db.Column(db.Integer,primary_key=<span class="literal">True</span>)</span><br><span class="line">    name=db.Column(db.String(<span class="number">30</span>),unique=<span class="literal">True</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"&lt;Role %s&gt;"</span> % self.name</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">    __tablename__=<span class="string">"users"</span></span><br><span class="line">    id=db.Column(db.Integer,primary_key=<span class="literal">True</span>)</span><br><span class="line">    username=db.Column(db.String(<span class="number">64</span>),unique=<span class="literal">True</span>,index=<span class="literal">True</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"&lt;User %s&gt;"</span> % self.username</span><br></pre></td></tr></table></figure>
+
+<p><strong>tablename</strong>定义在数据库中使用的表名，如果没有定义<strong>tablename</strong>,Flask-SQLAlchemy会使用一个默认的名字，但是默认的表名没有遵循复数形式进行命名的约定。</p>
+<p>常使用的列类型</p>
+<table>
+<thead>
+<tr>
+<th align="center">类型名称</th>
+<th align="center">python类型</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Integer</td>
+<td align="center">int</td>
+<td align="center">常规整形，通常为32位</td>
+</tr>
+<tr>
+<td align="center">SmallInteger</td>
+<td align="center">int</td>
+<td align="center">短整形，通常为16位</td>
+</tr>
+<tr>
+<td align="center">BigInteger</td>
+<td align="center">int或long</td>
+<td align="center">精度不受限整形</td>
+</tr>
+<tr>
+<td align="center">Float</td>
+<td align="center">float</td>
+<td align="center">浮点数</td>
+</tr>
+<tr>
+<td align="center">Numeric</td>
+<td align="center">decimal.Decimal</td>
+<td align="center">定点数</td>
+</tr>
+<tr>
+<td align="center">String</td>
+<td align="center">str</td>
+<td align="center">可变长度字符串</td>
+</tr>
+<tr>
+<td align="center">Text</td>
+<td align="center">str</td>
+<td align="center">可变长度字符串，适合大量文本</td>
+</tr>
+<tr>
+<td align="center">Unicode</td>
+<td align="center">unicode</td>
+<td align="center">可变长度Unicode字符串</td>
+</tr>
+<tr>
+<td align="center">UnicodeText</td>
+<td align="center">unicode</td>
+<td align="center">可变长度Unicode字符串,对较长或不限长度的字符串做了优化</td>
+</tr>
+<tr>
+<td align="center">Boolean</td>
+<td align="center">bool</td>
+<td align="center">布尔型</td>
+</tr>
+<tr>
+<td align="center">Date</td>
+<td align="center">datetime.date</td>
+<td align="center">日期类型</td>
+</tr>
+<tr>
+<td align="center">Time</td>
+<td align="center">datetime.time</td>
+<td align="center">时间类型</td>
+</tr>
+<tr>
+<td align="center">DataTime</td>
+<td align="center">datetime.datatime</td>
+<td align="center">日期和时间</td>
+</tr>
+<tr>
+<td align="center">Interval</td>
+<td align="center">datetime.timedelta</td>
+<td align="center">时间间隔</td>
+</tr>
+<tr>
+<td align="center">Enum</td>
+<td align="center">str</td>
+<td align="center">字符列表</td>
+</tr>
+<tr>
+<td align="center">PickleType</td>
+<td align="center">任意Python对象</td>
+<td align="center">自动Pickle序列化</td>
+</tr>
+<tr>
+<td align="center">LargeBinary</td>
+<td align="center">str</td>
+<td align="center">二进制</td>
+</tr>
+</tbody></table>
+<p>常使用的列选项</p>
+<table>
+<thead>
+<tr>
+<th align="center">参数</th>
+<th align="center">含义</th>
+<th align="center">可选值</th>
+<th align="center">默认值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">primary_key</td>
+<td align="center">主键</td>
+<td align="center">True,False</td>
+<td align="center">False</td>
+</tr>
+<tr>
+<td align="center">default</td>
+<td align="center">指定默认值</td>
+<td align="center">自定义值</td>
+<td align="center">无</td>
+</tr>
+<tr>
+<td align="center">index</td>
+<td align="center">是否建索引</td>
+<td align="center">True,False</td>
+<td align="center">False</td>
+</tr>
+<tr>
+<td align="center">nullable</td>
+<td align="center">字段可否可空</td>
+<td align="center">True,False</td>
+<td align="center">False</td>
+</tr>
+<tr>
+<td align="center">unique</td>
+<td align="center">是否允许出现重复值</td>
+<td align="center">True,False</td>
+<td align="center">False</td>
+</tr>
+</tbody></table>
+<h3 id="关系"><a href="#关系" class="headerlink" title="关系"></a>关系</h3><h4 id="一对多和多对一-1"><a href="#一对多和多对一-1" class="headerlink" title="一对多和多对一"></a>一对多和多对一</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Role</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">    __tablename__=<span class="string">"roles"</span></span><br><span class="line">    id=db.Column(db.Integer,primary_key=<span class="literal">True</span>)</span><br><span class="line">    name=db.Column(db.String(<span class="number">30</span>),unique=<span class="literal">True</span>)</span><br><span class="line">    users=db.relationship(<span class="string">"User"</span>,backref=<span class="string">"role"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"&lt;Role %s&gt;"</span> % self.name</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">    __tablename__=<span class="string">"users"</span></span><br><span class="line">    id=db.Column(db.Integer,primary_key=<span class="literal">True</span>)</span><br><span class="line">    username=db.Column(db.String(<span class="number">64</span>),unique=<span class="literal">True</span>,index=<span class="literal">True</span>)</span><br><span class="line">    role_id=(db.Integer,db.ForeignKey(<span class="string">"roles.id"</span>))</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"&lt;User %s&gt;"</span> % self.username</span><br></pre></td></tr></table></figure>
+
+<p>两张表之间的关系事实上是由ForeignKey建立起来的，relationship在两张表之间建立了一个虚拟关系，帮助我们更方便的操作这种关系。注意：在一对多或多对一的关系中，ForeignKey只会出现在多的一方，并且它所关联的一定是另一张表的primary_key。 relationship的一个必须参数是要建立虚拟关系的表所对应类的名字，如果这个类还没有定义，可以用一个字符串代替，它的其他更多可选参数见下图：</p>
+<p><img src="/images/rela.png" alt="关系选项"></p>
+<p><a href="http://blog.csdn.net/bestallen/article/details/52551579" target="_blank" rel="noopener">lazy选项</a></p>
+<h4 id="数据库操作"><a href="#数据库操作" class="headerlink" title="数据库操作"></a>数据库操作</h4><h5 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建表</span></span><br><span class="line">db.create_all()</span><br><span class="line"><span class="comment">#删除表</span></span><br><span class="line">db.drop_all()</span><br></pre></td></tr></table></figure>
+
+<h5 id="插入行"><a href="#插入行" class="headerlink" title="插入行"></a>插入行</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> models <span class="keyword">import</span> Role,User</span><br><span class="line">admin_role=Role(name=<span class="string">"Admin"</span>)</span><br><span class="line">mod_role=Role(name=<span class="string">"Moderator"</span>)</span><br><span class="line">user_role=Role(name=<span class="string">"User"</span>)</span><br><span class="line">john=User(usename=<span class="string">"John"</span>,role=admin_role)</span><br><span class="line">susan=User(username=<span class="string">"Susan"</span>,role=mod_role)</span><br><span class="line">david=User(username=<span class="string">"David"</span>,role=user_role)</span><br></pre></td></tr></table></figure>
+
+<p>注意这里创建Role和User实例时，都没有传id属性，这是因为primary_key是由Flask-SQLAlchemy管理的。relationship建立的虚拟字段role和users也是可以使用的,虽然他们不是真正的数据库列，但却是一对多关系的高级表示。此时这些对象的状态是暂时的，并没有写入数据库中，此时打印对象的id值：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(admin_role.id)   <span class="comment">#-&gt;None</span></span><br><span class="line">print(john.id)   <span class="comment">#-&gt;None</span></span><br></pre></td></tr></table></figure>
+
+<p>添加如会话：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">db.session.add(admin_role)</span><br><span class="line">db.session.add(mod_role)</span><br><span class="line">db.session.add(user_role)</span><br><span class="line">db.session.add(john)</span><br><span class="line">db.session.add(susan)</span><br><span class="line">db.session.add(david)</span><br><span class="line"><span class="comment">#或者一次性添加</span></span><br><span class="line">db.session.add_all([admin_role,mod_role,user_role,john,susan,davia])</span><br><span class="line"><span class="comment">#此时这些数据对象的状态变成挂起的了，依然没有写入到数据库中，我们打印对象的id，依然是None</span></span><br><span class="line">print(admin_role.id) <span class="comment">#-&gt;None</span></span><br><span class="line"><span class="comment">#直到我们commit()之后，这些数据对象才持久化到数据库中</span></span><br><span class="line">db.commit()</span><br><span class="line">print(admin_role.id) <span class="comment">#-&gt;1</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="修改行"><a href="#修改行" class="headerlink" title="修改行"></a>修改行</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">admin_role.name=<span class="string">"Administrator"</span></span><br><span class="line">db.session.add(admin_role)</span><br><span class="line">db.session.commit()</span><br></pre></td></tr></table></figure>
+
+<h5 id="删除行"><a href="#删除行" class="headerlink" title="删除行"></a>删除行</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db.session.delete(mod_role)</span><br><span class="line">db.session.commit()</span><br></pre></td></tr></table></figure>
+
+<h5 id="查询行"><a href="#查询行" class="headerlink" title="查询行"></a>查询行</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Role.query.all()</span><br><span class="line">[&lt;Role <span class="string">"Administrator"</span>&gt;,&lt;Role <span class="string">"User"</span>&gt;]</span><br></pre></td></tr></table></figure>
+
+<p>Flask-SQLAlchemy为每个模型都提供了一个query对象，模型名.query就可以拿到这个query对象，在query对象的后面可以加查询过滤器，查询过滤器返回的仍然是query对象，这意味着我们还可以继续在后面追加查询过滤器，从而精确的筛选出我们需要的数据。query对象建立好之后，Flask-SQLAlchemy并没有执行SQL查询，要想真正的得到数据，我们还必须要在query对象的后面执行查询执行函数。下面是常用的查询过滤器和查询执行函数：</p>
+<table>
+<thead>
+<tr>
+<th align="center">过滤器</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">filter()</td>
+<td align="center">把过滤器添加到原查询上，返回一个新查询</td>
+</tr>
+<tr>
+<td align="center">filter_by()</td>
+<td align="center">把等值过滤器添加到原查询上，返回一个新查询</td>
+</tr>
+<tr>
+<td align="center">limit()</td>
+<td align="center">使用指定的值限制原查询返回的结果数量，返回一个新查询</td>
+</tr>
+<tr>
+<td align="center">offset()</td>
+<td align="center">偏移原查询返回的结果，返回一个新查询</td>
+</tr>
+<tr>
+<td align="center">order_by()</td>
+<td align="center">根据指定条件对原查询结果进行排序，返回一个新查询</td>
+</tr>
+<tr>
+<td align="center">group_by()</td>
+<td align="center">根据指定条件对原查询结果进行分组，返回一个新查询</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center">查询执行方法</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">all()</td>
+<td align="center">以列表形式返回查询的所有结果</td>
+</tr>
+<tr>
+<td align="center">first()</td>
+<td align="center">返回查询的第一个结果，如果没有结果，则返回None</td>
+</tr>
+<tr>
+<td align="center">first_or_404()</td>
+<td align="center">返回查询的第一个结果，如果没有结果，则终止请求，返回404错误响应</td>
+</tr>
+<tr>
+<td align="center">get()</td>
+<td align="center">返回指定主键对应的行，如果没有对应的行，则返回None</td>
+</tr>
+<tr>
+<td align="center">get_or_404</td>
+<td align="center">返回指定主键对应的行，如果没有找到指定的主键，则终止请求，返回404错误响应</td>
+</tr>
+<tr>
+<td align="center">count()</td>
+<td align="center">返回查询结果的数量</td>
+</tr>
+<tr>
+<td align="center">paginate()</td>
+<td align="center">返回一个Paginate对象，它包含指定范围内的结果</td>
+</tr>
+<tr>
+<td align="center">下面我们看看relationship建立的虚拟字段role,users</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(admin_role.users)</span><br><span class="line"><span class="comment">#输出：[&lt;User John&gt;]</span></span><br></pre></td></tr></table></figure></td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<p>这里有一个小问题，我们用users虚拟字段的时候，默认我们就得到了当前角色的所有用户的列表，也就是得到了查询执行函数执行之后的结果，但是如果我们想要做更加精细的筛选呢？</p>
+<p>事实上，我们更期待它返回的是一个query对象，而不是结果列表。这是可以做得到的。</p>
+<h5 id="多对多"><a href="#多对多" class="headerlink" title="多对多"></a>多对多</h5><p><img src="/images/m2m2.png" alt="多对多"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">registrations=db.Table(<span class="string">"registrations"</span>,</span><br><span class="line">    db.Column(<span class="string">"student_id"</span>,db.Integer,db.ForeignKey(<span class="string">"students.id"</span>)),</span><br><span class="line">    db.Column(<span class="string">"class_id"</span>,db.Integer,db.ForeignKey(<span class="string">"classes.id"</span>))</span><br><span class="line">)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Student</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">    id=db.Column(db.Integer,primary_key=<span class="literal">True</span>)</span><br><span class="line">    name=db.Column(db.String(<span class="number">20</span>))</span><br><span class="line">    classes=db.relationship(<span class="string">"Class"</span>,</span><br><span class="line">                            secondary=registrations,</span><br><span class="line">                            backref=db.backref(<span class="string">"students"</span>,lazy=<span class="string">"dynamic"</span>),</span><br><span class="line">                            lazy=<span class="string">"dynamic"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Class</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">    id=db.Column(db.Integer,primary_key=<span class="literal">True</span>)</span><br><span class="line">    name=db.Column(db.String(<span class="number">20</span>))</span><br><span class="line">c=Class(name=<span class="string">"语文"</span>)</span><br><span class="line"><span class="comment">#学生s注册了课程c</span></span><br><span class="line">s.classes.append(c)</span><br><span class="line">db.session.add(s)</span><br><span class="line">s.classes.remove(c)</span><br><span class="line">db.session.add(s)</span><br><span class="line"><span class="comment">#学生s注册的所有课程</span></span><br><span class="line">s.classes.all()</span><br><span class="line"><span class="comment">#注册c的所有的学生</span></span><br><span class="line">c.students.all()</span><br></pre></td></tr></table></figure>
+
+<h5 id="自引用"><a href="#自引用" class="headerlink" title="自引用"></a>自引用</h5><p><img src="/images/zyy.png" alt="自引用"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Follow</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">    __tablename__=<span class="string">"follows"</span></span><br><span class="line">    follower_id=db.Column(db.Integer,db.ForeignKey(<span class="string">"users.id"</span>),primary_key=<span class="literal">True</span>)</span><br><span class="line">    followed_id=db.Column(db.Integer,db.ForeignKey(<span class="string">"user.id"</span>),primary_key=<span class="literal">True</span>)</span><br><span class="line">    timestamp=db.Column(db.DateTime,default=datetime.utcnow)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">    __tablename__=<span class="string">"users"</span></span><br><span class="line">    username=db.Column(db.String(<span class="number">20</span>),index=<span class="literal">True</span>)</span><br><span class="line">    followed=db.relationship(<span class="string">"Follow"</span>,</span><br><span class="line">                            foreign_key=[Follow.follower_id],</span><br><span class="line">                            backref=db.backref(<span class="string">"follower"</span>,lazy=<span class="string">"joined"</span>),</span><br><span class="line">                            lazy=<span class="string">"dynamic"</span>,</span><br><span class="line">                            cascade=<span class="string">"all,delete-orphan"</span>)</span><br><span class="line">     followers=db.relationship(<span class="string">"Follow"</span>,</span><br><span class="line">                            foreign_key=[Follow.followed_id],</span><br><span class="line">                            backref=db.backref(<span class="string">"followed"</span>,lazy=<span class="string">"joined"</span>),</span><br><span class="line">                            lazy=<span class="string">"dynamic"</span>,</span><br><span class="line">                            cascade=<span class="string">"all,delete-orphan"</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p>参考内容过多，在此不一一列出，默默感谢那些走在前面的大佬。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+            <a href="/tags/database/" rel="tag"># database</a>
+          
+            <a href="/tags/sqlalchemy/" rel="tag"># sqlalchemy</a>
+          
+            <a href="/tags/flask-sqlalchemy/" rel="tag"># flask-sqlalchemy</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/29/chapter-two-of-fluent-python/" rel="next" title="Python内置的序列类型">
+                <i class="fa fa-chevron-left"></i> Python内置的序列类型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/22/Sort-Algorithm/" rel="prev" title="排序算法">
+                排序算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#基本概念"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#mysql客户端工具基本操作"><span class="nav-number">2.</span> <span class="nav-text">mysql客户端工具基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#连接并登录"><span class="nav-number">2.1.</span> <span class="nav-text">连接并登录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编码的修改"><span class="nav-number">2.2.</span> <span class="nav-text">编码的修改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本操作"><span class="nav-number">2.3.</span> <span class="nav-text">基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查看当前所有的数据库："><span class="nav-number">2.3.1.</span> <span class="nav-text">查看当前所有的数据库：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#切换数据库："><span class="nav-number">2.3.2.</span> <span class="nav-text">切换数据库：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建数据库："><span class="nav-number">2.3.3.</span> <span class="nav-text">创建数据库：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#建立数据表："><span class="nav-number">2.3.4.</span> <span class="nav-text">建立数据表：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除数据库："><span class="nav-number">2.3.5.</span> <span class="nav-text">删除数据库：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除数据表："><span class="nav-number">2.3.6.</span> <span class="nav-text">删除数据表：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看当前数据库的所有的表："><span class="nav-number">2.3.7.</span> <span class="nav-text">查看当前数据库的所有的表：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看某一个表的结构："><span class="nav-number">2.3.8.</span> <span class="nav-text">查看某一个表的结构：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看某一张表的前10条数据："><span class="nav-number">2.3.9.</span> <span class="nav-text">查看某一张表的前10条数据：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建和管理用户"><span class="nav-number">2.3.10.</span> <span class="nav-text">创建和管理用户</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建用户"><span class="nav-number">2.3.10.1.</span> <span class="nav-text">创建用户</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#授权"><span class="nav-number">2.3.10.2.</span> <span class="nav-text">授权</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#设置和更改用户密码"><span class="nav-number">2.3.10.3.</span> <span class="nav-text">设置和更改用户密码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#插销用户权限"><span class="nav-number">2.3.10.4.</span> <span class="nav-text">插销用户权限</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#删除用户"><span class="nav-number">2.3.10.5.</span> <span class="nav-text">删除用户</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SQL"><span class="nav-number">3.</span> <span class="nav-text">SQL</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#select"><span class="nav-number">3.1.</span> <span class="nav-text">select</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#distinct"><span class="nav-number">3.2.</span> <span class="nav-text">distinct</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#where"><span class="nav-number">3.3.</span> <span class="nav-text">where</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#and-amp-or"><span class="nav-number">3.4.</span> <span class="nav-text">and &amp; or</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#order-by"><span class="nav-number">3.5.</span> <span class="nav-text">order by</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#insert-into"><span class="nav-number">3.6.</span> <span class="nav-text">insert into</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#update"><span class="nav-number">3.7.</span> <span class="nav-text">update</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#delete"><span class="nav-number">3.8.</span> <span class="nav-text">delete</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原生SQL在python代码中的使用"><span class="nav-number">3.9.</span> <span class="nav-text">原生SQL在python代码中的使用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ORM"><span class="nav-number">4.</span> <span class="nav-text">ORM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SQLAlchemy的基本使用"><span class="nav-number">4.1.</span> <span class="nav-text">SQLAlchemy的基本使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#连接配置"><span class="nav-number">4.1.1.</span> <span class="nav-text">连接配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建表"><span class="nav-number">4.1.2.</span> <span class="nav-text">创建表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Column构造函数常用参数"><span class="nav-number">4.1.3.</span> <span class="nav-text">Column构造函数常用参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插入一条数据"><span class="nav-number">4.1.4.</span> <span class="nav-text">插入一条数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对象状态"><span class="nav-number">4.1.5.</span> <span class="nav-text">对象状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Session对象缓存清理"><span class="nav-number">4.1.6.</span> <span class="nav-text">Session对象缓存清理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询"><span class="nav-number">4.1.7.</span> <span class="nav-text">查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多条件查询"><span class="nav-number">4.1.8.</span> <span class="nav-text">多条件查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改"><span class="nav-number">4.1.9.</span> <span class="nav-text">修改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除"><span class="nav-number">4.1.10.</span> <span class="nav-text">删除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回滚"><span class="nav-number">4.1.11.</span> <span class="nav-text">回滚</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#表与表之间的关系"><span class="nav-number">4.1.12.</span> <span class="nav-text">表与表之间的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一对多和多对一"><span class="nav-number">4.1.13.</span> <span class="nav-text">一对多和多对一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多对多关系"><span class="nav-number">4.1.14.</span> <span class="nav-text">多对多关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flask-SQLAlchemy的使用"><span class="nav-number">4.2.</span> <span class="nav-text">Flask-SQLAlchemy的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装"><span class="nav-number">4.2.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置数据库"><span class="nav-number">4.2.2.</span> <span class="nav-text">配置数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定义模型"><span class="nav-number">4.2.3.</span> <span class="nav-text">定义模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关系"><span class="nav-number">4.2.4.</span> <span class="nav-text">关系</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一对多和多对一-1"><span class="nav-number">4.2.4.1.</span> <span class="nav-text">一对多和多对一</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据库操作"><span class="nav-number">4.2.4.2.</span> <span class="nav-text">数据库操作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#创建"><span class="nav-number">4.2.4.2.1.</span> <span class="nav-text">创建</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#插入行"><span class="nav-number">4.2.4.2.2.</span> <span class="nav-text">插入行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#修改行"><span class="nav-number">4.2.4.2.3.</span> <span class="nav-text">修改行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#删除行"><span class="nav-number">4.2.4.2.4.</span> <span class="nav-text">删除行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#查询行"><span class="nav-number">4.2.4.2.5.</span> <span class="nav-text">查询行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多对多"><span class="nav-number">4.2.4.2.6.</span> <span class="nav-text">多对多</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#自引用"><span class="nav-number">4.2.4.2.7.</span> <span class="nav-text">自引用</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

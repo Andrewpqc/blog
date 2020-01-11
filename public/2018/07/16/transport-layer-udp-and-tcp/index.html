@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="编程, 技术">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="如上图，计算机网络在TCP/IP概念模型中被分为4层，传输层位于应用层和网络层之间，它是分层的网络体系结构的重要组成部分。该层为运行在不同主机上的应用进程提供直接通信起着至关重要的作用。这篇文章，就聊一聊传输层。 在协议栈中，传输层位于网络层之上。网络层提供了主机之间的逻辑通信，而传输层为不同主机上的进程之间提供了逻辑通信。理解传输层与网络层的这种本质差别对理解传输层提供的服务至关重要。下面我们举">
+<meta property="og:type" content="article">
+<meta property="og:title" content="聊聊计算机网络传输层">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/07/16/transport-layer-udp-and-tcp/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="如上图，计算机网络在TCP/IP概念模型中被分为4层，传输层位于应用层和网络层之间，它是分层的网络体系结构的重要组成部分。该层为运行在不同主机上的应用进程提供直接通信起着至关重要的作用。这篇文章，就聊一聊传输层。 在协议栈中，传输层位于网络层之上。网络层提供了主机之间的逻辑通信，而传输层为不同主机上的进程之间提供了逻辑通信。理解传输层与网络层的这种本质差别对理解传输层提供的服务至关重要。下面我们举">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/cs-network-layers.jpg">
+<meta property="og:updated_time" content="2018-07-16T07:01:45.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="聊聊计算机网络传输层">
+<meta name="twitter:description" content="如上图，计算机网络在TCP/IP概念模型中被分为4层，传输层位于应用层和网络层之间，它是分层的网络体系结构的重要组成部分。该层为运行在不同主机上的应用进程提供直接通信起着至关重要的作用。这篇文章，就聊一聊传输层。 在协议栈中，传输层位于网络层之上。网络层提供了主机之间的逻辑通信，而传输层为不同主机上的进程之间提供了逻辑通信。理解传输层与网络层的这种本质差别对理解传输层提供的服务至关重要。下面我们举">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/cs-network-layers.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/07/16/transport-layer-udp-and-tcp/">
+
+
+
+
+
+  <title>聊聊计算机网络传输层 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/07/16/transport-layer-udp-and-tcp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">聊聊计算机网络传输层</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-16T15:01:45+08:00">
+                2018-07-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Network/" itemprop="url" rel="index">
+                    <span itemprop="name">Network</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/16/transport-layer-udp-and-tcp/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/07/16/transport-layer-udp-and-tcp/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="/images/cs-network-layers.jpg" alt><br>如上图，计算机网络在TCP/IP概念模型中被分为4层，传输层位于应用层和网络层之间，它是分层的网络体系结构的重要组成部分。<strong>该层为运行在不同主机上的应用进程提供直接通信</strong>起着至关重要的作用。这篇文章，就聊一聊传输层。</p>
+<p>在协议栈中，传输层位于网络层之上。<strong>网络层提供了主机之间的逻辑通信，而传输层为不同主机上的进程之间提供了逻辑通信。</strong>理解传输层与网络层的这种本质差别对理解传输层提供的服务至关重要。下面我们举一个类比的例子，来说明。</p>
+<h1 id="一个类比例子"><a href="#一个类比例子" class="headerlink" title="一个类比例子"></a>一个类比例子</h1><blockquote>
+<p>考虑有两个家庭，一家位于美国东海岸，一家位于美国西海岸，每家有12个孩子。东海岸的孩子们是西海岸家庭孩子们的堂兄弟姐妹。这两个家庭的孩子们喜欢彼此通信，每个人每周要给每个堂兄弟姐妹写一封信，每封信都用单独的信封通过传统的邮政服务发送。因此，每个家庭每周向另一家庭发送144封信。（如果他们有电子邮件的话，这些孩子可以省不少钱！）每个家庭有一个孩子负责收发邮件，西海岸家庭是Ann而东海岸家庭是Bill。每周Ann去她所有的兄弟姐妹那里收集邮件，并将这些邮件交到每天到家门口的邮政运输车上。当信件到达西海岸家庭时，Ann也负责将信件发到她的兄弟姐妹手上，东海岸家庭中Bill也负责类似工作。</p>
+</blockquote>
+<p>－－ 例子来源于《<a href="https://book.douban.com/subject/26176870/" target="_blank" rel="noopener">计算机网络－自顶向下的方法</a>》</p>
+<p>我们可以做下面这样的类比:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">应用层报文　　＝　信封上的字符</span><br><span class="line">进程　　　　　＝　堂兄弟姐妹</span><br><span class="line">主机(端系统)　＝　家庭</span><br><span class="line">运输层协议　　＝　Ann和Bill</span><br><span class="line">网络层协议　　＝　邮政服务</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，网络层就像邮递员，而运输层就像Ann和Bill。现在我们再来理解上面的这句话:<strong>网络层提供了主机之间的逻辑通信，而传输层为不同主机上的进程之间提供了逻辑通信。</strong>邮政服务知识将信件送到指定的家庭，它不会将信件分发到家庭的具体成员手中。这个分发的工作则是由Ann和Bill提供的。值得注意的是Ann和Bill都是在各自的家里进行工作的，他们没有参与任何中间邮件中心对邮件进行分拣的工作，也没有将邮件从一个邮件中心送到另一个邮件中心。相应的，<strong>运输层协议只工作在端系统中</strong>。在端系统中，运输层协议将来自应用进程的的报文移动到网络边缘(即网络层)，但对有关这些报文在网络层中如何移动却不做任何规定。<br>由这个例子，我们可以做出如下概括:<strong>网络层提供了不同端系统的数据交付服务，而传输层则将这种不同主机间的交付拓展为了运行在不同端系统上的两个进程之间的交付。</strong>进程到进程之间的数据交付是传输层提供的最基本的服务之一。</p>
+<h1 id="多路复用与多路分解"><a href="#多路复用与多路分解" class="headerlink" title="多路复用与多路分解"></a>多路复用与多路分解</h1><p>传输层的这种进程间的数据交付是怎样实现的呢?众所周知，一个网络应用程序有一个或多个套接字(Socket),它相当于是从网络向进程传递数据和从进程向网络传递数据的门户。在接收端，传输层实际上并没有将数据交付给进程，而是将数据交给了一个中间套接字。由于在任一时刻，在接收主机上可能不止一个套接字，所以每个套接字都有唯一的标识符。</p>
+<p>现在我们考虑接收主机怎样将一个到达的运输层报文段定向到适当的套接字。为此目的每个运输层报文段中具有几个字段。在接收端，运输层检查这些字段，标识出接收套接字，进而将报文段定向到该套接字。将运输层报文段中的数据交付到正确的套接字的工作称为<strong>多路分解</strong>。在源主机从不同套接字中收集数据块，并为每个数据块封装上首部信息(这将在以后用于分解)从而生成报文段，然后将这些报文段传递到网络，所有这些工作被称为<strong>多路复用</strong>。联系上面的例子，Ann收集家庭成员的信件，并交到每天到家门口的邮政运输车上就是多路复用；而Ann分发收到的邮件给各个兄弟姐妹的过程则为多路分解。</p>
+<h1 id="传输层提供的其他服务"><a href="#传输层提供的其他服务" class="headerlink" title="传输层提供的其他服务"></a>传输层提供的其他服务</h1><p>上面讲到了传输层通过多路复用和多路分解将不同主机间的交付拓展为了运行在不同端系统上的两个进程之间的交付。进程到进程之间的数据交付是传输层提供的最基本的服务之一。除此之外传输层还提供了许多其它的服务。下面进行列举:</p>
+<ul>
+<li>进程间的数据交付(TCP,UDP)</li>
+<li>完整性检查(TCP,UDP)</li>
+<li>可靠数据传输(TCP)</li>
+<li>拥塞控制(TCP)</li>
+</ul>
+<p>这里先列举出来，置于这些服务究竟是怎么实现的，请关注后续文章。</p>
+<h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><p>1.运输层拓展了网络层的主机到主机的数据交付，提供了进程之间的数据交付。<br>2.运输层只运行在端系统中。<br>3.进程间的数据交付只是传输层最基本的功能之一，传输层还可以提供很多其他的功能。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/15/http2/" rel="next" title="HTTP常用首部字段">
+                <i class="fa fa-chevron-left"></i> HTTP常用首部字段
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/16/udp-and-its-features/" rel="prev" title="UDP协议及其功能">
+                UDP协议及其功能 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一个类比例子"><span class="nav-number">1.</span> <span class="nav-text">一个类比例子</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#多路复用与多路分解"><span class="nav-number">2.</span> <span class="nav-text">多路复用与多路分解</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#传输层提供的其他服务"><span class="nav-number">3.</span> <span class="nav-text">传输层提供的其他服务</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结论"><span class="nav-number">4.</span> <span class="nav-text">结论</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

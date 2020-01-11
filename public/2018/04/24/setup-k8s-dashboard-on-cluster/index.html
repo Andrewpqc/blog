@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="kubernetes,dashboard,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="kubernetes-Dashboard是一个基于Web UI的kubernetes用户接口。你可以使用它在kubernetes集群中部署、调试容器化的应用，管理集群本身，创建、预览、更新集群中所拥有的资源对象，扩展和滚动更新你的应用。下面就来记录一下我是如何配置安装kuernetes-dashboard的。 kubernetes-dashboard 1.6.x以前和1.7.x的差距比较大，主要增">
+<meta name="keywords" content="kubernetes,dashboard">
+<meta property="og:type" content="article">
+<meta property="og:title" content="为集群配置安装kubernetes-dashboard插件">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/04/24/setup-k8s-dashboard-on-cluster/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="kubernetes-Dashboard是一个基于Web UI的kubernetes用户接口。你可以使用它在kubernetes集群中部署、调试容器化的应用，管理集群本身，创建、预览、更新集群中所拥有的资源对象，扩展和滚动更新你的应用。下面就来记录一下我是如何配置安装kuernetes-dashboard的。 kubernetes-dashboard 1.6.x以前和1.7.x的差距比较大，主要增">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-04-24T13:02:38.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="为集群配置安装kubernetes-dashboard插件">
+<meta name="twitter:description" content="kubernetes-Dashboard是一个基于Web UI的kubernetes用户接口。你可以使用它在kubernetes集群中部署、调试容器化的应用，管理集群本身，创建、预览、更新集群中所拥有的资源对象，扩展和滚动更新你的应用。下面就来记录一下我是如何配置安装kuernetes-dashboard的。 kubernetes-dashboard 1.6.x以前和1.7.x的差距比较大，主要增">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/04/24/setup-k8s-dashboard-on-cluster/">
+
+
+
+
+
+  <title>为集群配置安装kubernetes-dashboard插件 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/04/24/setup-k8s-dashboard-on-cluster/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">为集群配置安装kubernetes-dashboard插件</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-24T21:02:38+08:00">
+                2018-04-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/04/24/setup-k8s-dashboard-on-cluster/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/04/24/setup-k8s-dashboard-on-cluster/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>kubernetes-Dashboard是一个基于Web UI的kubernetes用户接口。你可以使用它在kubernetes集群中部署、调试容器化的应用，管理集群本身，创建、预览、更新集群中所拥有的资源对象，扩展和滚动更新你的应用。下面就来记录一下我是如何配置安装kuernetes-dashboard的。</p>
+<p>kubernetes-dashboard 1.6.x以前和1.7.x的差距比较大，主要增加了一些https的认证。由于我们的集群的版本为1.7.5，下面打算安装kubernetes-dashboard V1.7.1,首先我们需要做的就是下载需要的镜像。</p>
+<h1 id="镜像准备"><a href="#镜像准备" class="headerlink" title="镜像准备"></a>镜像准备</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="built_in">set</span> -o errexit</span><br><span class="line"><span class="built_in">set</span> -o nounset</span><br><span class="line"><span class="built_in">set</span> -o pipefail</span><br><span class="line"></span><br><span class="line">GCR_URL=gcr.io/google_containers</span><br><span class="line">DOCKERHUB_URL=alleyj</span><br><span class="line"></span><br><span class="line">images=(kubernetes-dashboard-init-amd64:V1.0.1</span><br><span class="line">    kubernetes-dashboard-amd64:v1.7.1)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> imageName <span class="keyword">in</span> <span class="variable">$&#123;images[@]&#125;</span> ; <span class="keyword">do</span></span><br><span class="line">  docker pull <span class="variable">$DOCKERHUB_URL</span>/<span class="variable">$imageName</span></span><br><span class="line">  docker tag <span class="variable">$DOCKERHUB_URL</span>/<span class="variable">$imageName</span> <span class="variable">$GCR_URL</span>/<span class="variable">$imageName</span></span><br><span class="line">  docker rmi <span class="variable">$DOCKERHUB_URL</span>/<span class="variable">$imageName</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="下载对应的yml文件"><a href="#下载对应的yml文件" class="headerlink" title="下载对应的yml文件"></a>下载对应的yml文件</h1><p>接下来我们需要一个kubernetes-dashboard.yaml的配置文件，可以直接在<a href="https://github.com/kubernetes/dashboard/tree/master/src/deploy/recommended" target="_blank" rel="noopener">dashboard的仓库中</a>的dashboard/src/deploy/recommended文件夹下下载。<strong>注意:由于我们这里安装的是kubernetes-dashboard V1.7.1,所以我们需要下载对应版本的kubernetes-dashboard.yaml文件。具体做法是，调整repository的tag至v1.7.1</strong>。查看文件的内容:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br></pre></td><td class="code"><pre><span class="line"># Copyright 2015 Google Inc. All Rights Reserved.</span><br><span class="line">#</span><br><span class="line"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span><br><span class="line"># you may not use this file except in compliance with the License.</span><br><span class="line"># You may obtain a copy of the License at</span><br><span class="line">#</span><br><span class="line">#     http://www.apache.org/licenses/LICENSE-2.0</span><br><span class="line">#</span><br><span class="line"># Unless required by applicable law or agreed to in writing, software</span><br><span class="line"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span><br><span class="line"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span><br><span class="line"># See the License for the specific language governing permissions and</span><br><span class="line"># limitations under the License.</span><br><span class="line"></span><br><span class="line"># Configuration to deploy release version of the Dashboard UI compatible with</span><br><span class="line"># Kubernetes 1.7.</span><br><span class="line">#</span><br><span class="line"># Example usage: kubectl create -f &lt;this_file&gt;</span><br><span class="line"></span><br><span class="line"># ------------------- Dashboard Secret ------------------- #</span><br><span class="line"></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Secret</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br><span class="line">  name: kubernetes-dashboard-certs</span><br><span class="line">  namespace: kube-system</span><br><span class="line">type: Opaque</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"># ------------------- Dashboard Service Account ------------------- #</span><br><span class="line"></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br><span class="line">  name: kubernetes-dashboard</span><br><span class="line">  namespace: kube-system</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"># ------------------- Dashboard Role &amp; Role Binding ------------------- #</span><br><span class="line"></span><br><span class="line">kind: Role</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">metadata:</span><br><span class="line">  name: kubernetes-dashboard-minimal</span><br><span class="line">  namespace: kube-system</span><br><span class="line">rules:</span><br><span class="line">  # Allow Dashboard to create and watch for changes of &apos;kubernetes-dashboard-key-holder&apos; secret.</span><br><span class="line">- apiGroups: [&quot;&quot;]</span><br><span class="line">  resources: [&quot;secrets&quot;]</span><br><span class="line">  verbs: [&quot;create&quot;, &quot;watch&quot;]</span><br><span class="line">- apiGroups: [&quot;&quot;]</span><br><span class="line">  resources: [&quot;secrets&quot;]</span><br><span class="line">  # Allow Dashboard to get, update and delete &apos;kubernetes-dashboard-key-holder&apos; secret.</span><br><span class="line">  resourceNames: [&quot;kubernetes-dashboard-key-holder&quot;, &quot;kubernetes-dashboard-certs&quot;]</span><br><span class="line">  verbs: [&quot;get&quot;, &quot;update&quot;, &quot;delete&quot;]</span><br><span class="line">  # Allow Dashboard to get metrics from heapster.</span><br><span class="line">- apiGroups: [&quot;&quot;]</span><br><span class="line">  resources: [&quot;services&quot;]</span><br><span class="line">  resourceNames: [&quot;heapster&quot;]</span><br><span class="line">  verbs: [&quot;proxy&quot;]</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">kind: RoleBinding</span><br><span class="line">metadata:</span><br><span class="line">  name: kubernetes-dashboard-minimal</span><br><span class="line">  namespace: kube-system</span><br><span class="line">roleRef:</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line">  kind: Role</span><br><span class="line">  name: kubernetes-dashboard-minimal</span><br><span class="line">subjects:</span><br><span class="line">- kind: ServiceAccount</span><br><span class="line">  name: kubernetes-dashboard</span><br><span class="line">  namespace: kube-system</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"># ------------------- Dashboard Deployment ------------------- #</span><br><span class="line"></span><br><span class="line">kind: Deployment</span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br><span class="line">  name: kubernetes-dashboard</span><br><span class="line">  namespace: kube-system</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  revisionHistoryLimit: 10</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      k8s-app: kubernetes-dashboard</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        k8s-app: kubernetes-dashboard</span><br><span class="line">    spec:</span><br><span class="line">      initContainers:</span><br><span class="line">      - name: kubernetes-dashboard-init</span><br><span class="line">        image: gcr.io/google_containers/kubernetes-dashboard-init-amd64:v1.0.0</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: kubernetes-dashboard-certs</span><br><span class="line">          mountPath: /certs</span><br><span class="line">      containers:</span><br><span class="line">      - name: kubernetes-dashboard</span><br><span class="line">        image: gcr.io/google_containers/kubernetes-dashboard-amd64:v1.7.1</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 9090</span><br><span class="line">          protocol: TCP</span><br><span class="line">        args:</span><br><span class="line">          - --tls-key-file=/certs/dashboard.key</span><br><span class="line">          - --tls-cert-file=/certs/dashboard.crt</span><br><span class="line">          # Uncomment the following line to manually specify Kubernetes API server Host</span><br><span class="line">          # If not specified, Dashboard will attempt to auto discover the API server and connect</span><br><span class="line">          # to it. Uncomment only if the default does not work.</span><br><span class="line">          # - --apiserver-host=http://my-address:port</span><br><span class="line">        volumeMounts:</span><br><span class="line">        - name: kubernetes-dashboard-certs</span><br><span class="line">          mountPath: /certs</span><br><span class="line">          readOnly: true</span><br><span class="line">          # Create on-disk volume to store exec logs</span><br><span class="line">        - mountPath: /tmp</span><br><span class="line">          name: tmp-volume</span><br><span class="line">        livenessProbe:</span><br><span class="line">          httpGet:</span><br><span class="line">            scheme: HTTPS</span><br><span class="line">            path: /</span><br><span class="line">            port: 8443</span><br><span class="line">          initialDelaySeconds: 30</span><br><span class="line">          timeoutSeconds: 30</span><br><span class="line">      volumes:</span><br><span class="line">      - name: kubernetes-dashboard-certs</span><br><span class="line">        secret:</span><br><span class="line">          secretName: kubernetes-dashboard-certs</span><br><span class="line">      - name: tmp-volume</span><br><span class="line">        emptyDir: &#123;&#125;</span><br><span class="line">      serviceAccountName: kubernetes-dashboard</span><br><span class="line">      # Comment the following tolerations if Dashboard must not be deployed on master</span><br><span class="line">      tolerations:</span><br><span class="line">      - key: node-role.kubernetes.io/master</span><br><span class="line">        effect: NoSchedule</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"># ------------------- Dashboard Service ------------------- #</span><br><span class="line"></span><br><span class="line">kind: Service</span><br><span class="line">apiVersion: v1</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br><span class="line">  name: kubernetes-dashboard</span><br><span class="line">  namespace: kube-system</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">    - port: 443</span><br><span class="line">      targetPort: 8443</span><br><span class="line">  selector:</span><br><span class="line">    k8s-app: kubernetes-dashboard</span><br></pre></td></tr></table></figure>
+
+<p>查看上述的文件，可以看到这里需要的两个镜像都已经存在于本地，但是略有不同的是这里需要的<code>kubernetes-dashboard-init-amd64:v1.0.0</code>，而我们本地有的镜像tag为<code>v1.0.1</code>,所以我们这里更改一下这个yml文件，将<code>kubernetes-dashboard-init-amd64的tag</code>从<code>v1.0.0</code>改为<code>v1.0.1</code>.</p>
+<h1 id="创建相应的资源"><a href="#创建相应的资源" class="headerlink" title="创建相应的资源"></a>创建相应的资源</h1><h2 id="初次尝试"><a href="#初次尝试" class="headerlink" title="初次尝试"></a>初次尝试</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kc create -f kubernetes-dashboard.yml</span><br></pre></td></tr></table></figure>
+
+<p>查看kube-system中，kubernetes-dashboard所对应的pod的状态一直是这样的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                                              READY     STATUS     RESTARTS   AGE</span><br><span class="line">kubernetes-dashboard-3554419144-j2qqp             0/1       Init:0/1   0          3m</span><br></pre></td></tr></table></figure>
+
+<p>我们discribe一下这个pod</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl describe pod kubernetes-dashboard-3554419144-j2qqp -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p>输出的Event如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Events:</span><br><span class="line">  FirstSeen	LastSeen	Count	From					SubObjectPath					Type		Reason			Message</span><br><span class="line">  ---------	--------	-----	----					-------------					--------	------			-------</span><br><span class="line">  29s		29s		1	default-scheduler									Normal		Scheduled		Successfully assigned kubernetes-dashboard-3554419144-j2qqp to izwz9f6pgul78p7die5tlzz</span><br><span class="line">  29s		29s		1	kubelet, izwz9f6pgul78p7die5tlzz							Normal		SuccessfulMountVolume	MountVolume.SetUp succeeded <span class="keyword">for</span> volume <span class="string">"tmp-volume"</span> </span><br><span class="line">  29s		29s		1	kubelet, izwz9f6pgul78p7die5tlzz							Normal		SuccessfulMountVolume	MountVolume.SetUp succeeded <span class="keyword">for</span> volume <span class="string">"kubernetes-dashboard-certs"</span> </span><br><span class="line">  29s		29s		1	kubelet, izwz9f6pgul78p7die5tlzz							Normal		SuccessfulMountVolume	MountVolume.SetUp succeeded <span class="keyword">for</span> volume <span class="string">"kubernetes-dashboard-token-5mhr7"</span> </span><br><span class="line">  28s		28s		1	kubelet, izwz9f6pgul78p7die5tlzz	spec.initContainers&#123;kubernetes-dashboard-init&#125;	Normal		Pulled			Container image <span class="string">"gcr.io/google_containers/kubernetes-dashboard-init-amd64:v1.0.1"</span> already present on machine</span><br><span class="line">  28s		28s		1	kubelet, izwz9f6pgul78p7die5tlzz	spec.initContainers&#123;kubernetes-dashboard-init&#125;	Normal		Created			Created container</span><br><span class="line">  28s		28s		1	kubelet, izwz9f6pgul78p7die5tlzz	spec.initContainers&#123;kubernetes-dashboard-init&#125;	Normal		Started			Started container</span><br><span class="line">  27s		8s		3	kubelet, izwz9f6pgul78p7die5tlzz	spec.containers&#123;kubernetes-dashboard&#125;		Normal		Pulled			Container image <span class="string">"gcr.io/google_containers/kubernetes-dashboard-amd64:v1.7.1"</span> already present on machine</span><br><span class="line">  27s		8s		3	kubelet, izwz9f6pgul78p7die5tlzz	spec.containers&#123;kubernetes-dashboard&#125;		Normal		Created			Created container</span><br><span class="line">  26s		7s		3	kubelet, izwz9f6pgul78p7die5tlzz	spec.containers&#123;kubernetes-dashboard&#125;		Normal		Started			Started container</span><br><span class="line">  25s		4s		5	kubelet, izwz9f6pgul78p7die5tlzz	spec.containers&#123;kubernetes-dashboard&#125;		Warning		BackOff			Back-off restarting failed container</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，initContainer kubernetes-dashboard-init容器全运行正常，kubernetes-dashboard容器运行失败。</p>
+<p>接着我们来查看一下logs:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl logs kubernetes-dashboard-3554419144-j2qqp -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p>输出如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">2018/04/24 14:41:19 Using in-cluster config to connect to apiserver</span><br><span class="line">2018/04/24 14:41:19 Using service account token for csrf signing</span><br><span class="line">2018/04/24 14:41:19 No request provided. Skipping authorization</span><br><span class="line">2018/04/24 14:41:19 Starting overwatch</span><br><span class="line">2018/04/24 14:41:19 Successful initial request to the apiserver, version: v1.7.5</span><br><span class="line">2018/04/24 14:41:19 New synchronizer has been registered: kubernetes-dashboard-key-holder-kube-system. Starting</span><br><span class="line">2018/04/24 14:41:19 Starting secret synchronizer for kubernetes-dashboard-key-holder in namespace kube-system</span><br><span class="line">2018/04/24 14:41:19 Initializing secret synchronizer synchronously using secret kubernetes-dashboard-key-holder from namespace kube-system</span><br><span class="line">2018/04/24 14:41:19 Initializing JWE encryption key from synchronized object</span><br><span class="line">2018/04/24 14:41:19 Creating in-cluster Heapster client</span><br><span class="line">2018/04/24 14:41:19 Serving securely on HTTPS port: 8443</span><br><span class="line">2018/04/24 14:41:19 open /certs/dashboard.crt: no such file or directory</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这里说没有<code>/certs/dashboard.crt</code>文件，这个证书文件本应该是在运行init容器时创建的，但是这里不知道为什么我们这里没有创建成功。</p>
+<p>下面，我们删除刚才由<code>kubernetes-dashboard.yml</code>文件所创建的资源，然后采取openssl来创建自签名证书。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl delete -f kubenetes-dashboard.yml</span><br></pre></td></tr></table></figure>
+
+<h2 id="再次尝试"><a href="#再次尝试" class="headerlink" title="再次尝试"></a>再次尝试</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ openssl req -newkey rsa:4096 -nodes -sha256 -keyout dashboard.key -x509 -days 365 -out dashboard.crt</span><br></pre></td></tr></table></figure>
+
+<p>依据提示，填写签发者信息:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Generating a 4096 bit RSA private key</span><br><span class="line">......................++</span><br><span class="line">....................................................................................................++</span><br><span class="line">writing new private key to &apos;dashboard.key&apos;</span><br><span class="line">-----</span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line">For some fields there will be a default value,</span><br><span class="line">If you enter &apos;.&apos;, the field will be left blank.</span><br><span class="line">-----</span><br><span class="line">Country Name (2 letter code) [XX]:CN</span><br><span class="line">State or Province Name (full name) []:Hubei  </span><br><span class="line">Locality Name (eg, city) [Default City]:Wuhan</span><br><span class="line">Organization Name (eg, company) [Default Company Ltd]:Muxistudio</span><br><span class="line">Organizational Unit Name (eg, section) []:be</span><br><span class="line">Common Name (eg, your name or your server&apos;s hostname) []:iZwz9f6pgul78p7die5tlzZ</span><br><span class="line">Email Address []:3480437308@qq.com</span><br></pre></td></tr></table></figure>
+
+<p>执行完之后，你的命令执行目录就会多出来两个文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ll</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-rw-r--r--. 1 root root 2086 Nov 14 09:59 dashboard.crt</span><br><span class="line">-rw-r--r--. 1 root root 3272 Nov 14 09:59 dashboard.key</span><br></pre></td></tr></table></figure>
+
+<p>将这两个文件移动到<code>/certs/</code>目录之下，然后根据这两个文件使用下面的命令来创建secret,来替换掉kubernetes-dashboard.yml中定义的secret：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl create secret generic kubernetes-dashboard-certs --from-file=/certs -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p>下面，我们再次依据<code>kubernetes-dashboard.yml</code>来创建dashboard所需要的资源对象:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl create -f kubernetes-dashboard.yml</span><br></pre></td></tr></table></figure>
+
+<p>输出如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">serviceaccount &quot;kubernetes-dashboard&quot; created</span><br><span class="line">role &quot;kubernetes-dashboard-minimal&quot; created</span><br><span class="line">rolebinding &quot;kubernetes-dashboard-minimal&quot; created</span><br><span class="line">deployment &quot;kubernetes-dashboard&quot; created</span><br><span class="line">service &quot;kubernetes-dashboard&quot; created</span><br><span class="line">Error from server (AlreadyExists): error when creating &quot;dashboard.yml&quot;: secrets &quot;kubernetes-dashboard-certs&quot; already exists</span><br></pre></td></tr></table></figure>
+
+<p>从输出也可以看出来，其他资源已经创建成功，而<code>kubernetes-dashboard-certs</code>则被我们成功替换掉了。</p>
+<p>下面，我们查看一下dashboard对应的pod的事件:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl describe pod kubernetes-dashboard-3554419144-jjj5q -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p>事件如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Events:</span><br><span class="line">  FirstSeen	LastSeen	Count	From					SubObjectPath					Type		Reason			Message</span><br><span class="line">  ---------	--------	-----	----					-------------					--------	------			-------</span><br><span class="line">  3m		3m		1	default-scheduler									Normal		Scheduled		Successfully assigned kubernetes-dashboard-3554419144-jjj5q to izwz9f6pgul78p7die5tlzz</span><br><span class="line">  3m		3m		1	kubelet, izwz9f6pgul78p7die5tlzz							Normal		SuccessfulMountVolume	MountVolume.SetUp succeeded for volume &quot;tmp-volume&quot; </span><br><span class="line">  3m		3m		1	kubelet, izwz9f6pgul78p7die5tlzz							Normal		SuccessfulMountVolume	MountVolume.SetUp succeeded for volume &quot;kubernetes-dashboard-token-jzx4v&quot; </span><br><span class="line">  3m		3m		1	kubelet, izwz9f6pgul78p7die5tlzz							Normal		SuccessfulMountVolume	MountVolume.SetUp succeeded for volume &quot;kubernetes-dashboard-certs&quot; </span><br><span class="line">  3m		3m		1	kubelet, izwz9f6pgul78p7die5tlzz	spec.initContainers&#123;kubernetes-dashboard-init&#125;	Normal		Pulled			Container image &quot;gcr.io/google_containers/kubernetes-dashboard-init-amd64:v1.0.1&quot; already present on machine</span><br><span class="line">  3m		3m		1	kubelet, izwz9f6pgul78p7die5tlzz	spec.initContainers&#123;kubernetes-dashboard-init&#125;	Normal		Created			Created container</span><br><span class="line">  3m		3m		1	kubelet, izwz9f6pgul78p7die5tlzz	spec.initContainers&#123;kubernetes-dashboard-init&#125;	Normal		Started			Started container</span><br><span class="line">  3m		3m		1	kubelet, izwz9f6pgul78p7die5tlzz	spec.containers&#123;kubernetes-dashboard&#125;		Normal		Pulled			Container image &quot;gcr.io/google_containers/kubernetes-dashboard-amd64:v1.7.1&quot; already present on machine</span><br><span class="line">  3m		3m		1	kubelet, izwz9f6pgul78p7die5tlzz	spec.containers&#123;kubernetes-dashboard&#125;		Normal		Created			Created container</span><br><span class="line">  3m		3m		1	kubelet, izwz9f6pgul78p7die5tlzz	spec.containers&#123;kubernetes-dashboard&#125;		Normal		Started			Started container</span><br></pre></td></tr></table></figure>
+
+<p>如上，一切正常。我们的kubernetes-dashboard插件就此安装完成。</p>
+<h1 id="暴露服务"><a href="#暴露服务" class="headerlink" title="暴露服务"></a>暴露服务</h1><p>下面，我们要访问服务器上的<code>kubernetes-dashboard</code>服务就还需要做下面的一步操作：将kubernetes-dashboard的service变为外部可路由。将service的类型由默认的ClusterIP改为NodePort.<br>执行下面的命令，更改service的配置文件:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl edit service kubernetes-dashboard -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p>更改完成之后，我们查看服务的暴露的主机端口:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get service kubernetes-dashboard -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p>输出:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NAME                   CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE</span><br><span class="line">kubernetes-dashboard   10.109.219.222   &lt;nodes&gt;       443:30087/TCP   52m</span><br></pre></td></tr></table></figure>
+
+<p>如上，服务暴露的主机端口为30087,我们访问<code>https://&lt;主机公网IP&gt;:30087/</code>即可访问到dashboard服务。注意，<strong>这里使用的是HTTPS服务，并且使用的是自签名证书，所以在我们初次进入时，浏览器会因为无法识别证书的签署机构而阻止继续访问，这时我们只需要点击高级选项，标识网站为安全即可。</strong></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          
+            <a href="/tags/dashboard/" rel="tag"># dashboard</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/23/setup-kubernetes-cluster-with-kubeadm/" rel="next" title="用Kubeadm搭建一个k8s 1.7.5的单节点集群">
+                <i class="fa fa-chevron-left"></i> 用Kubeadm搭建一个k8s 1.7.5的单节点集群
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/25/k8s-dashboard-auth/" rel="prev" title="Kubernetes-dashboard的身份认证">
+                Kubernetes-dashboard的身份认证 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#镜像准备"><span class="nav-number">1.</span> <span class="nav-text">镜像准备</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#下载对应的yml文件"><span class="nav-number">2.</span> <span class="nav-text">下载对应的yml文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#创建相应的资源"><span class="nav-number">3.</span> <span class="nav-text">创建相应的资源</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#初次尝试"><span class="nav-number">3.1.</span> <span class="nav-text">初次尝试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#再次尝试"><span class="nav-number">3.2.</span> <span class="nav-text">再次尝试</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#暴露服务"><span class="nav-number">4.</span> <span class="nav-text">暴露服务</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

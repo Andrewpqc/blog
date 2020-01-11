@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="TCP,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="追求高速的传输速率是当今网络的永恒主题，但有时候我们也需要对发送方进行控制以提供流量控制服务和拥塞控制服务。这一片文章就介绍一下TCP的流量控制服务和拥塞控制服务。 流量控制流量控制的定义前面讲过，一条TCP连接每一侧主机都为该连接设置了接收缓存。当该TCP连接收到了正确的、按序的字节后，他就将数据放入接收缓存。相关联的应用进程会从该缓存中读取数据。但不必是数据一到达就立即读取。事实上，接收方也许">
+<meta name="keywords" content="TCP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP流量控制与拥塞控制">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/07/21/tcp-flow-control-and-congestion-control/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="追求高速的传输速率是当今网络的永恒主题，但有时候我们也需要对发送方进行控制以提供流量控制服务和拥塞控制服务。这一片文章就介绍一下TCP的流量控制服务和拥塞控制服务。 流量控制流量控制的定义前面讲过，一条TCP连接每一侧主机都为该连接设置了接收缓存。当该TCP连接收到了正确的、按序的字节后，他就将数据放入接收缓存。相关联的应用进程会从该缓存中读取数据。但不必是数据一到达就立即读取。事实上，接收方也许">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/slide_23.jpg">
+<meta property="og:image" content="http://andrewpqc.github.io/images/a0HYBRB.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/4vCVSNC.png">
+<meta property="og:updated_time" content="2018-07-22T16:11:55.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TCP流量控制与拥塞控制">
+<meta name="twitter:description" content="追求高速的传输速率是当今网络的永恒主题，但有时候我们也需要对发送方进行控制以提供流量控制服务和拥塞控制服务。这一片文章就介绍一下TCP的流量控制服务和拥塞控制服务。 流量控制流量控制的定义前面讲过，一条TCP连接每一侧主机都为该连接设置了接收缓存。当该TCP连接收到了正确的、按序的字节后，他就将数据放入接收缓存。相关联的应用进程会从该缓存中读取数据。但不必是数据一到达就立即读取。事实上，接收方也许">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/slide_23.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/07/21/tcp-flow-control-and-congestion-control/">
+
+
+
+
+
+  <title>TCP流量控制与拥塞控制 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/07/21/tcp-flow-control-and-congestion-control/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">TCP流量控制与拥塞控制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-21T00:11:55+08:00">
+                2018-07-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Network/" itemprop="url" rel="index">
+                    <span itemprop="name">Network</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/21/tcp-flow-control-and-congestion-control/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/07/21/tcp-flow-control-and-congestion-control/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>追求高速的传输速率是当今网络的永恒主题，但有时候我们也需要对发送方进行控制以提供流量控制服务和拥塞控制服务。这一片文章就介绍一下TCP的流量控制服务和拥塞控制服务。</p>
+<h1 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a>流量控制</h1><h2 id="流量控制的定义"><a href="#流量控制的定义" class="headerlink" title="流量控制的定义"></a>流量控制的定义</h2><p>前面讲过，一条TCP连接每一侧主机都为该连接设置了接收缓存。当该TCP连接收到了正确的、按序的字节后，他就将数据放入接收缓存。相关联的应用进程会从该缓存中读取数据。但不必是数据一到达就立即读取。事实上，接收方也许正忙于其他任务，甚至要过很长时间后才读取该数据。<strong>如果某个应用进程读取比较缓慢，但是发送方发送的太多、太快，发送的数据就会很容易地使该连接的接收缓存溢出。</strong></p>
+<p>TCP为它的应用程序提供了<strong>流量控制服务(flow-control service)</strong>以消除发送方使接收方缓存溢出的可能性。流量控制因此是一个<strong>速度匹配服务</strong>，即发送方的发送速率与接收方应用程序的读取速率相匹配。</p>
+<h2 id="流量控制的实现"><a href="#流量控制的实现" class="headerlink" title="流量控制的实现"></a>流量控制的实现</h2><p>TCP通过让发送方维护一个称为<strong>接收窗口(receive window)的变量(TCP报文段首部的接收窗口字段)来提供流量控制</strong>。通俗的讲，接收窗口用于给发送方一个指示－－该接收方还有多少可用的缓存空间。因为TCP是全双工通信，在连接两端的发送方都各自维护了一个接收窗口。<br><img src="/images/slide_23.jpg" alt><br>如上图所示<code>RcvBuffer</code>是接收缓存的总大小，<code>buffered data</code>是当前已经缓存了的数据，而<code>free buffer space</code>是当前剩余的缓存空间大小,<code>rwnd</code>的值就是<code>free buffer space</code>。主机B通过把当前的<code>rwnd</code>值放入到它发送给主机A的报文段首部的接收窗口字段中，通知主机A它在该连接的缓存中还有多少可用空间。<br>而<strong>主机A则将自己发往主机B的序号空间中未确认的数据量控制在<code>rwnd</code>值的范围内</strong>,这样就可以避免主机A使主机B的接收缓存溢出。</p>
+<h1 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h1><h2 id="为什么需要拥塞控制"><a href="#为什么需要拥塞控制" class="headerlink" title="为什么需要拥塞控制?"></a>为什么需要拥塞控制?</h2><p>我们在前面讲到过，在TCP协议中，分组丢失一般是当网络变得拥塞时由路由器缓存溢出引起的。因此分组重传是作为网络拥塞的征兆来对待，但是却无法处理导致网络拥塞的原因，因为有太多的源想以过高的速率发送数据。一旦网络发生拥塞，分组所经历的时延会变大，分组丢失的可能性会变大，发送端需要重传的分组会变多，这只会导致网络越来越拥塞，形成恶性循环。因此，为了处理网络拥塞，需要一些机制以在面临网络拥塞时遏制发送方。</p>
+<h2 id="拥塞控制方法"><a href="#拥塞控制方法" class="headerlink" title="拥塞控制方法"></a>拥塞控制方法</h2><p>在实践中采用了两种主要的拥塞控制方法，这两种方法是根据网络层是否为传输层拥塞控制提供了显示帮助来区分。它们是<strong>端到端拥塞控制</strong>和<strong>网路辅助的拥塞控制</strong>。</p>
+<ul>
+<li>端到端拥塞控制<br>在端到端的拥塞控制中，网路层没有为运输层提供显示支持。即使网络中存在拥塞，端系统也必须通过对网络行为的观察(如分组的丢失与时延)来推理判断之。</li>
+<li>网络辅助的拥塞控制<br>在网络辅助的拥塞控制中，网络层构件(即路由器)向发送方提供关于网络中拥塞状态的显示反馈信息。拥塞信息从网络反馈到发送发通常有两种方式:直接反馈信息可以由网络路由器发给发送方，这种方式的通知通常采用一种阻塞分组的形式；第二种方法是路由器标记或更新从发送方流向接收方的分组中的某个字段来指示拥塞的产生，一旦收到一个标记的分组后，接收方就会向发送方发送该网络拥塞指示。<br><img src="/images/a0HYBRB.png" alt></li>
+</ul>
+<h2 id="TCP拥塞控制"><a href="#TCP拥塞控制" class="headerlink" title="TCP拥塞控制"></a>TCP拥塞控制</h2><p>TCP是通过端到端的方法来解决拥塞控制的，因为IP层不会向端系统提供有关网络拥塞的反馈信息。TCP报文段的丢失被认为是网络拥塞的一个迹象，TCP会相应的减小其窗口长度。这里我们需要明确的几个问题是:<br>1.TCP发送方如何限制它向其连接发送流量的速率?<br>2.TCP发送方如何感知从它到目的地之间的路径上存在拥塞呢?<br>3.当感知到了拥塞时，采用何种算法来改变其发送速率呢?</p>
+<p>首先我们来考虑TCP发送方怎样限制它向网络发送流量的速率。与流量控制一样，在发送方的TCP拥塞控制机制中跟踪了一个额外的变量，即<strong>拥塞窗口</strong>(congestion window)。拥塞窗口表示为cwnd,通过这个拥塞窗口，我们就能够对发送方向其连接发送数据的速率进行限制。具体的措施是:<strong>让一个发送方中未确认的数据量不会超过cwnd和rwnd的最小值</strong>，即:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LastByteSend - LastByteAcked &lt;= min&#123;cwnd,rwnd&#125;</span><br></pre></td></tr></table></figure>
+
+<p>LastByteSend,LastByteAcked分别是最后一个发送的字节的序号和最后一个被确认的字节的序号。</p>
+<p>如前所述TCP发送方通过捕获到丢包时间的产生感知从它到目的地之间的路径上存在拥塞。</p>
+<p>在拥塞情况发生时，我们可以通过减小cwnd的值来减小发送方发送数据的速率。那么如果没有拥塞发生呢?如果没有拥塞，我们应该增加cwnd的值来增大发送方发送数据的速率。发送方发送速率过大会导致网络拥塞，甚至拥塞崩溃；而如果发送方过于谨慎，发送太慢则不能充分利用带宽。因此根据网络情况合理设置cwnd的值非常重要。</p>
+<p>在概述了TCP拥塞控制之后，现在我们来考虑一下广受赞誉的TCP拥塞控制算法。该算法包括三部分:<strong>慢启动，拥塞避免，快速恢复</strong>。</p>
+<h3 id="慢启动"><a href="#慢启动" class="headerlink" title="慢启动"></a>慢启动</h3><p>当一条TCP连接开始，cwnd值通常初始置为一个MSS较小值。这使得初始发送速率为MSS/RTT。在慢启动(slow-start)状态，cwnd的值以1个MSS开始并且每当传输的报文段首次被确认就增加一个MSS。</p>
+<p><img src="/images/4vCVSNC.png" alt></p>
+<p>何时结束慢启动阶段的指数增长呢？<br>①如果存在一个由超时指示的丢包事件，TCP发送方将cwnd设置为1并重新开始慢启动过程。它还将第二个状态变量的值ssthresh（慢启动阈值）设置为cwnd/2，即当检测到拥塞时将ssthresh置为拥塞窗口值的一半。<br>②当检测到拥塞时ssthresh设为cwnd的一半，当到达或超过ssthresh的值时，结束慢启动并且TCP转移到拥塞避免模式。<br>③如果检测到3个冗余ACK，这时TCP执行一种快速重传并进入快速恢复状态。</p>
+<h3 id="拥塞避免"><a href="#拥塞避免" class="headerlink" title="拥塞避免"></a>拥塞避免</h3><p>每个RTT只将cwnd的值增加一个MSS：对于TCP发送方无论何时到达一个新的确认，就将cwnd增加一个MSS(MSS/cwnd)字节。例如，如果MSS是1460字节，并且cwnd是14 600字节，则在一个RTT内发送10个报文段。每个到达ACK增加1/10MSS的拥塞窗口长度，因此在收到对所有10个报文段的确认后，拥塞窗口的值将增加了一个MSS。当出现超时时，TCP的拥塞避免与慢启动阶段一样。当出现丢包时，网络继续从发送方向接收方交付报文段，当接收到3个冗余ACK时，将ssthresh的值置为cwnd的一半，同时将cwnd的值减半加上3个MSS。</p>
+<h3 id="快速恢复"><a href="#快速恢复" class="headerlink" title="快速恢复"></a>快速恢复</h3><p>1）对收到的每个用冗余ACK，cwnd值增加一个MSS。<br>2）当对丢失报文段的一个ACK到达时，TCP在降低cwnd进入拥塞避免状态。<br>3）如果出现超时事件，执行如同慢启动和拥塞避免中相同的动作后，迁移到慢启动状态.</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/TCP/" rel="tag"># TCP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/20/tcp-pipeline/" rel="next" title="TCP的流水线机制">
+                <i class="fa fa-chevron-left"></i> TCP的流水线机制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/27/linux-cmd-notes/" rel="prev" title="一起来记Linux命令(不定期更新).">
+                一起来记Linux命令(不定期更新). <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#流量控制"><span class="nav-number">1.</span> <span class="nav-text">流量控制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流量控制的定义"><span class="nav-number">1.1.</span> <span class="nav-text">流量控制的定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流量控制的实现"><span class="nav-number">1.2.</span> <span class="nav-text">流量控制的实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#拥塞控制"><span class="nav-number">2.</span> <span class="nav-text">拥塞控制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么需要拥塞控制"><span class="nav-number">2.1.</span> <span class="nav-text">为什么需要拥塞控制?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拥塞控制方法"><span class="nav-number">2.2.</span> <span class="nav-text">拥塞控制方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP拥塞控制"><span class="nav-number">2.3.</span> <span class="nav-text">TCP拥塞控制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#慢启动"><span class="nav-number">2.3.1.</span> <span class="nav-text">慢启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#拥塞避免"><span class="nav-number">2.3.2.</span> <span class="nav-text">拥塞避免</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速恢复"><span class="nav-number">2.3.3.</span> <span class="nav-text">快速恢复</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

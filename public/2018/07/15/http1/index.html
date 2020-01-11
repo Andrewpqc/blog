@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="HTTP,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="HTTP协议是Hyper Text Transfer Protocol(超文本传输协议）的缩写,是用于从万维网（WWW:World Wide Web)服务器传输超文本到本地浏览器的传送协议。HTTP是当今世界上应用最为广泛的应用层协议之一。 HTTP协议工作于客户端-服务端架构(CS)之上。浏览器作为HTTP客户端通过URL向HTTP服务端即WEB服务器发送所有请求。Web服务器根据接收到的请求后">
+<meta name="keywords" content="HTTP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP协议总结">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/07/15/http1/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="HTTP协议是Hyper Text Transfer Protocol(超文本传输协议）的缩写,是用于从万维网（WWW:World Wide Web)服务器传输超文本到本地浏览器的传送协议。HTTP是当今世界上应用最为广泛的应用层协议之一。 HTTP协议工作于客户端-服务端架构(CS)之上。浏览器作为HTTP客户端通过URL向HTTP服务端即WEB服务器发送所有请求。Web服务器根据接收到的请求后">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/http%E8%AF%B7%E6%B1%82%E5%93%8D%E5%BA%94.jpg">
+<meta property="og:image" content="http://andrewpqc.github.io/images/http_request.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/http_resp.jpeg">
+<meta property="og:updated_time" content="2018-07-15T09:03:57.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTP协议总结">
+<meta name="twitter:description" content="HTTP协议是Hyper Text Transfer Protocol(超文本传输协议）的缩写,是用于从万维网（WWW:World Wide Web)服务器传输超文本到本地浏览器的传送协议。HTTP是当今世界上应用最为广泛的应用层协议之一。 HTTP协议工作于客户端-服务端架构(CS)之上。浏览器作为HTTP客户端通过URL向HTTP服务端即WEB服务器发送所有请求。Web服务器根据接收到的请求后">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/http%E8%AF%B7%E6%B1%82%E5%93%8D%E5%BA%94.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/07/15/http1/">
+
+
+
+
+
+  <title>HTTP协议总结 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/07/15/http1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">HTTP协议总结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-15T17:03:57+08:00">
+                2018-07-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Network/" itemprop="url" rel="index">
+                    <span itemprop="name">Network</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/15/http1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/07/15/http1/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>HTTP协议是Hyper Text Transfer Protocol(超文本传输协议）的缩写,是用于从万维网（WWW:World Wide Web)服务器传输超文本到本地浏览器的传送协议。HTTP是当今世界上应用最为广泛的<strong>应用层</strong>协议之一。</p>
+<p>HTTP协议工作于客户端-服务端架构(CS)之上。浏览器作为HTTP客户端通过URL向HTTP服务端即WEB服务器发送所有请求。Web服务器根据接收到的请求后，向客户端发送响应信息。</p>
+<p><img src="/images/http%E8%AF%B7%E6%B1%82%E5%93%8D%E5%BA%94.jpg" alt></p>
+<p>下面总结一下HTTP的相关知识点，首先我们从HTTP的报文结构开始。</p>
+<h1 id="HTTP报文格式"><a href="#HTTP报文格式" class="headerlink" title="HTTP报文格式"></a>HTTP报文格式</h1><h2 id="请求报文"><a href="#请求报文" class="headerlink" title="请求报文"></a>请求报文</h2><p><img src="/images/http_request.png" alt></p>
+<p>HTTP请求报文由四部分组成:<strong>请求行、请求头、一个空行、请求体</strong>。如上图第一行为请求行，请求行由3部分组成，分别是请求方法，请求的URL和所使用的HTTP协议版本，这三部分用一个空格隔开，行未为一个回车换行符。请求行下面的是请求头部分，每一个请求头由头部字段名和值组成，中间用冒号分隔，行未依然为回车换行符。请求头可以有任意个。一个单独的换车换行符(即一个空行)表示了请求头部分结束，空行下面的就是可选的请求体部分。这就是一个HTTP请求的报文格式。</p>
+<h2 id="响应报文"><a href="#响应报文" class="headerlink" title="响应报文"></a>响应报文</h2><p><img src="/images/http_resp.jpeg" alt><br>HTTP响应报文与请求报文的格式基本相同，它是由:<strong>状态行、响应头、一个空行、响应实体四部分组成</strong>。如上图第一行为状态行。与请求报文不同的是状态行由协议版本、状态码和原因短语组成。</p>
+<h1 id="HTTP方法"><a href="#HTTP方法" class="headerlink" title="HTTP方法"></a>HTTP方法</h1><p>根据HTTP标准，HTTP请求可以使用多种请求方法。<br>HTTP1.0定义了三种请求方法： GET, POST 和 HEAD方法。<br>HTTP1.1新增了五种请求方法：OPTIONS, PUT, DELETE, TRACE 和 CONNECT 方法。</p>
+<table>
+<thead>
+<tr>
+<th align="center">方法名</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">GET</td>
+<td align="center">请求指定的页面信息，并返回实体主体。</td>
+</tr>
+<tr>
+<td align="center">POST</td>
+<td align="center">向指定资源提交数据进行处理请求（例如提交表单或者上传文件）。数据被包含在请求体中。POST请求可能会导致新的资源的建立和/或已有资源的修改。</td>
+</tr>
+<tr>
+<td align="center">PUT</td>
+<td align="center">从客户端向服务器传送的数据取代指定的文档的内容.</td>
+</tr>
+<tr>
+<td align="center">DELETE</td>
+<td align="center">请求服务器删除指定的页面。</td>
+</tr>
+<tr>
+<td align="center">HEAD</td>
+<td align="center">类似于get请求，只不过返回的响应中没有具体的内容，用于获取报头</td>
+</tr>
+<tr>
+<td align="center">OPTIONS</td>
+<td align="center">允许客户端查看服务器的性能、获取服务器支持的HTTP请求方法。</td>
+</tr>
+<tr>
+<td align="center">TRACE</td>
+<td align="center">回显服务器收到的请求，主要用于测试或诊断。</td>
+</tr>
+<tr>
+<td align="center">CONNECT</td>
+<td align="center">HTTP/1.1协议中预留给能够将连接改为管道方式的代理服务器。</td>
+</tr>
+</tbody></table>
+<p>在实践中GET,POST,PUT,DELETE四种方法使用的比较多,他们分别对应对资源的获取，创建，更新，删除这四种操作。</p>
+<h1 id="HTTP状态码"><a href="#HTTP状态码" class="headerlink" title="HTTP状态码"></a>HTTP状态码</h1><p>HTTP状态码类型及其含义:</p>
+<table>
+<thead>
+<tr>
+<th align="center">分类</th>
+<th align="center">分类描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1xx</td>
+<td align="center">信息，服务器收到请求，需要请求者继续执行操作</td>
+</tr>
+<tr>
+<td align="center">2xx</td>
+<td align="center">成功，操作被成功接收并处理</td>
+</tr>
+<tr>
+<td align="center">3xx</td>
+<td align="center">重定向，需要进一步的操作以完成请求</td>
+</tr>
+<tr>
+<td align="center">4xx</td>
+<td align="center">客户端错误，请求包含语法错误或无法完成请求</td>
+</tr>
+<tr>
+<td align="center">5xx</td>
+<td align="center">服务器错误，服务器在处理请求的过程中发生了错误</td>
+</tr>
+</tbody></table>
+<p>常见HTTP状态码列表:</p>
+<table>
+<thead>
+<tr>
+<th align="center">状态码</th>
+<th align="center">状态码英文名称</th>
+<th align="center">中文描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">100</td>
+<td align="center">Continue</td>
+<td align="center">继续。客户端应继续其请求</td>
+</tr>
+<tr>
+<td align="center">101</td>
+<td align="center">Switching Protocols</td>
+<td align="center">切换协议。服务器根据客户端的请求切换协议。只能切换到更高级的协议，例如，切换到HTTP的新版本协议</td>
+</tr>
+<tr>
+<td align="center">200</td>
+<td align="center">OK</td>
+<td align="center">请求成功。一般用于GET与POST请求</td>
+</tr>
+<tr>
+<td align="center">201</td>
+<td align="center">Created</td>
+<td align="center">已创建。成功请求并创建了新的资源</td>
+</tr>
+<tr>
+<td align="center">202</td>
+<td align="center">Accepted</td>
+<td align="center">已接受。已经接受请求，但未处理完成</td>
+</tr>
+<tr>
+<td align="center">203</td>
+<td align="center">Non-Authoritative Information</td>
+<td align="center">非授权信息。请求成功。但返回的meta信息不在原始的服务器，而是一个副本</td>
+</tr>
+<tr>
+<td align="center">204</td>
+<td align="center">No Content</td>
+<td align="center">无内容。服务器成功处理，但未返回内容。在未更新网页的情况下，可确保浏览器继续显示当前文档</td>
+</tr>
+<tr>
+<td align="center">205</td>
+<td align="center">Reset Content</td>
+<td align="center">重置内容。服务器处理成功，用户终端（例如：浏览器）应重置文档视图。可通过此返回码清除浏览器的表单域</td>
+</tr>
+<tr>
+<td align="center">206</td>
+<td align="center">Partial Content</td>
+<td align="center">部分内容。服务器成功处理了部分GET请求</td>
+</tr>
+<tr>
+<td align="center">300</td>
+<td align="center">Multiple Choices</td>
+<td align="center">多种选择。请求的资源可包括多个位置，相应可返回一个资源特征与地址的列表用于用户终端（例如：浏览器）选择</td>
+</tr>
+<tr>
+<td align="center">301</td>
+<td align="center">Moved Permanently</td>
+<td align="center">永久移动。请求的资源已被永久的移动到新URI，返回信息会包括新的URI，浏览器会自动定向到新URI。今后任何新的请求都应使用新的URI代替</td>
+</tr>
+<tr>
+<td align="center">302</td>
+<td align="center">Found</td>
+<td align="center">临时移动。与301类似。但资源只是临时被移动。客户端应继续使用原有URI</td>
+</tr>
+<tr>
+<td align="center">303</td>
+<td align="center">See Other</td>
+<td align="center">查看其它地址。与301类似。使用GET和POST请求查看</td>
+</tr>
+<tr>
+<td align="center">304</td>
+<td align="center">Not Modified</td>
+<td align="center">未修改。所请求的资源未修改，服务器返回此状态码时，不会返回任何资源。客户端通常会缓存访问过的资源，通过提供一个头信息指出客户端希望只返回在指定日期之后修改的资源</td>
+</tr>
+<tr>
+<td align="center">305</td>
+<td align="center">Use Proxy</td>
+<td align="center">使用代理。所请求的资源必须通过代理访问</td>
+</tr>
+<tr>
+<td align="center">306</td>
+<td align="center">Unused</td>
+<td align="center">已经被废弃的HTTP状态码</td>
+</tr>
+<tr>
+<td align="center">307</td>
+<td align="center">Temporary Redirect</td>
+<td align="center">临时重定向。与302类似。使用GET请求重定向</td>
+</tr>
+<tr>
+<td align="center">400</td>
+<td align="center">Bad Request</td>
+<td align="center">客户端请求的语法错误，服务器无法理解</td>
+</tr>
+<tr>
+<td align="center">401</td>
+<td align="center">Unauthorized</td>
+<td align="center">请求要求用户的身份认证</td>
+</tr>
+<tr>
+<td align="center">402</td>
+<td align="center">Payment Required</td>
+<td align="center">保留，将来使用</td>
+</tr>
+<tr>
+<td align="center">403</td>
+<td align="center">Forbidden</td>
+<td align="center">服务器理解请求客户端的请求，但是拒绝执行此请求</td>
+</tr>
+<tr>
+<td align="center">404</td>
+<td align="center">Not Found</td>
+<td align="center">服务器无法根据客户端的请求找到资源（网页）。通过此代码，网站设计人员可设置”您所请求的资源无法找到”的个性页面</td>
+</tr>
+<tr>
+<td align="center">405</td>
+<td align="center">Method Not Allowed</td>
+<td align="center">客户端请求中的方法被禁止</td>
+</tr>
+<tr>
+<td align="center">406</td>
+<td align="center">Not Acceptable</td>
+<td align="center">服务器无法根据客户端请求的内容特性完成请求</td>
+</tr>
+<tr>
+<td align="center">407</td>
+<td align="center">Proxy Authentication Required</td>
+<td align="center">请求要求代理的身份认证，与401类似，但请求者应当使用代理进行授权</td>
+</tr>
+<tr>
+<td align="center">408</td>
+<td align="center">Request Time-out</td>
+<td align="center">服务器等待客户端发送的请求时间过长，超时</td>
+</tr>
+<tr>
+<td align="center">409</td>
+<td align="center">Conflict</td>
+<td align="center">服务器完成客户端的PUT请求是可能返回此代码，服务器处理请求时发生了冲突</td>
+</tr>
+<tr>
+<td align="center">411</td>
+<td align="center">Length Required</td>
+<td align="center">服务器无法处理客户端发送的不带Content-Length的请求信息</td>
+</tr>
+<tr>
+<td align="center">413</td>
+<td align="center">Request Entity Too Large</td>
+<td align="center">由于请求的实体过大，服务器无法处理，因此拒绝请求。为防止客户端的连续请求，服务器可能会关闭连接。如果只是服务器暂时无法处理，则会包含一个Retry-After的响应信息</td>
+</tr>
+<tr>
+<td align="center">414</td>
+<td align="center">Request-URI Too Large</td>
+<td align="center">请求的URI过长（URI通常为网址），服务器无法处理</td>
+</tr>
+<tr>
+<td align="center">415</td>
+<td align="center">Unsupported Media Type</td>
+<td align="center">服务器无法处理请求附带的媒体格式</td>
+</tr>
+<tr>
+<td align="center">429</td>
+<td align="center">Too Many Requests</td>
+<td align="center">发送请求太多，服务器拒绝服务</td>
+</tr>
+<tr>
+<td align="center">500</td>
+<td align="center">Internal Server Error</td>
+<td align="center">服务器内部错误，无法完成请求</td>
+</tr>
+<tr>
+<td align="center">501</td>
+<td align="center">Not Implemented</td>
+<td align="center">服务器不支持请求的功能，无法完成请求</td>
+</tr>
+<tr>
+<td align="center">502</td>
+<td align="center">Bad Gateway</td>
+<td align="center">充当网关或代理的服务器，从远端服务器接收到了一个无效的请求</td>
+</tr>
+<tr>
+<td align="center">503</td>
+<td align="center">Service Unavailable</td>
+<td align="center">由于超载或系统维护，服务器暂时的无法处理客户端的请求。延时的长度可包含在服务器的Retry-After头信息中</td>
+</tr>
+<tr>
+<td align="center">504</td>
+<td align="center">Gateway Time-out</td>
+<td align="center">充当网关或代理的服务器，未及时从远端服务器获取请求</td>
+</tr>
+<tr>
+<td align="center">505</td>
+<td align="center">HTTP Version not supported</td>
+<td align="center">服务器不支持请求的HTTP协议的版本，无法完成处理</td>
+</tr>
+</tbody></table>
+<h1 id="持续连接与非持续连接"><a href="#持续连接与非持续连接" class="headerlink" title="持续连接与非持续连接"></a>持续连接与非持续连接</h1><p>HTTP是建立在TCP协议之上的应用层协议，众所周知TCP协议为了实现可靠数据传输在建立连接的过程会进行三次握手。也就是说，客户端需要与服务器建立连接必须首先先服务器发送一个特殊的报文段(SYN)，该报文段是不能携带应用层数据的，然后客户端需要等待服务器发回确认报文(SYNAK)。待接收到服务器发会的SYNACK报文之后，客户端还需要发送ACK报文给服务器(这个ACK报文中可以携带应用层的数据)。在客户端服务器进行了三次报文的传输之后，连接才算建立，之后应用层的数据会在这个连接上传输。</p>
+<p>HTTP 协议的初始版本中，<strong>每进行一个 HTTP 通信(即一个请求响应对)都要断开一次 TCP 连接，这种方式称为非持续连接</strong>。比如使用浏览器浏览一个包含多张图片的 HTML 页面时，在发送请求访问HTML页面资源的同时，也会请求该HTML页面里包含的其他资源。因此，非持续连接每次的请求都会造成无畏的TCP连接建立和断开，增加通信量的开销。为了解决上述 TCP 连接的问题，HTTP/1.1 和部分 HTTP/1.0 想出了持久连接的方法。其特点是，只要任意一端没有明确提出断开连接，则保持TCP连接状态。<strong>旨在建立一次 TCP 连接后进行多次请求和响应的交互，这种方式称为持久连接</strong>。<strong>在HTTP/1.1 中，所有的连接默认都是持久连接。</strong></p>
+<h1 id="流水线"><a href="#流水线" class="headerlink" title="流水线"></a>流水线</h1><p>持久连接使得多数请求以流水线方式发送成为可能。以前发送请求后需等待并接收到响应，才能发送下一个请求。流水线技术出现后，不用等待亦可发送下一个请求。这样就能做到同时并行发送多个请求，而不需要一个接一个地等待响应了。比如，当请求一个包含多张图片的 HTML页面时，与挨个连接相比，用持久连接可以让请求更快结束。而流水线技术要比持久连接速度更快。请求数越多，时间差就越明显。采用流水线方式的持久连接使的HTTP通信的速度大幅提升。</p>
+<h1 id="一些辨析"><a href="#一些辨析" class="headerlink" title="一些辨析"></a>一些辨析</h1><h2 id="301-302-303-307"><a href="#301-302-303-307" class="headerlink" title="301/302/303/307"></a>301/302/303/307</h2><p>301/302/303/307都是表示重定向。重定向实际使用是一个响应码(301或302或303或307)和一个响应头location，当浏览器收到响应的时候check响应码是3xx，则会取出响应头中Location对应的url，然后将该url替换浏览器地址栏中的并发起另一次HTTP事务。既然它们都表示重定向，那么他们的区别是什么呢</p>
+<p>HTTP 1.0规范中有2个重定向－－301和302，在HTTP 1.1规范中存在4个重定向——301、302、303和307。<br><strong>HTTP 1.0规范定义</strong>301表示永久重定向,也就是资源的真实URL为Location头部中的URL。对于GET请求重定向，浏览器跟进；对于POST请求的重定向，还是需要用户确认之后才能重定向，并且应该以POST方法发出重定向请。302表示临时重定向，Location中的地址不应该被认为是资源路径，在后续的请求中应该继续使用原地址。这时，原请求是POST，则不能自动进行重定向；原请求是GET，才可以自动重定向。<br><strong>在目前主流浏览器的实现中</strong>浏览器无论是接收到301还是302,同样无论是GET还是POST,都会自动进行重定向，这导致规范和实现之间产生了二义性。由此衍生了一些问题，譬如302劫持，因此在HTTP 1.1中将302的规范细化成了303和307，希望以此来消除二义性。</p>
+<blockquote>
+<p><strong>302劫持</strong>：<br>对于301,搜索引擎在抓取新内容的同时也将旧的网址交换为重定向之后的网址；对于302,搜索引擎会抓取新的内容而保存旧的网址。利用这一原理，从网站A（网站比较烂）上做了一个302跳转到网站B（搜索排名很靠前），这时候有时搜索引擎会使用网站B的内容，但却收录了网站A的地址，这样在不知不觉间，网站B在为网站A作贡献，网站A的排名就靠前了，这就是302劫持。</p>
+</blockquote>
+<p>为了消除上面规范与实现的二义性，在HTTP 1.1中引入了303和307状态码。实际上官方文档已经不建议使用302状态码，只是为了兼容而保留302。 HTTP 1.1把HTTP 1.0规范中302的实现和规范拆分开，分别赋予HTTP 1.1中303和307，因此在HTTP 1.1中，303继承了HTTP 1.0中302的实现（即原请求是post，也允许自动进行重定向，结果是无论原请求是get还是post，都可以自动进行重定向），而307则继承了HTTP 1.0中302的规范（即如果原请求是post，则不允许进行自动重定向，结果是post不重定向，get可以自动重定向）。</p>
+<p>在HTTP 1.1规范中，307为临时重定向，如果重定向307的原请求不是get或者head方法，那么浏览器一定不能自动的进行重定向，即便Location有url，也应该忽略。</p>
+<h2 id="GET-POST"><a href="#GET-POST" class="headerlink" title="GET/POST"></a>GET/POST</h2><blockquote>
+<p>GET后退按钮/刷新无害，POST数据会被重新提交（浏览器应该告知用户数据会被重新提交）。<br>GET书签可收藏，POST为书签不可收藏。GET能被缓存，POST不能缓存 。<br>GET编码类型application/x-www-form-url，POST编码类型encodedapplication/x-www-form-urlencoded 或 multipart/form-data。为二进制数据使用多重编码。<br>GET历史参数保留在浏览器历史中。POST参数不会保存在浏览器历史中。<br>GET对数据长度有限制，当发送数据时，GET 方法向 URL 添加数据；URL 的长度是受限制的（URL 的最大长度是 2048 个字符）。POST无限制。<br>GET只允许 ASCII 字符。POST没有限制。也允许二进制数据。<br>与 POST 相比，GET 的安全性较差，因为所发送的数据是URL的一部分。在发送密码或其他敏感信息时绝不要使用 GET ！POST 比 GET 更安全，因为参数不会被保存在浏览器历史或 web 服务器日志中。GET的数据在URL中对所有人都是可见的。POST的数据不会显示在 URL 中。<br>GET是幂等的，POST不幂等。</p>
+</blockquote>
+<p>关于GET/POST的辨析，可以参考:<a href="https://www.zhihu.com/question/28586791" target="_blank" rel="noopener">https://www.zhihu.com/question/28586791</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HTTP/" rel="tag"># HTTP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/02/something-about-https-and-let-s-encrypt/" rel="next" title="聊聊HTTP、HTTPS那些事儿">
+                <i class="fa fa-chevron-left"></i> 聊聊HTTP、HTTPS那些事儿
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/15/http2/" rel="prev" title="HTTP常用首部字段">
+                HTTP常用首部字段 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTP报文格式"><span class="nav-number">1.</span> <span class="nav-text">HTTP报文格式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#请求报文"><span class="nav-number">1.1.</span> <span class="nav-text">请求报文</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#响应报文"><span class="nav-number">1.2.</span> <span class="nav-text">响应报文</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTP方法"><span class="nav-number">2.</span> <span class="nav-text">HTTP方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTP状态码"><span class="nav-number">3.</span> <span class="nav-text">HTTP状态码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#持续连接与非持续连接"><span class="nav-number">4.</span> <span class="nav-text">持续连接与非持续连接</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流水线"><span class="nav-number">5.</span> <span class="nav-text">流水线</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一些辨析"><span class="nav-number">6.</span> <span class="nav-text">一些辨析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#301-302-303-307"><span class="nav-number">6.1.</span> <span class="nav-text">301/302/303/307</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GET-POST"><span class="nav-number">6.2.</span> <span class="nav-text">GET/POST</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

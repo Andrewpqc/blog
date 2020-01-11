@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="编程, 技术">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="一、什么是Thrift ？Thrift整体架构图： Thrift是一套包含序列化功能和支持服务通信的RPC框架，主要包含三大部分：代码生成、序列化框架、RPC框架，大致相当于protoc + protobuffer + grpc，并且支持大量语言，保证常用功能在跨语言间功能一致，是一套全栈式的RPC解决方案。Thrift最初由FaceBook开发，之后由ASF管理。 二、Thrift请求响应模型">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thrift序列化协议浅析">
+<meta property="og:url" content="http://andrewpqc.github.io/2019/02/24/thrift/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="一、什么是Thrift ？Thrift整体架构图： Thrift是一套包含序列化功能和支持服务通信的RPC框架，主要包含三大部分：代码生成、序列化框架、RPC框架，大致相当于protoc + protobuffer + grpc，并且支持大量语言，保证常用功能在跨语言间功能一致，是一套全栈式的RPC解决方案。Thrift最初由FaceBook开发，之后由ASF管理。 二、Thrift请求响应模型">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/thrift_layer_arch.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/thrift_req_rsp.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/message_binary_encoding.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/thrift_length_prefix.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/thrift_map.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/thrift_list_set.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/thrift_field.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/thrift_zigzag.png">
+<meta property="og:updated_time" content="2019-10-09T09:55:47.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Thrift序列化协议浅析">
+<meta name="twitter:description" content="一、什么是Thrift ？Thrift整体架构图： Thrift是一套包含序列化功能和支持服务通信的RPC框架，主要包含三大部分：代码生成、序列化框架、RPC框架，大致相当于protoc + protobuffer + grpc，并且支持大量语言，保证常用功能在跨语言间功能一致，是一套全栈式的RPC解决方案。Thrift最初由FaceBook开发，之后由ASF管理。 二、Thrift请求响应模型">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/thrift_layer_arch.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2019/02/24/thrift/">
+
+
+
+
+
+  <title>Thrift序列化协议浅析 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2019/02/24/thrift/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Thrift序列化协议浅析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-02-24T17:55:47+08:00">
+                2019-02-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/24/thrift/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2019/02/24/thrift/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一、什么是Thrift-？"><a href="#一、什么是Thrift-？" class="headerlink" title="一、什么是Thrift ？"></a>一、什么是Thrift ？</h2><p>Thrift整体架构图：<br><img src="/images/thrift_layer_arch.png" alt></p>
+<p>Thrift是一套包含序列化功能和支持服务通信的RPC框架，主要包含三大部分：代码生成、序列化框架、RPC框架，大致相当于protoc + protobuffer + grpc，并且支持大量语言，保证常用功能在跨语言间功能一致，是一套全栈式的RPC解决方案。Thrift最初由FaceBook开发，之后由ASF管理。</p>
+<h2 id="二、Thrift请求响应模型"><a href="#二、Thrift请求响应模型" class="headerlink" title="二、Thrift请求响应模型"></a>二、Thrift请求响应模型</h2><p><img src="/images/thrift_req_rsp.png" alt></p>
+<p>在Thrift的官方Doc中将Thrift的RPC请求响应描述为上面的四个步骤。图中，最外层只有Message和Struct。<br>这里可以将Message和Struct类比为TCP中的首部和负载。Message中放的是传递的元信息(metadata)，Struct则包含的是具体传递的数据(payload)</p>
+<p>注意这里不要理解成了Client，Server在一个TCP上Send了两次，而应该理解为字节流，2的数据紧跟在1的数据后面，4的数据紧跟在3的数据后面。</p>
+<h2 id="三、深入Message和Struct"><a href="#三、深入Message和Struct" class="headerlink" title="三、深入Message和Struct"></a>三、深入Message和Struct</h2><h3 id="Message"><a href="#Message" class="headerlink" title="Message"></a>Message</h3><p>Message中主要包含Name,Message Type,Sequence ID等数据。</p>
+<ol>
+<li>Name：为调用的方法名</li>
+<li>Message Type:有Call, OneWay, Reply, Exception四种，在实际传递的时候，传递的是Type ID,这四种Type对应的Type ID如下<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Call      ---&gt; 1</span><br><span class="line">OneWay    ---&gt; 2</span><br><span class="line">Reply     ---&gt; 3</span><br><span class="line">Exception ---&gt; 4</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>其中Call、OneWay用于Request， Reply、 Exception用于Response中。<br>四者的含义如下:</p>
+<ul>
+<li>Call: 调用远程方法，并且期待对方发送响应。</li>
+<li>OneWay: 调用远程方法，不期待响应。即没有步骤3,4。</li>
+<li>Reply: 表明处理完成，响应正常返回。</li>
+<li>Exception:表明出理出错。</li>
+</ul>
+<ol start="3">
+<li>Sequence ID : 序列号, 有符号的四字节整数。在一个传输层的连接上所有未完成的请求必须有唯一的序列号，客户端使用序列号来处理响应的失序到达，实现请求和响应的匹配。服务端不需要检查该序列号，也不能对序列号有任何的逻辑依赖，只需要响应的时候将其原样返回即可。这里注意将Thrift序列号和我们常用的用于防止非幂等请求多次提交的unique ID区分开来。</li>
+</ol>
+<h3 id="Struct"><a href="#Struct" class="headerlink" title="Struct"></a>Struct</h3><p>在上面的Thrift请求响应模型中，有两种Struct：</p>
+<ol>
+<li>Request Struct</li>
+<li>Response Struct<br>这两种Struct的结构是一样的，都是由多个Field组成。关于Struct的详细在下面讲Thrift序列化的时候会讲到，所以接着往下看哦 :&gt;)</li>
+</ol>
+<h2 id="四、Thrift序列化协议"><a href="#四、Thrift序列化协议" class="headerlink" title="四、Thrift序列化协议"></a>四、Thrift序列化协议</h2><p>Thrift支持多种序列化协议，常用的有: Binary、Compact、JSON。这里我们主要分析Binary和Compact。</p>
+<h3 id="Binary序列化"><a href="#Binary序列化" class="headerlink" title="Binary序列化"></a>Binary序列化</h3><p>binary序列化是一种二进制的序列化方式。不可读，但传输效率高。头条的绝大部分kite服务采用的都是Binary序列化的方式。</p>
+<h4 id="Message的序列化"><a href="#Message的序列化" class="headerlink" title="Message的序列化"></a>Message的序列化</h4><p>Message的序列化分为两种，strict encoding和old encoding。 在有些实现中，会通过<br>检查Thrift消息的第一个bit来判断使用了那种encoding：</p>
+<ul>
+<li>1 —-&gt; strict encoding</li>
+<li>0 —-&gt; old encoding<br>Message的Binary序列化下面的一张图就够了:<br><img src="/images/message_binary_encoding.png" alt></li>
+</ul>
+<h4 id="Struct的序列化"><a href="#Struct的序列化" class="headerlink" title="Struct的序列化"></a>Struct的序列化</h4><p>Struct装的是Thrift通信的实际参数，一个Struct由很多基本类型组合而成，要了解Struct怎么序列化的必须知道这些基本类型的序列化。下面我们就由大到小来逐一分析这些基本类型:</p>
+<table>
+<thead>
+<tr>
+<th align="center">类型名</th>
+<th align="center">idl类型名</th>
+<th align="center">占用字节数</th>
+<th align="center">类型ID</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">bool</td>
+<td align="center">bool</td>
+<td align="center">1</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">byte</td>
+<td align="center">byte</td>
+<td align="center">1</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">short</td>
+<td align="center">i16</td>
+<td align="center">2</td>
+<td align="center">6</td>
+</tr>
+<tr>
+<td align="center">int</td>
+<td align="center">i32</td>
+<td align="center">4</td>
+<td align="center">8</td>
+</tr>
+<tr>
+<td align="center">long</td>
+<td align="center">i64</td>
+<td align="center">8</td>
+<td align="center">10</td>
+</tr>
+<tr>
+<td align="center">double</td>
+<td align="center">double</td>
+<td align="center">8</td>
+<td align="center">4</td>
+</tr>
+<tr>
+<td align="center">string</td>
+<td align="center">string</td>
+<td align="center">4+N</td>
+<td align="center">11</td>
+</tr>
+<tr>
+<td align="center">[]byte</td>
+<td align="center">binary</td>
+<td align="center">4+N</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">list</td>
+<td align="center">list</td>
+<td align="center">1+4+N</td>
+<td align="center">15</td>
+</tr>
+<tr>
+<td align="center">set</td>
+<td align="center">set</td>
+<td align="center">1+4+N</td>
+<td align="center">14</td>
+</tr>
+<tr>
+<td align="center">map</td>
+<td align="center">map</td>
+<td align="center">1+1+4+NX+NY</td>
+<td align="center">13</td>
+</tr>
+<tr>
+<td align="center">field</td>
+<td align="center"></td>
+<td align="center">1+2+X</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">struct</td>
+<td align="center">struct</td>
+<td align="center">N*X</td>
+<td align="center">12</td>
+</tr>
+<tr>
+<td align="center">enum</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">union</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">exception</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<h5 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码:"></a>定长编码:</h5><p>上表中的 bool, byte, short, int, long, double采用的都是固定字节数编码，各类型占用的字节数见上。</p>
+<h5 id="长度前缀编码-4-N"><a href="#长度前缀编码-4-N" class="headerlink" title="长度前缀编码(4+N)"></a>长度前缀编码(4+N)</h5><p><img src="/images/thrift_length_prefix.png" alt><br>string, byte array采用的是长度前缀编码，前四个字节(无符号四字节整数)表示长度，后面跟着的就是实际的内容。</p>
+<h5 id="map的编码-1-1-4-NX-NY"><a href="#map的编码-1-1-4-NX-NY" class="headerlink" title="map的编码(1+1+4+NX+NY)"></a>map的编码(1+1+4+NX+NY)</h5><p><img src="/images/thrift_map.png" alt><br>其中key-type和value-type可以是任何基本类型。注意将此处的map与python中的dict区分，这里的key和value各自都必须是同种类型，而python中dict是多态字典。</p>
+<h5 id="list和set的编码-1-4-N-X"><a href="#list和set的编码-1-4-N-X" class="headerlink" title="list和set的编码(1+4+N*X)"></a>list和set的编码(1+4+N*X)</h5><p><img src="/images/thrift_list_set.png" alt><br>注意与python中的list,set区分，这里的list，set中的元素必须是同一种类型。</p>
+<h5 id="field的编码-1-2-X"><a href="#field的编码-1-2-X" class="headerlink" title="field的编码(1+2+X)"></a>field的编码(1+2+X)</h5><p><img src="/images/thrift_field.png" alt><br>filed不是一个实际存在的类型，而是一个抽象概念。field不独立出现，而是出现在struct内部，其中field-type可以是任何其他的类型，field-id就是定义IDL时该field在struct的编号，field-value是对应类型的值的序列化结果。</p>
+<p>struct的编码，一个struct就是由多个field编码而成，最后一个field排列完成之后是一个stop field，这个field是一个8bit全为0的字节，它标志着一条Thrift消息的结束。这也是上面思考题的答案。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">---------------------------------------------</span><br><span class="line">| field1 | field2 |...| fieldN | stop field |        stop field: 00000000</span><br><span class="line">|    M   |    M   |...|    M   |            |     所以Message Type编码的时候不能用0</span><br><span class="line">---------------------------------------------</span><br></pre></td></tr></table></figure>
+
+<p>thrift序列化的时候并没有将字段名给序列化进去，所以在idl文件中更改字段名是没有任何影响的。有些同学可能有疑问。那字段名是怎么在客户端和服务端统一的呢?答案是客户端和服务端使用的是同一个idl文件呀，自己想一想，是不是?</p>
+<h3 id="Compact序列化"><a href="#Compact序列化" class="headerlink" title="Compact序列化"></a>Compact序列化</h3><p>Compact序列化也是一种二进制的序列化，不同于Binary的点主要在于整数类型采用了zigzag 和 varint压缩编码实现，这里简要介绍下zigzag 和 varint整数编码。</p>
+<h4 id="VarInt"><a href="#VarInt" class="headerlink" title="VarInt"></a>VarInt</h4><p>对于一个整形数字，一般使用 4 个字节来表示一个整数值。但是经过研究发现，消息传递中大部分使用的整数值都是很小的非负整数，如果全部使用 4 个字节来表示一个整数会很浪费。比如数字1用四字节表示就是这样:<br>00000000 00000000 00000000 00000001<br>对较小整数来说，这种固定字节数编码很浪费bit。所以人们就发明了一个类型叫变长整数varint。数值非常小时，只需要使用一个字节来存储，数值稍微大一点可以使用 2 个字节，再大一点就是 3 个字节，它还可以超过 4 个字节用来表达长整形数字。</p>
+<p>其原理也很简单，就是保留每个字节的最高位的bit来标识后一个字节是否属于该bit，1表示属于，0表示不属于。</p>
+<p>示意图如下:<br><img src="/images/thrift_zigzag.png" alt><br>由于大多数时候使用的是较小的整数，所以总体上来说，Varint编码的方式可以有效的压缩多字节整数。</p>
+<p>那么对于负数怎么办呢?大家知道负数在计算机中是以补码的形式存在的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10000000 00000000 00000000 00000001  -1的原码</span><br><span class="line">11111111 11111111 11111111 11111110  -1的反码</span><br><span class="line">11111111 11111111 11111111 11111111  -1的补码</span><br></pre></td></tr></table></figure>
+
+<p>所以-1在计算机中就是<code>11111111 11111111 11111111</code>,如果按照Varint编码，那么需要6个字节才能存的下，但是在现实生活中，-1却是个常用的整数。越大的负数越常见，编码需要的字节数越大，这显然是不能容忍的。为了解决这个问题, 就要使用ZigZag编码压缩技术了。</p>
+<h4 id="ZigZag"><a href="#ZigZag" class="headerlink" title="ZigZag"></a>ZigZag</h4><p>zigzag 编码专门用来解决负数编码问题。zigzag 编码将整数范围一一映射到自然数范围，然后再进行 varint 编码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">0 =&gt; 0</span><br><span class="line">-1 =&gt; 1</span><br><span class="line">1 =&gt; 2</span><br><span class="line">-2 =&gt; 3</span><br><span class="line">2 =&gt; 4</span><br><span class="line">-3 =&gt; 5</span><br><span class="line">3 =&gt; 6</span><br></pre></td></tr></table></figure>
+
+<p>zigzag 将负数编码成正奇数，正数编码成偶数。解码的时候遇到偶数直接除 2 就是原值，遇到奇数就加 1 除 2 再取负就是原值。</p>
+<h4 id="Compact细节"><a href="#Compact细节" class="headerlink" title="Compact细节"></a>Compact细节</h4><p>Compact编码——压缩的二进制。Compact序列化的实现大致逻辑和Binary序列化实现是一样的，就是将i16、i32、i64三种类型使用zigzag+varint编码实现，string、binary、map、list、set复合类型的长度只采用varint编码没使用zigzag，其他逻辑几乎一样。</p>
+<h2 id="五、Transport"><a href="#五、Transport" class="headerlink" title="五、Transport"></a>五、Transport</h2><h3 id="unFramedTransport-VS-FramedTransport"><a href="#unFramedTransport-VS-FramedTransport" class="headerlink" title="unFramedTransport VS FramedTransport"></a>unFramedTransport VS FramedTransport</h3><p>首先，基于帧与不基于帧是在二进制协议的情况下谈的，文本协议不谈这个。</p>
+<p>早期, Thrift使用的是不基于帧的传输(unFramedTransport), 在这种情况下，处理器是直接向socket中读写数据。</p>
+<p>之后, Thrift中引入了基于帧的传输(FramedTransport):Client/Server会首先在内存中缓存完整的请求/响应，当将request struct/response struct的最后一个字节缓存完成之后，会计算该消息的长度，然后向socket中写入该长度(4字节有符号整数)，接着写入消息的实际内容。长度前缀+消息内容就组成了一个帧(Frame)。</p>
+<p>基于帧的传输主要是为了简化异步处理器的实现。</p>
+<h3 id="BufferedTransport"><a href="#BufferedTransport" class="headerlink" title="BufferedTransport"></a>BufferedTransport</h3><p>BufferedTransport资料貌似比较少,有的文档里说thrift0.8以上就不支持BufferedTransport了，<br>但是在go的lib中确实还是有BufferedTransport的。</p>
+<p>这里我们可以确定的是BufferedTransport一定是unFrame的。</p>
+<p>提问？</p>
+<h2 id="六、tcpdump抓包演示"><a href="#六、tcpdump抓包演示" class="headerlink" title="六、tcpdump抓包演示"></a>六、tcpdump抓包演示</h2><p>抓包演示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo tcpdump -i any -Xvv  dst  port 5678 and tcp</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">0x0000:  0200 0000 4500 00d6 0000 4000 4006 0000  ....E.....@.@...</span><br><span class="line">0x0010:  7f00 0001 7f00 0001 fe07 162e b53b 387a  .............;8z</span><br><span class="line">0x0020:  96c2 0195 8018 31d7 feca 0000 0101 080a  ......1.........</span><br><span class="line">0x0030:  43da 11ca 43da 11c9 8001 0001 0000 0003  C...C...........</span><br><span class="line">0x0040:  4164 6400 0000 010c 0001 0a00 0100 0000  Add.............</span><br><span class="line">0x0050:  0000 0000 640a 0002 0000 0000 0000 00c8  ....d...........</span><br><span class="line">0x0060:  0c00 ff0b 0001 0000 0021 3230 3139 3032  .........!201902</span><br><span class="line">0x0070:  3232 3134 3336 3032 3031 3030 3934 3039  2214360201009409</span><br><span class="line">0x0080:  3432 3339 3530 3538 4135 410b 0002 0000  42395058A5A.....</span><br><span class="line">0x0090:  0001 2d0b 0003 0000 000c 3130 2e39 342e  ..-.......10.94.</span><br><span class="line">0x00a0:  3934 2e32 3339 0b00 0400 0000 000d 0006  94.239..........</span><br><span class="line">0x00b0:  0b0b 0000 0002 0000 0007 636c 7573 7465  ..........cluste</span><br><span class="line">0x00c0:  7200 0000 0764 6566 6175 6c74 0000 0003  r....default....</span><br><span class="line">0x00d0:  656e 7600 0000 0000 0000                 env.......</span><br></pre></td></tr></table></figure>
+
+<h2 id="七、Reference"><a href="#七、Reference" class="headerlink" title="七、Reference"></a>七、Reference</h2><p>Thrift Official Doc: <a href="https://github.com/apache/thrift/tree/master/doc/specs" target="_blank" rel="noopener">https://github.com/apache/thrift/tree/master/doc/specs</a><br>Wikimore’s Blog: <a href="https://wikimore.github.io/2016/04/04/thrift-protocol/" target="_blank" rel="noopener">https://wikimore.github.io/2016/04/04/thrift-protocol/</a><br>Thrift官网: <a href="http://thrift.apache.org/docs/" target="_blank" rel="noopener">http://thrift.apache.org/docs/</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/25/gcc-and-gdb/" rel="next" title="gcc/g++常用编译选项和gdb常用调试命令">
+                <i class="fa fa-chevron-left"></i> gcc/g++常用编译选项和gdb常用调试命令
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/04/go-pre-commit/" rel="prev" title="Go项目配置pre-commit hook">
+                Go项目配置pre-commit hook <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、什么是Thrift-？"><span class="nav-number">1.</span> <span class="nav-text">一、什么是Thrift ？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、Thrift请求响应模型"><span class="nav-number">2.</span> <span class="nav-text">二、Thrift请求响应模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、深入Message和Struct"><span class="nav-number">3.</span> <span class="nav-text">三、深入Message和Struct</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Message"><span class="nav-number">3.1.</span> <span class="nav-text">Message</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Struct"><span class="nav-number">3.2.</span> <span class="nav-text">Struct</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、Thrift序列化协议"><span class="nav-number">4.</span> <span class="nav-text">四、Thrift序列化协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Binary序列化"><span class="nav-number">4.1.</span> <span class="nav-text">Binary序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Message的序列化"><span class="nav-number">4.1.1.</span> <span class="nav-text">Message的序列化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Struct的序列化"><span class="nav-number">4.1.2.</span> <span class="nav-text">Struct的序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#定长编码"><span class="nav-number">4.1.2.1.</span> <span class="nav-text">定长编码:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#长度前缀编码-4-N"><span class="nav-number">4.1.2.2.</span> <span class="nav-text">长度前缀编码(4+N)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#map的编码-1-1-4-NX-NY"><span class="nav-number">4.1.2.3.</span> <span class="nav-text">map的编码(1+1+4+NX+NY)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#list和set的编码-1-4-N-X"><span class="nav-number">4.1.2.4.</span> <span class="nav-text">list和set的编码(1+4+N*X)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#field的编码-1-2-X"><span class="nav-number">4.1.2.5.</span> <span class="nav-text">field的编码(1+2+X)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Compact序列化"><span class="nav-number">4.2.</span> <span class="nav-text">Compact序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#VarInt"><span class="nav-number">4.2.1.</span> <span class="nav-text">VarInt</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ZigZag"><span class="nav-number">4.2.2.</span> <span class="nav-text">ZigZag</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Compact细节"><span class="nav-number">4.2.3.</span> <span class="nav-text">Compact细节</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、Transport"><span class="nav-number">5.</span> <span class="nav-text">五、Transport</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#unFramedTransport-VS-FramedTransport"><span class="nav-number">5.1.</span> <span class="nav-text">unFramedTransport VS FramedTransport</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BufferedTransport"><span class="nav-number">5.2.</span> <span class="nav-text">BufferedTransport</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、tcpdump抓包演示"><span class="nav-number">6.</span> <span class="nav-text">六、tcpdump抓包演示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七、Reference"><span class="nav-number">7.</span> <span class="nav-text">七、Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

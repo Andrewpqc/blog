@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="session,express,cookie,redis,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文主要包括express框架中cookie和session的使用和需要注意的点，以及redis的使用，如何在express项目中集成redis来缓存session等内容。 Cookie和Session基本原理What’s Cookie?众所周知，HTTP协议本身是无状态的，服务器不负责维护会话的状态。每次客户端访问完,服务器就会立即断开链接。客户端访问了服务器，服务器不会关心客户端是谁，他只是在">
+<meta name="keywords" content="session,express,cookie,redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Express框架中的Cookie，Session，以及Redis使用">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/09/17/cookie-and-session-in-Express-use-redis-to-make-it-work-better/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="本文主要包括express框架中cookie和session的使用和需要注意的点，以及redis的使用，如何在express项目中集成redis来缓存session等内容。 Cookie和Session基本原理What’s Cookie?众所周知，HTTP协议本身是无状态的，服务器不负责维护会话的状态。每次客户端访问完,服务器就会立即断开链接。客户端访问了服务器，服务器不会关心客户端是谁，他只是在">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-11-14T12:33:05.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Express框架中的Cookie，Session，以及Redis使用">
+<meta name="twitter:description" content="本文主要包括express框架中cookie和session的使用和需要注意的点，以及redis的使用，如何在express项目中集成redis来缓存session等内容。 Cookie和Session基本原理What’s Cookie?众所周知，HTTP协议本身是无状态的，服务器不负责维护会话的状态。每次客户端访问完,服务器就会立即断开链接。客户端访问了服务器，服务器不会关心客户端是谁，他只是在">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/09/17/cookie-and-session-in-Express-use-redis-to-make-it-work-better/">
+
+
+
+
+
+  <title>Express框架中的Cookie，Session，以及Redis使用 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/09/17/cookie-and-session-in-Express-use-redis-to-make-it-work-better/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Express框架中的Cookie，Session，以及Redis使用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-09-17T20:33:05+08:00">
+                2017-09-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/NodeJS/" itemprop="url" rel="index">
+                    <span itemprop="name">NodeJS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/09/17/cookie-and-session-in-Express-use-redis-to-make-it-work-better/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/09/17/cookie-and-session-in-Express-use-redis-to-make-it-work-better/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要包括express框架中cookie和session的使用和需要注意的点，以及redis的使用，如何在express项目中集成redis来缓存session等内容。</p>
+<h1 id="Cookie和Session基本原理"><a href="#Cookie和Session基本原理" class="headerlink" title="Cookie和Session基本原理"></a>Cookie和Session基本原理</h1><h2 id="What’s-Cookie"><a href="#What’s-Cookie" class="headerlink" title="What’s Cookie?"></a>What’s Cookie?</h2><p>众所周知，HTTP协议本身是无状态的，服务器不负责维护会话的状态。每次客户端访问完,服务器就会立即断开链接。客户端访问了服务器，服务器不会关心客户端是谁，他只是在人的事先规划之下根据客户端请求报文中包含的信息做出相应的响应，完成了此次响应，就会立即与客户端断开，然后去处理下一个请求(注意：在异步非阻塞的设计之下，服务器并不是完完全全处理完一个请求才处理下一个请求的，node就是这样的设计)。即使下一个请求仍然由同一个客户端发起，服务器也不会有所察觉，他还是会按照一个全新的请求去处理。这样的设计就导致了访问者的身份和状态无法确定，这样的话我们要想在网上做一些具有连贯性的任务就不可实现。比如用户登录，网上购物，游戏的积分，线上学习的进度情况等等。于是cookie出现了。cookie是存储在客户端主机的磁盘上的一串有特定意义的字符串。cookie的实现是客户端和服务器相互配合的结果。目前只要是还在使用的浏览器都支持了cookie的实现。当某一个请求到达服务器，服务器如果需要追踪会话状态的话，就会在响应报文中设置一些特定的数据，这些数据告诉浏览器这个网站需要设置cookie并且cookie中需要包含那些信息。浏览器解析到了相应的信息，就会按照大家事先沟通好的方式，将这些cookie数据写入自己所在主机的磁盘的某一个位置。下一次当再次访问这个网站时，浏览器就会携带之前记录的cookie。这些cookie数据送到服务器，服务器就可以根据它来确定当前来访用户的身份，进而找到数据库中关于此用户的信息，从而确定其会话状态。</p>
+<h2 id="What’s-session"><a href="#What’s-session" class="headerlink" title="What’s session?"></a>What’s session?</h2><p>Session同Cookie一样，都是用来解决用户会话的跟踪问题。但是Cookie存在着安全的问题，Cookie中存储的数据必定含有一个可以确定用户身份的关键信息，这一个信息有可能是敏感信息，这样的信息存储在用户磁盘上是极其不安全的。Cookie可以被窃取，被篡改等。虽然也有加密cookie，但是不管怎么说，存储在客户端总是让人不放心的。并且要让客户端每次请求都要带着额外的一堆数据，这对于网络传输来说也是不利的。就在这时Session出现了，session是基于cookie的。但是和cookie不同的是，原来cookie中的数据转移到了服务器端，而客户端则只保留一个无意义的随机字符串，这个无意义的字符串与存储在服务器端的该客户端的相关信息有着一一对应的关系。现在客户端访问这个服务器就只需要带着这一个随机字符串，然后服务器就可以根据这一个字符串确定来访客户的会话状态了。Session与Cookie相比，安全性有了极大的提高，并且减少了客户端访问服务器时所携带的数据量。</p>
+<h1 id="在Express中使用Cookie或Session"><a href="#在Express中使用Cookie或Session" class="headerlink" title="在Express中使用Cookie或Session"></a>在Express中使用Cookie或Session</h1><h2 id="Express项目中使用Cookie"><a href="#Express项目中使用Cookie" class="headerlink" title="Express项目中使用Cookie"></a>Express项目中使用Cookie</h2><p>在express 4.x的版本的api中上行的req和下行的res中都有cookie,分别是读取cookie和设置cookie。在express中使用cookie需要用到cookie-parser这一个中间件，此中间件的使用方法是：<br>首先下载cookie-parser(如果你使用express-genarater生成项目的话，就已经下载好了cookie-parser，并且用到了项目中)</p>
+<p>###下载cookie-parser</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install cookie-parser --save</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> express=<span class="built_in">require</span>(<span class="string">'express'</span>);</span><br><span class="line"><span class="keyword">var</span> cookieParser=<span class="built_in">require</span>(<span class="string">'cookie-parser'</span>);　<span class="comment">//引包</span></span><br><span class="line">app.use(cookieParser())　　　<span class="comment">//这里的cookieParser()括号中没有字符串就是不带签名的cookie</span></span><br><span class="line"><span class="comment">//下面就可以使用cookie了</span></span><br><span class="line"><span class="comment">//设置cookie</span></span><br><span class="line">res.cookie(<span class="string">"username"</span>,<span class="string">"xiaoming"</span> ,&#123;<span class="attr">domain</span>: <span class="string">'.example.com'</span>, <span class="attr">path</span>: <span class="string">'/admin'</span>, <span class="attr">secure</span>: <span class="literal">true</span> &#125;)</span><br><span class="line"><span class="comment">//这里的vaule是一个简单字符串也可以是一个JSON格式的字符串</span></span><br><span class="line"><span class="comment">//读取cookie</span></span><br><span class="line">req.cookies.username</span><br><span class="line">                 -&gt;<span class="string">"xiaoming"</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="设置cookie时的参数"><a href="#设置cookie时的参数" class="headerlink" title="设置cookie时的参数"></a>设置cookie时的参数</h3><p>domain　：cookie在什么域名下有效，类型为String,。默认为网站域名<br>expires : cookie过期日期，类型为Date。如果没有设置或者设置为0，那么该cookie只在这个这个session有效，即关闭浏览器后，这个cookie会被浏览器删除。<br>httpOnly: 只能被web server访问，类型Boolean。不能通过js代码来读取cookie<br>maxAge : 实现expires的功能，设置cookie过期的时间，指明从现在开始，多少毫秒以后，cookie到期。<br>path : cookie在什么路径下有效，默认为’/‘，类型为String<br>secure ：只能被HTTPS使用，类型Boolean，默认为false<br>signed :使用签名，类型Boolean，默认为false。express会使用req.secret来完成签名，需要cookie-parser配合使用,将其设为true时，在取ｃｏｏｋｉｅ时要用 req.signedCookie（）方法<br>sameSite : Boolean or String Value of the “SameSite” Set-Cookie attribute.</p>
+<h3 id="签名cookie"><a href="#签名cookie" class="headerlink" title="签名cookie"></a>签名cookie</h3><p>要使用带签名的cookie(一种更安全的cookie的处理方式)，需要cookie-parser的配合：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//使用cookie-parser中间件的时候要传入secret</span></span><br><span class="line">app.use(cookieParser(<span class="string">"This is a secret that signedcookie needed"</span>));</span><br><span class="line"><span class="comment">//设置cookie时要将signed设为true</span></span><br><span class="line">res.cookie(<span class="string">"username"</span>,<span class="string">"andrewpqc"</span>,&#123;<span class="attr">signed</span>:<span class="literal">true</span>&#125;)</span><br><span class="line"><span class="comment">//读取签名cookie时要使用req.signedCookies</span></span><br><span class="line">req.signedCookies.username</span><br><span class="line">					-&gt;andrewpqc</span><br></pre></td></tr></table></figure>
+
+<h3 id="清除cookie"><a href="#清除cookie" class="headerlink" title="清除cookie"></a>清除cookie</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">res.clearCookie(<span class="string">'name'</span>, &#123; <span class="attr">path</span>: <span class="string">'/admin'</span> &#125;);</span><br><span class="line"><span class="comment">//这里设置的path要保持和设置该cookie时的一致</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Express项目中使用Session"><a href="#Express项目中使用Session" class="headerlink" title="Express项目中使用Session"></a>Express项目中使用Session</h2><p>Express中session的实现依赖于express-session</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save express-session</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> express=<span class="built_in">require</span>(<span class="string">'express'</span>);</span><br><span class="line"><span class="keyword">var</span> session=<span class="built_in">require</span>(<span class="string">'express-session'</span>);</span><br><span class="line"><span class="keyword">var</span> app=express();</span><br><span class="line">app.use(session(&#123;</span><br><span class="line">	secret:<span class="string">"keyboard cat"</span>,</span><br><span class="line">	resave:<span class="literal">false</span>,</span><br><span class="line">	saveUninitialized:<span class="literal">true</span>,</span><br><span class="line">	<span class="comment">//cookie:&#123;secret:true&#125;//这里设为true时，是https协议使用的</span></span><br><span class="line">	<span class="comment">//注意在实验时这里的secret要设为ｆａｌｓｅ，因为本地用的是http协议</span></span><br><span class="line">&#125;));</span><br><span class="line">app.get(<span class="string">'/'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">req,res,next</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(req.session.login)&#123;</span><br><span class="line">		res.send(<span class="string">'欢迎您'</span>＋<span class="string">','</span>+req.session.username)</span><br><span class="line">	&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">		res.send(<span class="string">'你还没有登录，请登录！'</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line">app.get(<span class="string">'/login'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">req,res,next</span>)</span>&#123;</span><br><span class="line">	req.session.login=<span class="literal">true</span>;        <span class="comment">//设置session</span></span><br><span class="line">	req.session.username=<span class="string">"xiaoming"</span>;<span class="comment">//设置session</span></span><br><span class="line">	req.session.cookie.expires=<span class="keyword">new</span> <span class="built_in">Date</span>(<span class="built_in">Date</span>.now()+<span class="number">3600000</span>);<span class="comment">//设置超时时间,这里１小时后失效</span></span><br><span class="line">	res.send(<span class="string">'你已经成功登陆'</span>)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>注意，这里在使用时和cookie不同，cookie的req,res都对应有cookie接口，分别读取和设置cookie。而session则不同，无论是读取还是设置，都是通过req.session这一个接口完成的。session的数据并不是存储在cookie中，cookie中存储的仅仅是session ID,而其他的有用的信息存储在服务器端。</p>
+<h3 id="可选参数以及详细说明"><a href="#可选参数以及详细说明" class="headerlink" title="可选参数以及详细说明"></a>可选参数以及详细说明</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">app.use(session(OPTIONS))</span><br></pre></td></tr></table></figure>
+
+<p>这里有一点需要说明的是从express-session 1.5.0开始，这一个模块已经不再需要cookie-parser这一个中间件了。并且如果你在cookie-parser中使用的secret与express-session中的secret不一致的话就会起冲突。所以最好的处理办法是，如果你已经决定在项目中使用session的，你大可把cookie-parser从你的代码中去掉.</p>
+<h1 id="redis的基本使用"><a href="#redis的基本使用" class="headerlink" title="redis的基本使用"></a>redis的基本使用</h1><h2 id="为什么要使用redis"><a href="#为什么要使用redis" class="headerlink" title="为什么要使用redis?"></a>为什么要使用redis?</h2><p>session中的数据要存储在服务器端，怎么存就成了一个问题？可以存储在服务器所在主机的文件系统中，也可以存储在服务器端的数据库中，还可以直接存储在服务器的内存中。(express-session默认就将session数据直接缓存在服务器所在主机的内存中)但是无论是存储在文件中还是普通数据库中，最终程序还是需要在磁盘上面进行读写。大家知道这种数据从磁盘上的读写是非常耗时的。而sesssion数据则是需要频繁的使用的，这就意味着频繁的I/O操作，这对程序的性能是一个巨大的损害。无疑，把session数据存储在内存中是一个最好的选择。但是像express-session默认的将其直接存储在服务器主机的内存中也是不行的。随着网站用户数的增加，session数据会越来越多，这将极大的占用服务器的内存，从而使程序变慢。网站的维护也将变得困难，因为一旦服务器重启，内存中的session数据就将全部丢失。这种方式也不利于session数据的共享。目前最常用的方式就是专门提供一个数据库，它把数据存储在内存中，必要时也可以将数据写入磁盘中，并且还支持多个程序的连接，实现数据的共享，同时提供操作数据的接口，方便程序操作数据。Redis就是这样的一个数据库。我们把Redis单独放在一个稳定的内存大的主机之上，做成一个数据库服务器，这样的话，上述的所有问题就统统解决了。<br>其实除了可以存储session数据之外，redis还可以缓存很多东西。比如我们可以把html缓存在redis中，客户端发请求需要这个html页面，那么我们的程序就可以先在缓存中找这个页面，如果没有找到在去数据库中找。类似这样的操作可以极大的提高响应的速度，增强用户体验。</p>
+<h2 id="redis使用-基于ubuntu系统"><a href="#redis使用-基于ubuntu系统" class="headerlink" title="redis使用(基于ubuntu系统)"></a>redis使用(基于ubuntu系统)</h2><h3 id="安装redis"><a href="#安装redis" class="headerlink" title="安装redis"></a>安装redis</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get install redis</span><br></pre></td></tr></table></figure>
+
+<p>上面的两条命令就可以安装redis了，但是这样安装的redis往往不是redis的最新版本，(但是也够用了，本人就是这样安装的，安装的是3.2.1版，当前最新的稳定版本是４．０．１)其实区别不大。<br>如果想要安装最新版可以使用下面的几条命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ wget http://download.redis.io/releases/redis-4.0.1.tar.gz</span><br><span class="line">$ tar xzf redis-4.0.1.tar.gz</span><br><span class="line">$ <span class="built_in">cd</span> redis-4.0.1</span><br><span class="line">$ make</span><br></pre></td></tr></table></figure>
+
+<p>这样的安装时间可能会长一些。</p>
+<h3 id="基本工具介绍"><a href="#基本工具介绍" class="headerlink" title="基本工具介绍"></a>基本工具介绍</h3><p>安装完成之后我们就有了两个基本工具了，服务启动工具：redis-server,命令行的客户端工具：redis-cli.</p>
+<h4 id="redis-server"><a href="#redis-server" class="headerlink" title="redis-server"></a>redis-server</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ redis-server</span><br></pre></td></tr></table></figure>
+
+<p>上面这条命令就可以启动redis的服务了，redis默认监听的是６３７９端口。但是这种方式启动redis,是以前台的方式启动的，这样的话，我们就必须保持这个会话，关闭回话窗口或按下ctrl+c,服务就停止了。我们还可以以守护式进程的方式，让redis在后台运行。这就需要配置了,在/etc/redis.conf或者/etc/redis/redis.conf中，我们把daemonize后面的no改为yes就行了。这时我们再次启动redis</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ redis-server /etc/redis/redis.conf</span><br></pre></td></tr></table></figure>
+
+<p>这次启动要在命令后面带上刚才修改了的配置文件的路径。这样的话，我们的redis就会在后台运行了。<br>注意：有的版本的redis默认daemonize的选项就是yes,也就是说默认就是在后台运行的，这时我们在运行$ redis-server就会告诉我们6379端口被占用。</p>
+<h4 id="redis-cli"><a href="#redis-cli" class="headerlink" title="redis-cli"></a>redis-cli</h4><p>redis-cli是一个redis的命令行客户端工具，用于连接和操作redis服务器。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ redis-cli</span><br></pre></td></tr></table></figure>
+
+<p>上面的这条命令，默认是连接到本地的6379端口，我们也可以指定主机名和端口号来进行远程链接</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ redis-cli -h 127.0.0.1 -p 6379</span><br></pre></td></tr></table></figure>
+
+<p>这条命令同样链接到本地的6379<br>链接到了redis服务器之后，我们就进入了与redis服务器的会话交互中，我们可以通过一些指令来进行操作：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ keys *             //查看存储的所有的键</span><br><span class="line">$ <span class="built_in">set</span> hello world    //设置键hello对应的值为world</span><br><span class="line">$ get hello          //查看键hello对应的值</span><br></pre></td></tr></table></figure>
+
+<h4 id="GUI工具"><a href="#GUI工具" class="headerlink" title="GUI工具"></a>GUI工具</h4><p>推荐Redis Desktop Manager</p>
+<h3 id="nodejs中操作redis"><a href="#nodejs中操作redis" class="headerlink" title="nodejs中操作redis"></a>nodejs中操作redis</h3><p>在nodejs中操作redis,需要一个redis的驱动。目前比较受欢迎的有两个node_redis,ioredis.下面我们就使用node-redis来讲解。</p>
+<h4 id="安装node-redis"><a href="#安装node-redis" class="headerlink" title="安装node_redis"></a>安装node_redis</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install --save redis</span><br></pre></td></tr></table></figure>
+
+<h4 id="使用-2"><a href="#使用-2" class="headerlink" title="使用"></a>使用</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//node_redis插件</span></span><br><span class="line"><span class="keyword">const</span> redis = <span class="built_in">require</span>(<span class="string">'redis'</span>);</span><br><span class="line"><span class="comment">//链接redis服务器</span></span><br><span class="line"><span class="keyword">var</span> client = redis.createClient(<span class="number">6379</span>, <span class="string">"localhost"</span>);</span><br><span class="line"><span class="comment">//保存数据</span></span><br><span class="line">client.set(<span class="string">"this is a key"</span>, <span class="string">"this is a vaule"</span>);</span><br><span class="line"><span class="comment">//获取数据</span></span><br><span class="line">client.get(<span class="string">'this is a key'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">err, value</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (err) &#123;</span><br><span class="line">		<span class="built_in">console</span>.log(err.message);</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="built_in">console</span>.log(value)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//我们可以改写toString方法，让redis存储一个json字符串，这是我们可以把他</span></span><br><span class="line"><span class="comment">//从redis中取出来之后就可以转化成对象，接着使用</span></span><br><span class="line"><span class="built_in">Object</span>.prototype.toString = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">JSON</span>.stringify(<span class="keyword">this</span>)</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//当然，最好不要改变原型链中的方法</span></span><br><span class="line"><span class="comment">//我们保存一个对象</span></span><br><span class="line">client.set(<span class="string">'key'</span>, &#123;<span class="string">"a"</span>: <span class="number">1</span>,<span class="string">"b"</span>: <span class="number">2</span>&#125;);</span><br><span class="line">client.get(<span class="string">'key'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">err, value</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (err) &#123;</span><br><span class="line">		<span class="built_in">console</span>.log(err.message);</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="built_in">console</span>.log(vaule, <span class="keyword">typeof</span> vaule)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="comment">//从输出结果中可以看到，上面的打印ｖａｕｌｅ的类型，是一个字符串</span></span><br><span class="line"><span class="comment">//那是因为当存储的是一个对象的时候，redis会使用toString方法，把他转化成字符串，见上</span></span><br><span class="line"><span class="comment">//操作列表list</span></span><br><span class="line"><span class="comment">//从右边依次插入a,b,c,d,e</span></span><br><span class="line">client.rpush(<span class="string">'testList'</span>,<span class="string">'a'</span>);</span><br><span class="line">client.rpush(<span class="string">'testList'</span>,<span class="string">'b'</span>);</span><br><span class="line">client.rpush(<span class="string">'testList'</span>,<span class="string">'c'</span>);</span><br><span class="line">client.rpush(<span class="string">'testList'</span>,<span class="string">'d'</span>);</span><br><span class="line">client.rpush(<span class="string">'testList'</span>,<span class="string">'e'</span>);</span><br><span class="line"><span class="comment">//同理，还有一个lpush</span></span><br><span class="line"><span class="comment">//从左边加数据</span></span><br><span class="line"><span class="comment">//删除数据（从右边删rpop,从左边删lpop）</span></span><br><span class="line">client.rpop(<span class="string">'testList'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">err,v</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(err)&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(err.message);</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(v);<span class="comment">//这里的v就是被删除的数据</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//读取列表</span></span><br><span class="line"><span class="comment">//取数据需要指定从哪里取到哪里，参数中如果是非负数就是从左边开始取，负数就是从右边开始取</span></span><br><span class="line"><span class="comment">//下面的这条语句就是取出全部的数据</span></span><br><span class="line">client.lrange(<span class="string">"testList"</span>,<span class="number">0</span>,<span class="number">-1</span>,<span class="function"><span class="keyword">function</span>(<span class="params">err,list</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(err)&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(err.message);</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">		consol.log(list);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="comment">//操作集合</span></span><br><span class="line"><span class="comment">//往集合里面添加东西</span></span><br><span class="line">client.sadd(<span class="string">"testSet"</span>,<span class="string">'a'</span>);</span><br><span class="line">client.sadd(<span class="string">"testSet"</span>,<span class="string">'b'</span>);</span><br><span class="line">client.sadd(<span class="string">"testSet"</span>,<span class="string">'c'</span>);</span><br><span class="line">client.sadd(<span class="string">"testSet"</span>,<span class="string">'d'</span>);</span><br><span class="line"><span class="comment">//集合里面的数据有互异性，在向里面添加数据时只会添加集合中没有的数据，集合中已经有的数据</span></span><br><span class="line"><span class="comment">//将无法插入</span></span><br><span class="line"><span class="comment">//从集合中取东西</span></span><br><span class="line">client.smembers(<span class="string">'testSet'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">err,values</span>)</span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(values)</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//消息中介</span></span><br><span class="line"><span class="comment">//通过redis的消息订阅与发布可以实现两个进程之间的通信</span></span><br><span class="line"><span class="comment">//消息的发布</span></span><br><span class="line">client.publish(<span class="string">'testPublish'</span>,<span class="string">'message from hhh'</span>);</span><br><span class="line"><span class="comment">//消息的订阅</span></span><br><span class="line">client.subscribe(<span class="string">'testPublish'</span>);</span><br><span class="line">client.on(<span class="string">'message'</span>,<span class="function"><span class="keyword">function</span>(<span class="params">channel,msg</span>)</span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(channel,msg)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="在Express项目中用redis来缓存Session"><a href="#在Express项目中用redis来缓存Session" class="headerlink" title="在Express项目中用redis来缓存Session"></a>在Express项目中用redis来缓存Session</h4><p>在express项目中使用redis需要connect-redis这一个插件。首先要安装connect-redis</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -save connect-redis</span><br></pre></td></tr></table></figure>
+
+<h4 id="使用-3"><a href="#使用-3" class="headerlink" title="使用"></a>使用</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> express=<span class="built_in">require</span>(<span class="string">'express'</span>);</span><br><span class="line"><span class="keyword">var</span> redis=<span class="built_in">require</span>(<span class="string">'redis);</span></span><br><span class="line"><span class="string">var session=require('</span>express-session<span class="string">');</span></span><br><span class="line"><span class="string">var RedisStore=require('</span>connect-redis<span class="string">')(session);</span></span><br><span class="line"><span class="string">var client=redis.createClient(6379,"127.0.0.1");</span></span><br><span class="line"><span class="string">var app=express();</span></span><br><span class="line"><span class="string">app.use(session(&#123;</span></span><br><span class="line"><span class="string">	secret: '</span>recommand <span class="number">128</span> bytes random string<span class="string">',</span></span><br><span class="line"><span class="string">	resave:true,</span></span><br><span class="line"><span class="string">	saveUninitialized:true,</span></span><br><span class="line"><span class="string">	cookie:&#123;&#125;,</span></span><br><span class="line"><span class="string">	//在express-session中间件选项中加入store就可以了</span></span><br><span class="line"><span class="string">	store:new RedisStore(&#123;client:client&#125;)</span></span><br><span class="line"><span class="string">&#125;));</span></span><br></pre></td></tr></table></figure>
+
+<p>配置完上面的内容之后，我们还是照常在我们的代码中去操作session，但是这是我们的session的数据就已经存在了redis的缓存系统中了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/session/" rel="tag"># session</a>
+          
+            <a href="/tags/express/" rel="tag"># express</a>
+          
+            <a href="/tags/cookie/" rel="tag"># cookie</a>
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/14/Set-and-Multiset-in-STL/" rel="next" title="Set and Multiset in STL">
+                <i class="fa fa-chevron-left"></i> Set and Multiset in STL
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/20/Data-manage-in-Docker/" rel="prev" title="Docker数据管理">
+                Docker数据管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Cookie和Session基本原理"><span class="nav-number">1.</span> <span class="nav-text">Cookie和Session基本原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#What’s-Cookie"><span class="nav-number">1.1.</span> <span class="nav-text">What’s Cookie?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What’s-session"><span class="nav-number">1.2.</span> <span class="nav-text">What’s session?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#在Express中使用Cookie或Session"><span class="nav-number">2.</span> <span class="nav-text">在Express中使用Cookie或Session</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Express项目中使用Cookie"><span class="nav-number">2.1.</span> <span class="nav-text">Express项目中使用Cookie</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用"><span class="nav-number">2.1.1.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置cookie时的参数"><span class="nav-number">2.1.2.</span> <span class="nav-text">设置cookie时的参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#签名cookie"><span class="nav-number">2.1.3.</span> <span class="nav-text">签名cookie</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#清除cookie"><span class="nav-number">2.1.4.</span> <span class="nav-text">清除cookie</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Express项目中使用Session"><span class="nav-number">2.2.</span> <span class="nav-text">Express项目中使用Session</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装"><span class="nav-number">2.2.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可选参数以及详细说明"><span class="nav-number">2.2.3.</span> <span class="nav-text">可选参数以及详细说明</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#redis的基本使用"><span class="nav-number">3.</span> <span class="nav-text">redis的基本使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么要使用redis"><span class="nav-number">3.1.</span> <span class="nav-text">为什么要使用redis?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis使用-基于ubuntu系统"><span class="nav-number">3.2.</span> <span class="nav-text">redis使用(基于ubuntu系统)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装redis"><span class="nav-number">3.2.1.</span> <span class="nav-text">安装redis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本工具介绍"><span class="nav-number">3.2.2.</span> <span class="nav-text">基本工具介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#redis-server"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">redis-server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis-cli"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">redis-cli</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GUI工具"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">GUI工具</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nodejs中操作redis"><span class="nav-number">3.2.3.</span> <span class="nav-text">nodejs中操作redis</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装node-redis"><span class="nav-number">3.2.3.1.</span> <span class="nav-text">安装node_redis</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用-2"><span class="nav-number">3.2.3.2.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在Express项目中用redis来缓存Session"><span class="nav-number">3.2.3.3.</span> <span class="nav-text">在Express项目中用redis来缓存Session</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用-3"><span class="nav-number">3.2.3.4.</span> <span class="nav-text">使用</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

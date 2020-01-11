@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Network in Docker,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在实践中，经常需要多个服务组件容器之间共同协作，这往往需要多个容器之间能够相互访问到对方的服务。同时，为了容器的安全有时我们也要避免容器之间的访问。 容器与用户的连接端口映射要想外部用户访问到服务器主机中容器中的服务，那么就要把提供服务的容器的端口映射到服务器主机的端口上。这样用户访问服务器主机的对应端口就可以访问到容器中的服务了。这是通过run命令的两个选项实现的 12docker run [-">
+<meta name="keywords" content="Network in Docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker网络管理">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/09/20/Network-management-of-Docker/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="在实践中，经常需要多个服务组件容器之间共同协作，这往往需要多个容器之间能够相互访问到对方的服务。同时，为了容器的安全有时我们也要避免容器之间的访问。 容器与用户的连接端口映射要想外部用户访问到服务器主机中容器中的服务，那么就要把提供服务的容器的端口映射到服务器主机的端口上。这样用户访问服务器主机的对应端口就可以访问到容器中的服务了。这是通过run命令的两个选项实现的 12docker run [-">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-11-16T04:33:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker网络管理">
+<meta name="twitter:description" content="在实践中，经常需要多个服务组件容器之间共同协作，这往往需要多个容器之间能够相互访问到对方的服务。同时，为了容器的安全有时我们也要避免容器之间的访问。 容器与用户的连接端口映射要想外部用户访问到服务器主机中容器中的服务，那么就要把提供服务的容器的端口映射到服务器主机的端口上。这样用户访问服务器主机的对应端口就可以访问到容器中的服务了。这是通过run命令的两个选项实现的 12docker run [-">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/09/20/Network-management-of-Docker/">
+
+
+
+
+
+  <title>Docker网络管理 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/09/20/Network-management-of-Docker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Docker网络管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-09-20T12:33:41+08:00">
+                2017-09-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index">
+                    <span itemprop="name">Docker</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/09/20/Network-management-of-Docker/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/09/20/Network-management-of-Docker/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在实践中，经常需要多个服务组件容器之间共同协作，这往往需要多个容器之间能够相互访问到对方的服务。同时，为了容器的安全有时我们也要避免容器之间的访问。</p>
+<h1 id="容器与用户的连接"><a href="#容器与用户的连接" class="headerlink" title="容器与用户的连接"></a>容器与用户的连接</h1><h2 id="端口映射"><a href="#端口映射" class="headerlink" title="端口映射"></a>端口映射</h2><p>要想外部用户访问到服务器主机中容器中的服务，那么就要把提供服务的容器的端口映射到服务器主机的端口上。这样用户访问服务器主机的对应端口就可以访问到容器中的服务了。这是通过run命令的两个选项实现的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run [-p]|[-P]………</span><br><span class="line">-P –publish-all=ture|<span class="literal">false</span> 默认为<span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>用大写的P将会对容器所暴露的所有的端口进行映射,命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run –P -i –t IMAGE [COMMAND] [ARG…]</span><br></pre></td></tr></table></figure>
+
+<p>这会将镜像所暴露的端口随机映射到49000~49900的端口。</p>
+<p>用小写的p时我们可以指定映射那些端口，对映射关系进行详细操作，总共有4种指定的方式：</p>
+<p>containerPort只指定需要映射的容器的端口，将他随机映射到一个宿主机的端口</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run –p 80 –i –t Ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>hostport:containerport两者皆指定，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run –p 8080:80 –i –t Ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>ip:containerport</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run –p 0.0.0.0:80 –I –t Ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>ip:hostport:containerport</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run –p 0.0.0.0:8080:80 –I –t Ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就可以通过docker的ps,inspect子命令查看到端口映射的情况了。</p>
+<h1 id="容器与容器之间的互联"><a href="#容器与容器之间的互联" class="headerlink" title="容器与容器之间的互联"></a>容器与容器之间的互联</h1><p>首先，无论是同一台主机上的容器之间，还是跨主机的容器之间都可以通过访问对方容器所在的主机的映射的端口访问到对方容器的服务。</p>
+<h2 id="同一台主机上的容器的互联"><a href="#同一台主机上的容器的互联" class="headerlink" title="同一台主机上的容器的互联"></a>同一台主机上的容器的互联</h2><h3 id="通过ip-端口互联"><a href="#通过ip-端口互联" class="headerlink" title="通过ip+端口互联"></a>通过ip+端口互联</h3><p>容器有自己的网络和ip地址，使用docker inspect＋容器ID就可以查看到相关信息。默认情况之下，在同一台物理主机中的容器之间可以通过对方容器的ip和端口访问到对方的服务。但是这样有一个弊端：随着容器的停止与启动，容器的ip可能会发生变化。这就意味着每一次你重启了集群中的一个容器，你就必须要查看这个启动的容器新的ip，然后更改访问这个容器中服务的容器的配置。这显然太麻烦了。好在docker为我们提供了更加稳定可靠的方式来维护容器的连通。那就是：docker run的–link选项，</p>
+<h3 id="容器名便捷互访"><a href="#容器名便捷互访" class="headerlink" title="容器名便捷互访"></a>容器名便捷互访</h3><h4 id="自定义容器名"><a href="#自定义容器名" class="headerlink" title="自定义容器名"></a>自定义容器名</h4><p>虽然镜像启动后，容器会自动获得一个随机的容器名，但是为了方便和易记，我们往往会为容器自定义一个名字：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -itd --name myname ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>如上，通过–name参数来指定容器的名称为myname.</p>
+<h4 id="容器互联"><a href="#容器互联" class="headerlink" title="容器互联"></a>容器互联</h4><p>使用–link参数能够让容器之间安全的进行交互。比如:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -d --name db mysql</span><br></pre></td></tr></table></figure>
+
+<p>上面我们以mysql镜像创建了名为db的容器，下面我们就让我们的应用程序容器与它链接起来：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -itd -P --name myweb --link db:mydb ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>如上，我们以ubuntu镜像创建了一个名为myweb的容器，它通过–link参数与上面的db容器建立了容器名互访连接的关系，他在myweb容器中将被称之为mydb.<br>注意–link参数的格式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">... --link &lt;CONTAINER_NAME&gt;:&lt;ALIAS&gt; ...</span><br></pre></td></tr></table></figure>
+
+<p>CONTAINER_NAME是所要链接的容器名，ALIAS是在容器中使用的所要链接容器的别名.<br>下面我们就可以在myweb容器中执行如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ping mydb</span><br></pre></td></tr></table></figure>
+
+<p>可以发现可以顺利ping通。假如db容器的80端口还提供了静态网站服务，那么在myweb容器中可以通过如下命令访问到这一服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ curl mydb:80</span><br></pre></td></tr></table></figure>
+
+<p>注意：ping和curl这两个命令可能在容器中并没有安装，所以要先安装后才可以使用。<br>之后无论你怎样重启容器，只要对方容器还在运行，你就可以通过这种方式在源容器中访问到目标容器。</p>
+<h1 id="高级网络管理"><a href="#高级网络管理" class="headerlink" title="高级网络管理"></a>高级网络管理</h1><h2 id="docker自带的网络"><a href="#docker自带的网络" class="headerlink" title="docker自带的网络"></a>docker自带的网络</h2><p>当我们安装docker的时候，会自动创建三个网络，我们可以使用下面的命令来查看主机中当前存在的网络：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker network ls</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">5a0d02e77f3c        bridge              bridge              <span class="built_in">local</span></span><br><span class="line">8349004e42e8        host                host                <span class="built_in">local</span></span><br><span class="line">92e7ec631cff        none                null                <span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+
+<p>NETWORK ID列是对应网络的唯一ID。NAME列是对应网络的名字。DRIVER是对应网络所使用的驱动。SCOPE是当前网络的作用域，这里的local说明当前网络作用域为本地。<br>上面的bridge,host,none就是docker安装时自动创建的三个网络。</p>
+<h3 id="bridge"><a href="#bridge" class="headerlink" title="bridge"></a>bridge</h3><p>bridge网络是docker容器默认使用的网络，除非在容器启动时显式的指定使用其他网络，如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -itd --name ct1 ubuntu</span><br><span class="line">$ docker run -itd --name ct2 --network host ubuntu</span><br></pre></td></tr></table></figure>
+
+<p>上面的两条命令用ubuntu镜像分别启动了两个容器ct1,ct2.其中ct1在默认的bridge网络中，ct2在我们指定的host网络中。可以通过docker inspect ct1和docker inspect ct2来查看当前容器所属的网络：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker inspect ct1</span><br></pre></td></tr></table></figure>
+
+<p>部分输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"Networks"</span>: &#123;   </span><br><span class="line">                <span class="string">"bridge"</span>: &#123;</span><br><span class="line">                    <span class="string">"IPAMConfig"</span>: null,</span><br><span class="line">                    <span class="string">"Links"</span>: null,</span><br><span class="line">                    <span class="string">"Aliases"</span>: null,</span><br><span class="line">                    <span class="string">"NetworkID"</span>: <span class="string">"5a0d02e77f3c89ec59b9432be752a35f6cc28c260022398751495ee563809570"</span>,</span><br><span class="line">                    <span class="string">"EndpointID"</span>: <span class="string">"a60ca83c9da616064ca9fa112f80a05549bc2ff408483381979b6921bdba46ef"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">"172.17.0.1"</span>,</span><br><span class="line">                    <span class="string">"IPAddress"</span>: <span class="string">"172.17.0.2"</span>,</span><br><span class="line">                    <span class="string">"IPPrefixLen"</span>: 16,</span><br><span class="line">                    <span class="string">"IPv6Gateway"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6Address"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6PrefixLen"</span>: 0,</span><br><span class="line">                    <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:11:00:02"</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+
+<p>对ct2执行同样的命令，同一部分的输出为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"Networks"</span>: &#123;</span><br><span class="line">                <span class="string">"host"</span>: &#123;</span><br><span class="line">                    <span class="string">"IPAMConfig"</span>: null,</span><br><span class="line">                    <span class="string">"Links"</span>: null,</span><br><span class="line">                    <span class="string">"Aliases"</span>: null,</span><br><span class="line">                    <span class="string">"NetworkID"</span>: <span class="string">"8349004e42e8dda028d04b62a19df90ecf9655409ad0f1e8847a70f5b49fdd1f"</span>,</span><br><span class="line">                    <span class="string">"EndpointID"</span>: <span class="string">"f3f957ca950edc0c12ab94e57d72d0799c8287ee638179ba63349cc87f27731e"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"IPAddress"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"IPPrefixLen"</span>: 0,</span><br><span class="line">                    <span class="string">"IPv6Gateway"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6Address"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6PrefixLen"</span>: 0,</span><br><span class="line">                    <span class="string">"MacAddress"</span>: <span class="string">""</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+
+<p>由上可见，确实ct1,ct2两个容器分属于不同的网络。<br>bridge网络的底层就是docker0这一虚拟网络设备，当容器运行在bridge网络中时，docker的守护进程就是通过docker0来链接到这些容器的，并且这些容器支持通过ip来访问对方。其实在你安装docker以后，docker0这一网络设备就已经成为你的主机的网络栈的一部分。你可以通过如下命令查看到docker0:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ip addr show</span><br></pre></td></tr></table></figure>
+
+<h3 id="host"><a href="#host" class="headerlink" title="host"></a>host</h3><p>运行在host网络中的容器，在网络方面与宿主机之间没有隔离，不用做端口映射，外界通过访问主机ip加对应端口访问到容器中的服务。直接使用 Docker host 的网络最大的好处就是性能，如果容器对网络传输效率有较高要求，则可以选择 host 网络。当然不便之处就是牺牲一些灵活性，比如要考虑端口冲突问题，Docker host 上已经使用的端口就不能再用了。Docker host 的另一个用途是让容器可以直接配置 host 网路。比如某些跨 host 的网络解决方案，其本身也是以容器方式运行的，这些方案需要对网络进行配置，比如管理 iptables。</p>
+<h3 id="none"><a href="#none" class="headerlink" title="none"></a>none</h3><p>故名思议，none 网络就是什么都没有的网络。挂在这个网络下的容器除了 lo，没有其他任何网卡。封闭意味着隔离，一些对安全性要求高并且不需要联网的应用可以使用 none 网络。比如某个容器的唯一用途是生成随机密码，就可以放到 none 网络中避免密码被窃取。</p>
+<h2 id="自定义网络"><a href="#自定义网络" class="headerlink" title="自定义网络"></a>自定义网络</h2><h3 id="定义网络"><a href="#定义网络" class="headerlink" title="定义网络"></a>定义网络</h3><p>在实践中使用最多的网络是默认的bridge网络，其实我们还可以自定义网络：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker network create --driver bridge mynetwork</span><br></pre></td></tr></table></figure>
+
+<p>如上我以bridge为驱动创建了一个自定义网络mynetwork,我们可以通过下面的命令查看当前主机中的网络：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker network ls</span><br></pre></td></tr></table></figure>
+
+<p>这时我们就可以发现除了docker自带的bridge,none,host三种网络之外，我们的自定义网络mynetwork也出现在输出中。</p>
+<h3 id="使用自定义网络运行容器"><a href="#使用自定义网络运行容器" class="headerlink" title="使用自定义网络运行容器"></a>使用自定义网络运行容器</h3><p>下面我们使用默认的bridge运行ct1,ct2,使用我们的自定义网络再运行起来一个ct3容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -d --name ct1 ubuntu</span><br><span class="line">$ docker run -d --name ct2 ubuntu</span><br><span class="line">$ docker run -d --name ct3 --network mynetwork ubuntu</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就得到了两个运行在bridge网络中的容器ct1,ct2，和一个运行在我自定义的网络mynetwork中的ct3.（可以使用docker inspect命令在Networks一项中查看到容器所属于的网络）</p>
+<h3 id="不同网络中容器的互访"><a href="#不同网络中容器的互访" class="headerlink" title="不同网络中容器的互访"></a>不同网络中容器的互访</h3><p>我们可以在ct1,ct2,ct3中相互的ping对方，可以发现位于默认bridge网络中的ct1,ct2可以相互的ping通，但是，ct1,ct2和位于mynetwork中的ct3确无法ping通。这就说明在相同网络中的容器可以通过ip相互访问，但是跨网络则不行。那如果需要不同网络中的容器能够相互访问怎么办呢？可以使用下面的命令实现将某一个容器加入某一个网络中，那么这个容器就可以访问都该网络中的容器了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker network connect mynetwork ct2</span><br></pre></td></tr></table></figure>
+
+<p>如上，我们通过上述命令将ct2加入到了mynetwork网络中，这时我们可以查看一下ct2所属于的网络：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker inspect ct2</span><br></pre></td></tr></table></figure>
+
+<p>部分输出如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"Networks"</span>: &#123;</span><br><span class="line">                <span class="string">"bridge"</span>: &#123;</span><br><span class="line">                    <span class="string">"IPAMConfig"</span>: null,</span><br><span class="line">                    <span class="string">"Links"</span>: null,</span><br><span class="line">                    <span class="string">"Aliases"</span>: null,</span><br><span class="line">                    <span class="string">"NetworkID"</span>: <span class="string">"5a0d02e77f3c89ec59b9432be752a35f6cc28c260022398751495ee563809570"</span>,</span><br><span class="line">                    <span class="string">"EndpointID"</span>: <span class="string">"b138dd2a40e7e194fd3c055c78dc4db6778b80c767fbe32a68096507ac039fa5"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">"172.17.0.1"</span>,</span><br><span class="line">                    <span class="string">"IPAddress"</span>: <span class="string">"172.17.0.3"</span>,</span><br><span class="line">                    <span class="string">"IPPrefixLen"</span>: 16,</span><br><span class="line">                    <span class="string">"IPv6Gateway"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6Address"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6PrefixLen"</span>: 0,</span><br><span class="line">                    <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:11:00:03"</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="string">"mynetwork"</span>: &#123;</span><br><span class="line">                    <span class="string">"IPAMConfig"</span>: &#123;&#125;,</span><br><span class="line">                    <span class="string">"Links"</span>: null,</span><br><span class="line">                    <span class="string">"Aliases"</span>: [</span><br><span class="line">                        <span class="string">"455c3ec1534d"</span></span><br><span class="line">                    ],</span><br><span class="line">                    <span class="string">"NetworkID"</span>: <span class="string">"69d07788867935f590056da4d1c60591ca5459029715029e30c54f440b59b968"</span>,</span><br><span class="line">                    <span class="string">"EndpointID"</span>: <span class="string">"afda2df82f371f3022e367e9b806c479d6ba06f5b6888b90c4bdcf2d48fffc8d"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">"172.18.0.1"</span>,</span><br><span class="line">                    <span class="string">"IPAddress"</span>: <span class="string">"172.18.0.3"</span>,</span><br><span class="line">                    <span class="string">"IPPrefixLen"</span>: 16,</span><br><span class="line">                    <span class="string">"IPv6Gateway"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6Address"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6PrefixLen"</span>: 0,</span><br><span class="line">                    <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:12:00:03"</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见，ct2现在既属于bridge网络，又属于mynetwork网络。并且在bridge网络和在mynetwork网络中的ip不相同。在ct3中要访问ct2那么就需要使用ct2在mynetwork中的ip，同理要在ct1中访问ct2则要使用ct2在bridge网络中的ip.</p>
+<h3 id="查看某一网络中的容器"><a href="#查看某一网络中的容器" class="headerlink" title="查看某一网络中的容器"></a>查看某一网络中的容器</h3><p>我们可以通过命令来查看某一网络中的所有的容器，如下我们查看bridge网络中的所有容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker network inspect bridge</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">"Name"</span>: <span class="string">"bridge"</span>,</span><br><span class="line">        <span class="string">"Id"</span>: <span class="string">"5a0d02e77f3c89ec59b9432be752a35f6cc28c260022398751495ee563809570"</span>,</span><br><span class="line">        <span class="string">"Created"</span>: <span class="string">"2017-09-19T20:50:37.834660229+08:00"</span>,</span><br><span class="line">        <span class="string">"Scope"</span>: <span class="string">"local"</span>,</span><br><span class="line">        <span class="string">"Driver"</span>: <span class="string">"bridge"</span>,</span><br><span class="line">        <span class="string">"EnableIPv6"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"IPAM"</span>: &#123;</span><br><span class="line">            <span class="string">"Driver"</span>: <span class="string">"default"</span>,</span><br><span class="line">            <span class="string">"Options"</span>: null,</span><br><span class="line">            <span class="string">"Config"</span>: [</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="string">"Subnet"</span>: <span class="string">"172.17.0.0/16"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">"172.17.0.1"</span></span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Internal"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Attachable"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Ingress"</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="string">"Containers"</span>: &#123;</span><br><span class="line">            <span class="string">"455c3ec1534dde68712fbb441e8fa97ed830430595d92a15ec7cbee801d22e39"</span>: &#123;</span><br><span class="line">                <span class="string">"Name"</span>: <span class="string">"ct2"</span>,</span><br><span class="line">                <span class="string">"EndpointID"</span>: <span class="string">"b138dd2a40e7e194fd3c055c78dc4db6778b80c767fbe32a68096507ac039fa5"</span>,</span><br><span class="line">                <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:11:00:03"</span>,</span><br><span class="line">                <span class="string">"IPv4Address"</span>: <span class="string">"172.17.0.3/16"</span>,</span><br><span class="line">                <span class="string">"IPv6Address"</span>: <span class="string">""</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"7b7063b9630d7945415063cf2dd0275414cb32cf5622c77ac27b96a10903ae57"</span>: &#123;</span><br><span class="line">                <span class="string">"Name"</span>: <span class="string">"ct1"</span>,</span><br><span class="line">                <span class="string">"EndpointID"</span>: <span class="string">"111c9a1c47272f854457530fb8ee077947728144b3191b80c15e6223e865a9e5"</span>,</span><br><span class="line">                <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:11:00:02"</span>,</span><br><span class="line">                <span class="string">"IPv4Address"</span>: <span class="string">"172.17.0.2/16"</span>,</span><br><span class="line">                <span class="string">"IPv6Address"</span>: <span class="string">""</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Options"</span>: &#123;</span><br><span class="line">            <span class="string">"com.docker.network.bridge.default_bridge"</span>: <span class="string">"true"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.enable_icc"</span>: <span class="string">"true"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.enable_ip_masquerade"</span>: <span class="string">"true"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.host_binding_ipv4"</span>: <span class="string">"0.0.0.0"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.bridge.name"</span>: <span class="string">"docker0"</span>,</span><br><span class="line">            <span class="string">"com.docker.network.driver.mtu"</span>: <span class="string">"1500"</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"Labels"</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>从Containers一项中我们可以发现目前在bridge网络中的容器为ct1和ct2,这和目前的实际状况是一致的。</p>
+<h3 id="容器退出某一网络"><a href="#容器退出某一网络" class="headerlink" title="容器退出某一网络"></a>容器退出某一网络</h3><p>我们也可以使一个容器退出某一网络，比如现在使ct2退出bridge:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker network disconnect bridge ct2</span><br></pre></td></tr></table></figure>
+
+<p>这时我们再次查看ct2的所属的网络就只有mynetwork了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker inspect ct2</span><br></pre></td></tr></table></figure>
+
+<p>部分输出;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"Networks"</span>: &#123;</span><br><span class="line">                <span class="string">"mynetwork"</span>: &#123;</span><br><span class="line">                    <span class="string">"IPAMConfig"</span>: &#123;&#125;,</span><br><span class="line">                    <span class="string">"Links"</span>: null,</span><br><span class="line">                    <span class="string">"Aliases"</span>: [</span><br><span class="line">                        <span class="string">"455c3ec1534d"</span></span><br><span class="line">                    ],</span><br><span class="line">                    <span class="string">"NetworkID"</span>: <span class="string">"69d07788867935f590056da4d1c60591ca5459029715029e30c54f440b59b968"</span>,</span><br><span class="line">                    <span class="string">"EndpointID"</span>: <span class="string">"afda2df82f371f3022e367e9b806c479d6ba06f5b6888b90c4bdcf2d48fffc8d"</span>,</span><br><span class="line">                    <span class="string">"Gateway"</span>: <span class="string">"172.18.0.1"</span>,</span><br><span class="line">                    <span class="string">"IPAddress"</span>: <span class="string">"172.18.0.3"</span>,</span><br><span class="line">                    <span class="string">"IPPrefixLen"</span>: 16,</span><br><span class="line">                    <span class="string">"IPv6Gateway"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6Address"</span>: <span class="string">""</span>,</span><br><span class="line">                    <span class="string">"GlobalIPv6PrefixLen"</span>: 0,</span><br><span class="line">                    <span class="string">"MacAddress"</span>: <span class="string">"02:42:ac:12:00:03"</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Network-in-Docker/" rel="tag"># Network in Docker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/20/Data-manage-in-Docker/" rel="next" title="Docker数据管理">
+                <i class="fa fa-chevron-left"></i> Docker数据管理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/25/Build-your-own-images/" rel="prev" title="构建镜像">
+                构建镜像 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#容器与用户的连接"><span class="nav-number">1.</span> <span class="nav-text">容器与用户的连接</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#端口映射"><span class="nav-number">1.1.</span> <span class="nav-text">端口映射</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#容器与容器之间的互联"><span class="nav-number">2.</span> <span class="nav-text">容器与容器之间的互联</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#同一台主机上的容器的互联"><span class="nav-number">2.1.</span> <span class="nav-text">同一台主机上的容器的互联</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通过ip-端口互联"><span class="nav-number">2.1.1.</span> <span class="nav-text">通过ip+端口互联</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容器名便捷互访"><span class="nav-number">2.1.2.</span> <span class="nav-text">容器名便捷互访</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#自定义容器名"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">自定义容器名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#容器互联"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">容器互联</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#高级网络管理"><span class="nav-number">3.</span> <span class="nav-text">高级网络管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#docker自带的网络"><span class="nav-number">3.1.</span> <span class="nav-text">docker自带的网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bridge"><span class="nav-number">3.1.1.</span> <span class="nav-text">bridge</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#host"><span class="nav-number">3.1.2.</span> <span class="nav-text">host</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#none"><span class="nav-number">3.1.3.</span> <span class="nav-text">none</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义网络"><span class="nav-number">3.2.</span> <span class="nav-text">自定义网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义网络"><span class="nav-number">3.2.1.</span> <span class="nav-text">定义网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用自定义网络运行容器"><span class="nav-number">3.2.2.</span> <span class="nav-text">使用自定义网络运行容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不同网络中容器的互访"><span class="nav-number">3.2.3.</span> <span class="nav-text">不同网络中容器的互访</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看某一网络中的容器"><span class="nav-number">3.2.4.</span> <span class="nav-text">查看某一网络中的容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容器退出某一网络"><span class="nav-number">3.2.5.</span> <span class="nav-text">容器退出某一网络</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

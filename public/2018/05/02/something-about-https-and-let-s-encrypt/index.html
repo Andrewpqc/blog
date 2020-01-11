@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="HTTPS,Let' Encrypt,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在HTTP协议中有可能存在信息窃听或身份伪装等安全问题，而使用HTTPS通信机制则可以有效的防止这些问题。这一篇文章我打算从安全的角度来聊一聊HTTP和HTTPS。 HTTP的缺点HTTP具有相当优秀和方便的一面，然而它也并非只有好的一面，事物皆具有两面性，它也有自己的不足之处。这些不足之处尤其体现在安全方面。下面我们就先来看看HTTP在安全方面的缺陷。 通信使用明文可能会被窃听众所周知，HTTP">
+<meta name="keywords" content="HTTPS,Let&#39; Encrypt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="聊聊HTTP、HTTPS那些事儿">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/05/02/something-about-https-and-let-s-encrypt/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="在HTTP协议中有可能存在信息窃听或身份伪装等安全问题，而使用HTTPS通信机制则可以有效的防止这些问题。这一篇文章我打算从安全的角度来聊一聊HTTP和HTTPS。 HTTP的缺点HTTP具有相当优秀和方便的一面，然而它也并非只有好的一面，事物皆具有两面性，它也有自己的不足之处。这些不足之处尤其体现在安全方面。下面我们就先来看看HTTP在安全方面的缺陷。 通信使用明文可能会被窃听众所周知，HTTP">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/sslsession.png">
+<meta property="og:updated_time" content="2018-05-02T15:05:56.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="聊聊HTTP、HTTPS那些事儿">
+<meta name="twitter:description" content="在HTTP协议中有可能存在信息窃听或身份伪装等安全问题，而使用HTTPS通信机制则可以有效的防止这些问题。这一篇文章我打算从安全的角度来聊一聊HTTP和HTTPS。 HTTP的缺点HTTP具有相当优秀和方便的一面，然而它也并非只有好的一面，事物皆具有两面性，它也有自己的不足之处。这些不足之处尤其体现在安全方面。下面我们就先来看看HTTP在安全方面的缺陷。 通信使用明文可能会被窃听众所周知，HTTP">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/sslsession.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/05/02/something-about-https-and-let-s-encrypt/">
+
+
+
+
+
+  <title>聊聊HTTP、HTTPS那些事儿 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/05/02/something-about-https-and-let-s-encrypt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">聊聊HTTP、HTTPS那些事儿</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-02T23:05:56+08:00">
+                2018-05-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Network/" itemprop="url" rel="index">
+                    <span itemprop="name">Network</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/02/something-about-https-and-let-s-encrypt/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/05/02/something-about-https-and-let-s-encrypt/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在HTTP协议中有可能存在信息窃听或身份伪装等安全问题，而使用HTTPS通信机制则可以有效的防止这些问题。这一篇文章我打算从安全的角度来聊一聊HTTP和HTTPS。</p>
+<h1 id="HTTP的缺点"><a href="#HTTP的缺点" class="headerlink" title="HTTP的缺点"></a>HTTP的缺点</h1><p>HTTP具有相当优秀和方便的一面，然而它也并非只有好的一面，事物皆具有两面性，它也有自己的不足之处。这些不足之处尤其体现在安全方面。下面我们就先来看看HTTP在安全方面的缺陷。</p>
+<h2 id="通信使用明文可能会被窃听"><a href="#通信使用明文可能会被窃听" class="headerlink" title="通信使用明文可能会被窃听"></a>通信使用明文可能会被窃听</h2><p>众所周知，HTTP报文使用明文(未经加密的报文)的方式来发送。而按照TCP/IP协议簇的工作方式，通信内容在所有的通信线路上都有可能遭到窥视。互联网是由能够连通到全世界的网络组成的。无论世界上哪个角落的服务器在和客户端通信时，再此通信线路上的某些网络设备、光缆、计算机等都不可能是个人的私有物，所以不排除某个环节中会遭到恶意窥视的行为的发生。</p>
+<p>即使经过加密处理的通信，其通信内容仍然会被窥视到，这点和未加密的通信是一样的。只是说如果通信经过加密，就有可能让人无法破解报文信息的含义，但加密处理后的报文信息还是会被看到。</p>
+<p>窃听相同段上的通信并非难事，只需要收集在互联网上流动的数据包(帧)就行了。对于收集来的数据包的解析工作，可以交给那些抓包或者嗅探器工具。所以说，<strong>互联网上任何角落都存在通信内容被窃听的风险</strong>。</p>
+<p>在目前大家正在研究的如何防止窃听的保护措施中，最为普及的就是加密技术。加密的对象可以是对整个通信线路进行加密，也就是服务器和客户端之间在建立起安全的通信线路之后才开始真正的通信。还有一种是将参与通信的内容本身加密。为了做到有效的内容加密，前提是要求客户端和服务器同时具备加密和解密机制。</p>
+<h2 id="不验证通信方身份可能遭遇伪装"><a href="#不验证通信方身份可能遭遇伪装" class="headerlink" title="不验证通信方身份可能遭遇伪装"></a>不验证通信方身份可能遭遇伪装</h2><p>HTTP协议中的请求和响应不会对通信方进行确认，也就是说存在’服务器是否就是发送请求中URI真正指定的主机，返回的响应是否真的返回到实际请求的客户端’等类似问题。理论上来讲，任何人都可以发起请求，服务器只要接收到请求，不管对方是谁都会返回一个响应，这会存在以下的各种忧患：</p>
+<ul>
+<li>无法确认请求发送至目标的Web服务器是，否是按照真实意图返回响应的那台服务器，有可能是已经伪装的Web服务器。</li>
+<li>无法确认响应返回到的客户端是否是按真实意图接收响应的那个客户端，有可能是已伪装的客户端。</li>
+<li>无意义的请求也会照单全收。无法阻止海量请求下的DoS攻击(Denial of Service,拒绝服务攻击)。</li>
+</ul>
+<p>虽然HTTP协议无法确认通信方，但如果使用SSL则可以，SSL不仅提供加密处理，而且还使用了一种被称为证书的手段，可用于确认通信方。证书由值得信任的第三方机构颁发，用以证明服务器和客户端是实际存在的。另外，伪造证书从技术角度来说是异常困难的一件事。所以只要能够确认同通信方(服务器或客户端)持有的证书，即可判断通信方的真实意图。</p>
+<h2 id="无法证明报文完整性，可能已遭篡改"><a href="#无法证明报文完整性，可能已遭篡改" class="headerlink" title="无法证明报文完整性，可能已遭篡改"></a>无法证明报文完整性，可能已遭篡改</h2><p>由于HTTP协议无法证明通信的报文的完整性，因此在请求或响应送出之后直到对方接收之前的这段时间内，即使请求或响应的内容遭到篡改，也没有办法获悉。换句话说，没有任何办法确认，发出的请求/响应和接收到的请求/响应是前后相同的。因为在数据传输的途中，内容可能会被篡改。像这样，请求或响应在传输途中，遭攻击者拦截并篡改内容的攻击称为中间人攻击(Man-in-the-Middle attack,MITM).</p>
+<p>虽然有使用HTTP协议确定报文完整性的方法，但事实上并不便捷、可靠。其中常用的是MD5,SHA-1等散列值校验的方法。但是这种方法都需要操作客户端的用户本人亲自检查验证下载的文件是否就是原来服务器上的文件，浏览器无法自动帮用户检查。另外，这种方法也依然无法百分之百的保证确认结果正确，应为MD5值本身被改写的话，用户是没有办法意识到的。</p>
+<p>通过上面的分析，我们知道HTTP在安全方面确实存在着很大的缺陷，为了有效的防止这些弊端，有必要使用HTTPS。</p>
+<h1 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h1><p><strong>HTTP加上加密处理和认证以及完整性保护后就是HTTPS</strong>。HTTPS并非是应用层的一种新协议，只是HTTP通信接口部分用SSL和TLS协议替代而已。通常，HTTP直接和TCP通信。当使用SSL时，则演变成先和SSL通信，再由SSL和TCP通信了。简言之，所谓HTTPS,其实就是身披SSL协议这层外壳的HTTP。在采用SSL之后，HTTP就拥有了安全传输的能力。</p>
+<h2 id="对称加密和非对称加密"><a href="#对称加密和非对称加密" class="headerlink" title="对称加密和非对称加密"></a>对称加密和非对称加密</h2><p>要了解https我们先来了解一下两种加密算法:对称加密和非对称加密。<br>对称加密特点是：加密和解密使用相同密钥的算法。它要求发送方和接收方在安全通信之前，商定一个对称密钥。对称算法的安全性完全依赖于密钥，密钥泄漏就意味着任何人都可以对他们发送或接收的消息解密，所以密钥的保密性对通信至关重要。<br>非对称加密特点是：有公钥和私钥之分，公钥可以给任何人，而私钥则只部署在服务器端。<strong>并且公钥加密的数据，有且只有与该公钥对应的私钥才可以解密。</strong>非对称加密的缺点是加密和解密的计算量比较大，非常消耗CPU资源。</p>
+<h2 id="SSL-TSL"><a href="#SSL-TSL" class="headerlink" title="SSL/TSL"></a>SSL/TSL</h2><p><img src="/images/sslsession.png" alt></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HTTPS/" rel="tag"># HTTPS</a>
+          
+            <a href="/tags/Let-Encrypt/" rel="tag"># Let' Encrypt</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/30/let-the-terminal-penetrate-the-firewall/" rel="next" title="终端翻墙备忘录">
+                <i class="fa fa-chevron-left"></i> 终端翻墙备忘录
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/15/http1/" rel="prev" title="HTTP协议总结">
+                HTTP协议总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTP的缺点"><span class="nav-number">1.</span> <span class="nav-text">HTTP的缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#通信使用明文可能会被窃听"><span class="nav-number">1.1.</span> <span class="nav-text">通信使用明文可能会被窃听</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不验证通信方身份可能遭遇伪装"><span class="nav-number">1.2.</span> <span class="nav-text">不验证通信方身份可能遭遇伪装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无法证明报文完整性，可能已遭篡改"><span class="nav-number">1.3.</span> <span class="nav-text">无法证明报文完整性，可能已遭篡改</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTPS"><span class="nav-number">2.</span> <span class="nav-text">HTTPS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#对称加密和非对称加密"><span class="nav-number">2.1.</span> <span class="nav-text">对称加密和非对称加密</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSL-TSL"><span class="nav-number">2.2.</span> <span class="nav-text">SSL/TSL</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

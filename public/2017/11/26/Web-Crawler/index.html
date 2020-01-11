@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="urllib,urllib3,requests,bs4,xpath,phantomjs,selenium,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="网络基础知识先来两张图撑场子！  计算机网络体系结构是分层的，分层的目的就是为了各司其职，每一层协议就负责处理好自己的工作，而不用去担心别人的事情。 TCP/IP协议 从字面意义上讲，有人可能会认为TCP/IP是指TCP和IP两种协议。实际生活当中有时也确实就是指这两种协议。然而在很多情况下，它只是利用 IP 进行通信时所必须用到的协议群的统称。具体来说，IP或ICMP、TCP或UDP、TELNE">
+<meta name="keywords" content="urllib,urllib3,requests,bs4,xpath,phantomjs,selenium">
+<meta property="og:type" content="article">
+<meta property="og:title" content="木犀后端分享——网络爬虫">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/11/26/Web-Crawler/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="网络基础知识先来两张图撑场子！  计算机网络体系结构是分层的，分层的目的就是为了各司其职，每一层协议就负责处理好自己的工作，而不用去担心别人的事情。 TCP/IP协议 从字面意义上讲，有人可能会认为TCP/IP是指TCP和IP两种协议。实际生活当中有时也确实就是指这两种协议。然而在很多情况下，它只是利用 IP 进行通信时所必须用到的协议群的统称。具体来说，IP或ICMP、TCP或UDP、TELNE">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B.png">
+<meta property="og:updated_time" content="2017-11-26T04:58:51.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="木犀后端分享——网络爬虫">
+<meta name="twitter:description" content="网络基础知识先来两张图撑场子！  计算机网络体系结构是分层的，分层的目的就是为了各司其职，每一层协议就负责处理好自己的工作，而不用去担心别人的事情。 TCP/IP协议 从字面意义上讲，有人可能会认为TCP/IP是指TCP和IP两种协议。实际生活当中有时也确实就是指这两种协议。然而在很多情况下，它只是利用 IP 进行通信时所必须用到的协议群的统称。具体来说，IP或ICMP、TCP或UDP、TELNE">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/11/26/Web-Crawler/">
+
+
+
+
+
+  <title>木犀后端分享——网络爬虫 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/11/26/Web-Crawler/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">木犀后端分享——网络爬虫</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-26T12:58:51+08:00">
+                2017-11-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/11/26/Web-Crawler/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/11/26/Web-Crawler/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="网络基础知识"><a href="#网络基础知识" class="headerlink" title="网络基础知识"></a>网络基础知识</h1><h2 id="先来两张图撑场子！"><a href="#先来两张图撑场子！" class="headerlink" title="先来两张图撑场子！"></a>先来两张图撑场子！</h2><p><img src="/images/%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84.png" alt="计算机网络体系结构"></p>
+<p><img src="/images/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B.png" alt="信息处理流程"></p>
+<p>计算机网络体系结构是分层的，分层的目的就是为了各司其职，每一层协议就负责处理好自己的工作，而不用去担心别人的事情。</p>
+<h2 id="TCP-IP协议"><a href="#TCP-IP协议" class="headerlink" title="TCP/IP协议"></a>TCP/IP协议</h2><blockquote>
+<p>从字面意义上讲，有人可能会认为TCP/IP是指TCP和IP两种协议。实际生活当中有时也确实就是指这两种协议。然而在很多情况下，它只是利用 IP 进行通信时所必须用到的协议群的统称。具体来说，IP或ICMP、TCP或UDP、TELNET或FTP、以及HTTP等都属于TCP/IP协议。他们与TCP或IP的关系紧密，是互联网必不可少的组成部分。TCP/IP 一词泛指这些协议，因此，有时也称 TCP/IP为网际协议群。</p>
+</blockquote>
+<p>就我本人的理解，TCP/IP就代表着一大堆的协议，这些协议就是具体负责网络中信息的传递。他们确保了数据可以被准确无误的传输到目的地。既传的远又传的准。也就是说，TCP/IP就帮你<strong>完美的解决了数据传输的问题</strong>，其他的协议就不需要再考虑数据传不远，传不到的问题了。</p>
+<p>更多详细的内容看－&gt;<a href="http://www.jianshu.com/p/9f3e879a4c9c" target="_blank" rel="noopener">TCP/IP协议</a>，上面的引用也出自此处。</p>
+<h2 id="HTTP协议"><a href="#HTTP协议" class="headerlink" title="HTTP协议"></a>HTTP协议</h2><blockquote>
+<p>HTTP协议（HyperText Transfer Protocol，超文本传输协议）是用于从WWW服务器传输超文本到本地浏览器的传输协议。它可以使浏览器更加高效，使网络传输减少。它不仅保证计算机正确快速地传输超文本文档，还确定传输文档中的哪一部分，以及哪部分内容首先显示(如文本先于图形)等。<br>HTTP是客户端浏览器或其他程序与Web服务器之间的应用层通信协议。在Internet上的Web服务器上存放的都是超文本信息，客户机需要通过HTTP协议传输所要访问的超文本信息。HTTP包含命令和传输信息，不仅可用于Web访问，也可以用于其他因特网/内联网应用系统之间的通信，从而实现各类应用资源超媒体访问的集成。</p>
+</blockquote>
+<p>HTTP协议是构建在TCP/IP协议之上的应用层的协议，它不必再关心数据的是否可以准确无误的到达目的地的问题，它关心和解决的是<strong>在什么时候传什么数据给谁</strong>的问题。</p>
+<p>更多详细内容请看－&gt;<a href="http://www.jianshu.com/p/6e9e4156ece3" target="_blank" rel="noopener">HTTP协议</a>,上面的引用也出自此处。</p>
+<h1 id="网络爬虫简介"><a href="#网络爬虫简介" class="headerlink" title="网络爬虫简介"></a>网络爬虫简介</h1><p><strong>网络爬虫</strong>:又被称为网页蜘蛛，网络机器人等。是一种按照一定的规则，<strong>自动</strong>地抓取万维网信息的程序或者脚本。大家可以理解为在网络上爬行的一只蜘蛛。互联网就比作一张大网，而爬虫便是在这张网上爬来爬去的蜘蛛，如果它遇到资源，那么它就会抓取下来。想抓取什么？这个由你来控制它。爬虫技术是数据挖掘,测试技术的重要组成部分，是搜索引擎技术的核心。</p>
+<p>说白了,爬虫技术就是一种<strong>自动化</strong>去请求下载并处理网络信息资源(html页面,css,js,pdf,word,excel，图片，音视频等)的技术。在实际中处理的比较多的网络信息资源是html页面，然后获取页面中有价值的文字信息。</p>
+<p>要学好网络爬虫我们就需要解决两个问题:怎样下载？怎样处理？</p>
+<h1 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h1><h2 id="去哪里下载？"><a href="#去哪里下载？" class="headerlink" title="去哪里下载？"></a>去哪里下载？</h2><p>网络信息资源分布在服务提供者的服务器上，我们要去下载它，第一个要解决的问题就是要知道它在哪里。</p>
+<h3 id="URL-URI-URN是什么鬼？"><a href="#URL-URI-URN是什么鬼？" class="headerlink" title="URL,URI,URN是什么鬼？"></a>URL,URI,URN是什么鬼？</h3><p><strong>URL</strong>:(Uniform Resource Locator,统一资源定位符)是一个Web地址，用来在Web上定位一个文档，或者调用一个CGI程序来为客户端生成一个文档。<br><strong>URI</strong>:(Uniform Resource Identifier,统一资源标识符)是URL的超集，可以应对将来可能出现的标识符命名约定。一个URL是一个简单的URI,它使用已有的协议或方案(http,ftp等)作为地址的一部分。<br><strong>URN</strong>:(Uniform Resource Name,统一资源名称)URN用来描述非URL的URI,只作为可能会用到的XML标识符。</p>
+<p><code>URI = URL + URN</code><br>现在唯一使用的URI只有URL,而很少听到URI和URN.</p>
+<p>我们在浏览器的地址栏里输入的网站地址就是URL。就像每家每户都有一个门牌地址一样，每个网页也都有一个Internet地址。当你在浏览器的地址框中输入一个URL或是单击一个超级链接时，URL就确定了要浏览的地址。浏览器通过超文本传输协议(HTTP)，将Web服务器上站点的网页代码提取出来，并翻译成漂亮的网页。</p>
+<h3 id="URL的组成"><a href="#URL的组成" class="headerlink" title="URL的组成"></a>URL的组成</h3><p>URL使用这种格式：<br><code>protocol_schema://net_location/path;params?query#frag</code></p>
+<table>
+<thead>
+<tr>
+<th align="center">URL组件</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">protocol_schema</td>
+<td align="center">网络协议或下载方案</td>
+</tr>
+<tr>
+<td align="center">net_location</td>
+<td align="center">服务器所在地(也许含有用户信息)</td>
+</tr>
+<tr>
+<td align="center">path</td>
+<td align="center">使用’/‘分割的文件的路径或CGI应用的路径</td>
+</tr>
+<tr>
+<td align="center">params</td>
+<td align="center">可选参数</td>
+</tr>
+<tr>
+<td align="center">query</td>
+<td align="center">连接符’&amp;’分割的一系列键值对</td>
+</tr>
+<tr>
+<td align="center">frag</td>
+<td align="center">指定文档内特定锚的部分</td>
+</tr>
+</tbody></table>
+<p>net_location可以进一步拆分成多个组件:<br><code>user:password@host:port</code></p>
+<table>
+<thead>
+<tr>
+<th align="center">net_location组件</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">user</td>
+<td align="center">用户名</td>
+</tr>
+<tr>
+<td align="center">password</td>
+<td align="center">用户密码</td>
+</tr>
+<tr>
+<td align="center">host</td>
+<td align="center">运行web服务器的节点地址(必须的)</td>
+</tr>
+<tr>
+<td align="center">port</td>
+<td align="center">端口号(如果没有则默认为80)</td>
+</tr>
+</tbody></table>
+<p>在net_location的四个组件中host最为重要，port只有在web服务器运行其他非默认端口号时才会使用，用户名和密码只有在使用FTP连接是才有可能用到，而即便是FTP，大多数的连接都是匿名的，这时不需要用户名和密码。</p>
+<h2 id="用什么下载？"><a href="#用什么下载？" class="headerlink" title="用什么下载？"></a>用什么下载？</h2><h3 id="urllib"><a href="#urllib" class="headerlink" title="urllib"></a>urllib</h3><p>urllib是python标准库提供的一个高级的Web通信库，支持基本的Web协议，如Http,Ftp,Gopher,同时也支持对本地文件的访问。具体来说urllib模块的功能就是利用这些协议从因特网，局域网，本地主机上下载数据。</p>
+<h4 id="导入"><a href="#导入" class="headerlink" title="导入"></a>导入</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib.request</span><br><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> request</span><br><span class="line"></span><br><span class="line"><span class="comment">#下面的这种导入是错误的：</span></span><br><span class="line"><span class="comment">#import urllib</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="下载并保存你的第一个网页"><a href="#下载并保存你的第一个网页" class="headerlink" title="下载并保存你的第一个网页"></a>下载并保存你的第一个网页</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> request</span><br><span class="line">file=request.urlopen(<span class="string">"http://www.baidu.com"</span>)</span><br><span class="line">myfirstpage=file.read()</span><br><span class="line"><span class="keyword">with</span> open(<span class="string">"myfirstpage.html"</span>,<span class="string">"w"</span>) <span class="keyword">as</span> f:</span><br><span class="line">    f.write(myfirstpage)</span><br></pre></td></tr></table></figure>
+
+<p>urlopen()传入一个URL string,会打开这个string所指向的url,下载对应的网页，返回该网页的文件对象(这里我把它赋值给了file变量)。如果没有给定协议或者下载方案，或者传入‘file’方案，urlopen()会打开一个本地文件。</p>
+<p>urlopen()返回的文件对象(即上面代码中的file)还有一些实用方法：</p>
+<table>
+<thead>
+<tr>
+<th align="center">urlopen()返回的对象的方法</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">file.read([bytes])</td>
+<td align="center">从file中读出所有或者bytes个字节，以字符串返回</td>
+</tr>
+<tr>
+<td align="center">file.readline()</td>
+<td align="center">从file中读取一行，以字符串返回</td>
+</tr>
+<tr>
+<td align="center">file.readlines()</td>
+<td align="center">从file中读出所有行，以列表返回，每一行作为列表中的一项</td>
+</tr>
+<tr>
+<td align="center">file.close()</td>
+<td align="center">关闭file的url连接</td>
+</tr>
+<tr>
+<td align="center">file.fileno()</td>
+<td align="center">返回file的文件句柄</td>
+</tr>
+<tr>
+<td align="center">file.info()</td>
+<td align="center">获得file的MIME头文件</td>
+</tr>
+<tr>
+<td align="center">file.geturl()</td>
+<td align="center">返回当前请求的url</td>
+</tr>
+<tr>
+<td align="center">file.getcode()</td>
+<td align="center">返回响应的状态码</td>
+</tr>
+</tbody></table>
+<p>例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> request</span><br><span class="line">f=request.urlopen(<span class="string">'http://www.baidu.com'</span>)</span><br><span class="line">print(f.fileno())</span><br><span class="line">print(f.getcode())</span><br><span class="line">print(f.geturl())</span><br><span class="line">print(f.info())</span><br><span class="line">f.close()</span><br></pre></td></tr></table></figure>
+
+<p>输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">3</span><br><span class="line">200</span><br><span class="line">http://www.baidu.com</span><br><span class="line">Date: Wed, 29 Nov 2017 03:58:52 GMT</span><br><span class="line">Content-Type: text/html; charset=utf-8</span><br><span class="line">Transfer-Encoding: chunked</span><br><span class="line">Connection: Close</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Set-Cookie: BAIDUID=B06CDC6F062BA8B6D50F401E830F6B5A:FG=1; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com</span><br><span class="line">Set-Cookie: BIDUPSID=B06CDC6F062BA8B6D50F401E830F6B5A; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com</span><br><span class="line">Set-Cookie: PSTM=1511927932; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com</span><br><span class="line">Set-Cookie: BDSVRTM=0; path=/</span><br><span class="line">Set-Cookie: BD_HOME=0; path=/</span><br><span class="line">Set-Cookie: H_PS_PSSID=1440_19036_21116_18560_17001_25178_25145_22157; path=/; domain=.baidu.com</span><br><span class="line">P3P: CP=&quot; OTI DSP COR IVA OUR IND COM &quot;</span><br><span class="line">Cache-Control: private</span><br><span class="line">Cxy_all: baidu+14ee1d71cc2cf84997fda3c20bcc1684</span><br><span class="line">Expires: Wed, 29 Nov 2017 03:58:18 GMT</span><br><span class="line">X-Powered-By: HPHP</span><br><span class="line">Server: BWS/1.1</span><br><span class="line">X-UA-Compatible: IE=Edge,chrome=1</span><br><span class="line">BDPAGETYPE: 1</span><br><span class="line">BDQID: 0xe0db52f000003afc</span><br><span class="line">BDUSERID: 0</span><br></pre></td></tr></table></figure>
+
+<h4 id="更优雅的下载并保存"><a href="#更优雅的下载并保存" class="headerlink" title="更优雅的下载并保存"></a>更优雅的下载并保存</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> request</span><br><span class="line"><span class="comment">#下载并保存</span></span><br><span class="line">filename,mime_hdrs=request.urlretrieve(url=<span class="string">'http://www.douban.com'</span>,filename=<span class="string">"mysecondpage.html"</span>)</span><br><span class="line"><span class="comment">#清除缓存</span></span><br><span class="line">request.urlcleanup()</span><br></pre></td></tr></table></figure>
+
+<p>urlretrieve()函数只需要传入资源对应的url和要将其保存在本地的位置，就可以实现下载并保存。这个方法不仅可以实现html页面的下载保存，对于所有网络信息资源都可以，包括图片，视音频等。</p>
+<p>urlretrieve()执行的过程中会产生一些缓存，如果我们想要清除这些缓存信息，可以使用urlcleanup()进行清除。</p>
+<h4 id="url的编码"><a href="#url的编码" class="headerlink" title="url的编码"></a>url的编码</h4><p>一般来说，必须要对某些不能打印的或者不被web服务器作为有效URL接收的特殊字符串进行转换。在一个URL中，逗号，下划线，句号，斜线，字母，数字这类符号不需要转化，其他的均需要转化。转换过程中那些url不能使用的字符前面会被加上%,同时转换成16进制，例如”=”将被转换成’%3d’,’3d’就是’=’的ASCLL码的16进制。urllib.request中提供的url转换的api就三个<code>quote()</code>,<code>unquote()</code>,<code>unquote_to_bytes()</code>，后两个做相反的工作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> request</span><br><span class="line">sourceUrl=<span class="string">"http://www.baidu.com/?key1=hhh&amp;key2=a b"</span></span><br><span class="line">quoteUrl=request.quote(sourceUrl)</span><br><span class="line"><span class="comment"># http%3A//www.baidu.com/%3Fkey1%3Dhhh%26key2%3Da%20b</span></span><br><span class="line">unquoteUrl=request.unquote(quoteUrl)</span><br><span class="line"><span class="comment"># http://www.baidu.com/?key1=hhh&amp;key2=a b</span></span><br><span class="line">unquotetobyte=request.unquote_to_bytes(quoteUrl)</span><br><span class="line"><span class="comment"># b'http://www.baidu.com/?key1=hhh&amp;key2=a b'</span></span><br></pre></td></tr></table></figure>
+
+<p>Tips：如果你在写爬虫时遇到类似下面的保错：<br>UnicodeEncodeError: ‘ascii’ codec can’t encode characters in position 14-15: ordinal not in range(128)<br>基本上就说明你的url需要转换了。如果你的url有中文，那就一定错了。一般来说，我们在浏览器地址栏中复制url时，浏览器就已经帮你做好转换了，所以一般不会遇到这种问题。但是，在自己构造url时就需要注意了。</p>
+<h4 id="url参数的编码"><a href="#url参数的编码" class="headerlink" title="url参数的编码"></a>url参数的编码</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib.parse <span class="keyword">import</span> urlencode</span><br><span class="line">d=&#123;<span class="string">'a'</span>:<span class="number">1</span>,<span class="string">'b'</span>:<span class="string">"h?h"</span>,<span class="string">'c'</span>:<span class="string">"哈哈"</span>&#125;</span><br><span class="line">print(urlencode(d))</span><br><span class="line"><span class="comment">#输出　c=%E5%93%88%E5%93%88&amp;a=1&amp;b=h%3Fh</span></span><br></pre></td></tr></table></figure>
+
+<p>urllib.parse.urlencode()可以从一个字典构造出查询字符串，并且自动做了url编码。</p>
+<h4 id="urllib请求头的添加"><a href="#urllib请求头的添加" class="headerlink" title="urllib请求头的添加"></a>urllib请求头的添加</h4><p>在urllib中添加请求头有两种方式，使用<code>build_opener()</code>,使用<code>add_header()</code><br>1.使用build_opener()</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> request</span><br><span class="line">headers=[(<span class="string">"Accept"</span>,<span class="string">"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"</span>),</span><br><span class="line">    (<span class="string">"User-Agent"</span>,<span class="string">"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36"</span>)]</span><br><span class="line">opener=request.build_opener()</span><br><span class="line">opener.addheader=headers</span><br><span class="line">data=opener.open(<span class="string">"http://www.baidu.com"</span>).read()</span><br></pre></td></tr></table></figure>
+
+<p>2.使用add_header()</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> request</span><br><span class="line">headers=[(<span class="string">"Accept"</span>,<span class="string">"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"</span>),</span><br><span class="line">    (<span class="string">"User-Agent"</span>,<span class="string">"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36"</span>)]</span><br><span class="line">req=request.Request(<span class="string">"http://www.baidu.com"</span>)</span><br><span class="line">req.add_header(headers)</span><br><span class="line">data=request.urlopen(req).read()</span><br></pre></td></tr></table></figure>
+
+<h4 id="代理服务器的设置"><a href="#代理服务器的设置" class="headerlink" title="代理服务器的设置"></a>代理服务器的设置</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> request</span><br><span class="line">proxy=request.ProxyHandler(&#123;<span class="string">"http"</span>:<span class="string">"localhost:9999"</span>&#125;)</span><br><span class="line">opener=request.build_opener(proxy,request.HTTPHandler)</span><br><span class="line">request.install_opener(opener)</span><br><span class="line">data=request.urlopen(<span class="string">"http://www.baidu.com"</span>).read()</span><br></pre></td></tr></table></figure>
+
+<h3 id="神器——urllib3"><a href="#神器——urllib3" class="headerlink" title="神器——urllib3"></a>神器——urllib3</h3><p><a href="https://urllib3.readthedocs.io/en/latest/index.html" target="_blank" rel="noopener">urllib3</a></p>
+<blockquote>
+<p>urllib3 is a powerful, sanity-friendly HTTP client for Python. Much of the Python ecosystem already uses urllib3 and you should too. urllib3 brings many critical features that are missing from the Python standard libraries:</p>
+</blockquote>
+<ul>
+<li>Thread safety.</li>
+<li>Connection pooling.</li>
+<li>Client-side SSL/TLS verification.</li>
+<li>File uploads with multipart encoding.</li>
+<li>Helpers for retrying requests and dealing with HTTP redirects.</li>
+<li>Support for gzip and deflate encoding.</li>
+<li>Proxy support for HTTP and SOCKS.</li>
+<li>100% test coverage.</li>
+</ul>
+<h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4><h5 id="第一个urllib3例子"><a href="#第一个urllib3例子" class="headerlink" title="第一个urllib3例子"></a>第一个urllib3例子</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager()</span><br><span class="line">response=http.request(<span class="string">'GET'</span>,<span class="string">"http://www.baidu.com"</span>)</span><br><span class="line">print(response.headers)</span><br><span class="line">print(response.status)</span><br><span class="line">print(response.data.decode(<span class="string">"utf-8"</span>))</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HTTPHeaderDict(&#123;&apos;Set-Cookie&apos;: &apos;BAIDUID=DAB4C909697193545FA8395524CF0963:FG=1; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, BIDUPSID=DAB4C909697193545FA8395524CF0963; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com, PSTM=1511944442; expires=Thu, 31-Dec-37 23:55:55 GMT; max-age=2147483647; path=/; domain=.baidu.com&apos;, &apos;Server&apos;: &apos;BWS/1.1&apos;, &apos;Cache-control&apos;: &apos;no-cache&apos;, &apos;Last-Modified&apos;: &apos;Wed, 22 Nov 2017 02:22:00 GMT&apos;, &apos;P3P&apos;: &apos;CP=&quot; OTI DSP COR IVA OUR IND COM &quot;&apos;, &apos;Accept-Ranges&apos;: &apos;bytes&apos;, &apos;Date&apos;: &apos;Wed, 29 Nov 2017 08:34:02 GMT&apos;, &apos;Content-Type&apos;: &apos;text/html&apos;, &apos;X-UA-Compatible&apos;: &apos;IE=Edge,chrome=1&apos;, &apos;Connection&apos;: &apos;Keep-Alive&apos;, &apos;Content-Length&apos;: &apos;14613&apos;, &apos;Pragma&apos;: &apos;no-cache&apos;, &apos;Vary&apos;: &apos;Accept-Encoding&apos;&#125;)</span><br><span class="line">200</span><br><span class="line">&lt;!DOCTYPE html&gt;&lt;!--STATUS OK--&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">......此处省略部分输出</span><br></pre></td></tr></table></figure>
+
+<h5 id="发起请求"><a href="#发起请求" class="headerlink" title="发起请求"></a>发起请求</h5><p>如上面的例子所示，你需要通过一个PoolManager实例来发起请求，这个实例对象会处理所有的和连接池，线程安全有关的细节。然后在这个PoolManager对象上调用request()方法，就可以发起请求。request()方法返回一个HttpResponse对象。通过该对象可以获取响应的内容。</p>
+<h5 id="接收数据"><a href="#接收数据" class="headerlink" title="接收数据"></a>接收数据</h5><p>request()方法返回的HttpResponse对象有status,data和headers三个属性，分别来获取响应的状态码，响应的数据，和响应头。其中data属性获取的是bytes类型的数据，我们要使用它就要先对它进行解码(decode).</p>
+<h5 id="请求头的设置"><a href="#请求头的设置" class="headerlink" title="请求头的设置"></a>请求头的设置</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager()</span><br><span class="line">response=http.request(<span class="string">'GET'</span>,<span class="string">"http://www.baidu.com"</span>,headers=&#123;<span class="string">'X-Something'</span>: <span class="string">'value'</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>请求头的信息在request()方法的headers参数中设置。</p>
+<h5 id="查询参数的设置"><a href="#查询参数的设置" class="headerlink" title="查询参数的设置"></a>查询参数的设置</h5><p>对于GET,HEAD,DELETE请求，你可以直接将参数作为一个字典传个request()的fields参数，就像下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager()</span><br><span class="line">response=http.request(<span class="string">'GET'</span>,<span class="string">"http://www.baidu.com"</span>,fields=&#123;<span class="string">'arg'</span>: <span class="string">'value'</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>但对于POST和PUT请求，你需要手动的编码查询参数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line"><span class="keyword">from</span> urllib.parse <span class="keyword">import</span> urlencode</span><br><span class="line">http=urllib3.PoolManager()</span><br><span class="line">encoded_args = urlencode(&#123;<span class="string">'arg'</span>: <span class="string">'value'</span>&#125;)</span><br><span class="line">url = <span class="string">'http://httpbin.org/post?'</span> + encoded_args</span><br><span class="line">response = http.request(<span class="string">'POST'</span>, url)</span><br></pre></td></tr></table></figure>
+
+<h5 id="提交表单数据"><a href="#提交表单数据" class="headerlink" title="提交表单数据"></a>提交表单数据</h5><p>就表单数据而言，主要使用的是POST,PUT两种提交方式，urllib3会自动的编码fields参数提供的字典。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">response = http.request(<span class="string">'POST'</span>,<span class="string">'http://httpbin.org/post'</span>,fields=&#123;<span class="string">'field'</span>: <span class="string">'value'</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<h5 id="发送JSON给服务器"><a href="#发送JSON给服务器" class="headerlink" title="发送JSON给服务器"></a>发送JSON给服务器</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager()</span><br><span class="line">data = &#123;<span class="string">'attribute'</span>: <span class="string">'value'</span>&#125;</span><br><span class="line">encoded_data = json.dumps(data).encode(<span class="string">'utf-8'</span>)</span><br><span class="line">r = http.request(<span class="string">'POST'</span>,<span class="string">'http://httpbin.org/post'</span>,body=encoded_data,headers=&#123;<span class="string">'Content-Type'</span>:<span class="string">'application/json'</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>将需要发送给服务器的json数据编码后传递给request()的body参数，然后在请求头中设置Content-Type字段为application/json.</p>
+<h5 id="发送文件或二进制数据"><a href="#发送文件或二进制数据" class="headerlink" title="发送文件或二进制数据"></a>发送文件或二进制数据</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(<span class="string">'example.txt'</span>) <span class="keyword">as</span> fp:</span><br><span class="line">    file_data = fp.read()</span><br><span class="line">r = http.request(<span class="string">'POST'</span>,<span class="string">'http://httpbin.org/post'</span>,fields=&#123;<span class="string">'filefield'</span>: (<span class="string">'example.txt'</span>, file_data,<span class="string">'text/plain'</span>)&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>在fields中的filefield对应的元组中，文件名的指定并不是严格必须的。为了匹配浏览器的行为，强烈建议在这个元组中传递第三个参数来指明文件的MIME类型。</p>
+<p>对于原始二进制数据(raw binary data)的发送可以简单的指定body参数。同样为了匹配浏览器的行为，建议要设置请求头中的Content-Type字段。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(<span class="string">'example.jpg'</span>, <span class="string">'rb'</span>) <span class="keyword">as</span> fp:</span><br><span class="line">     binary_data = fp.read()</span><br><span class="line">r = http.request(<span class="string">'POST'</span>,<span class="string">'http://httpbin.org/post'</span>,body=binary_data,headers=&#123;<span class="string">'Content-Type'</span>: <span class="string">'image/jpeg'</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<h5 id="设置证书验证"><a href="#设置证书验证" class="headerlink" title="设置证书验证"></a>设置证书验证</h5><p>官方强烈建议我们总是使用<a href="https://zh.wikipedia.org/wiki/傳輸層安全性協定" target="_blank" rel="noopener">SSL</a>证书验证。这样能够保证我们与服务器之间的通信的安全。默认情况下，urllib3不验证HTTPS请求。<br>为了启用验证你需要一些根证书。最简单和最可靠的方法是使用<strong>certifi</strong>包。这个包提供了Mozilla的根证书包。在使用之前需要安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pip3 install certifi</span><br></pre></td></tr></table></figure>
+
+<p>如果你在安装urllib3时使用了下面的命令，那么你的系统中就已经安装了certifi:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pip3 install urllib3[secure]</span><br></pre></td></tr></table></figure>
+
+<p>这条命令在安装urllib3的同时会安装certifi.<br>如果你使用的是python2可能会需要其他的一些包。</p>
+<p>一旦你安装了证书验证所需要的依赖，你在创建PoolManager对象的时候，就可以传入相应的参数，在请求的时候来启用证书验证。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> certifi</span><br><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager(cert_reqs=<span class="string">"CERT_REQUIRED"</span>,ca_certs=certifi.where())</span><br><span class="line"><span class="comment">#下面请求https://google.com</span></span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">'https://google.com'</span>)<span class="comment">#没有任何错误</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#下面请求https://expired.badssl.com</span></span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">'https://expired.badssl.com'</span>)</span><br><span class="line"><span class="comment">#抛出urllib3.exceptions.SSLError：[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:645)的错误，说明该网站没有配置安全证书。</span></span><br></pre></td></tr></table></figure>
+
+<p>在实例化PoolManager对象时做出上述配置后，PoolManager对象就会自动处理证书验证，如果验证失败就会抛出urllib3.exceptions.SSLError的异常。</p>
+<p>如果需要的话，你也可以使用操作系统提供的证书，只需要将上述的ca_certs参数的值指定为你的系统中安全证书包所在的绝对路径即可。例如，在大多数的Linux操作系统中，安全证书存储在<code>/etc/ssl/certs/ca-certificates.crt</code>中。其他的操作系统可能会有些许不同。上述验证改为使用操作系统提供的证书后如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> certifi</span><br><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager(cert_reqs=<span class="string">"CERT_REQUIRED"</span>,ca_certs=<span class="string">"/etc/ssl/certs/ca-certificates.crt"</span></span><br><span class="line"><span class="comment">#下面请求https://google.com</span></span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">'https://google.com'</span>)<span class="comment">#没有任何错误</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#下面请求https://expired.badssl.com</span></span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">'https://expired.badssl.com'</span>)</span><br><span class="line"><span class="comment">#抛出urllib3.exceptions.SSLError：[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:645)的错误，说明该网站没有配置安全证书。</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="https://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification" target="_blank" rel="noopener">在python2中为urllib3应用添加证书验证功能</a></p>
+<h5 id="设置超时时间"><a href="#设置超时时间" class="headerlink" title="设置超时时间"></a>设置超时时间</h5><p>设置超时时间可以让你控制你的请求最长等待的时间，超过你设置的时间服务器还没有响应，那么就抛出异常。<br>简单的,你可以给PoolManager对象的request()方法的timeout参数制定一个浮点数来制定本次请求的超时时间。就像下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager()</span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">"http://www.baidu.com"</span>,timeout=<span class="number">2.5</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果你需要更加细粒度的控制超时时间，你可以使用一个TimeOut实例来分别指定连接超时和读取超时：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager()</span><br><span class="line"><span class="comment">#只限制连接超时时间为2.0秒，对读取时间不做限制</span></span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">"http://www.google.com"</span>,</span><br><span class="line">        timeout=urllib3.Timeout(connect=<span class="number">2.0</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">#限制连接超时时间为1.0秒，读取超时时间为2.0秒</span></span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">"http://www.baidu.com"</span>,</span><br><span class="line">        timeout=urllib3.Timeout(connect=<span class="number">1.0</span>,read=<span class="number">2.0</span>))</span><br></pre></td></tr></table></figure>
+
+<p>如果你需要对所有的请求做同样的超时设置，那么你可以直接在PoolManager的层面上做配置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http1=urllib3.PoolManager(timeout=<span class="number">3.0</span>)</span><br><span class="line">http2=urllib3.PoolManager(timeout=</span><br><span class="line">    urllib3.Timeout(connect=<span class="number">1.0</span>,read=<span class="number">2.0</span>))</span><br></pre></td></tr></table></figure>
+
+<p>这样某一个PoolManager对象的所有的request()使用的默认超时设置就是它的PoolManager的超时设置。<strong>当然你仍然可以在request()方法中重载这个配置。</strong></p>
+<h5 id="设置重试次数"><a href="#设置重试次数" class="headerlink" title="设置重试次数"></a>设置重试次数</h5><p>urllib3在默认情况下，再一次请求中，能够自动的重试３次，自动跟进３次重定向。你通过request()方法的retries参数控制重试：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#下面的情况是重试次数为１０，最多跟进３次重定向</span></span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">"http://www.bidu.com"</span>,retries=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果你要禁用重试<strong>和</strong>重定向跟进的功能的话，只需要将retries指定为False:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#禁用重定向跟进和重试功能</span></span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">"http://www.google.com"</span>,retries=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果你要禁用重定向跟进，但是保留默认的３次重试的话，你只需要将request()的redirect参数指定为False：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#禁用重定向的跟进功能，保留了３次的重试功能</span></span><br><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">"http://www.baidu.com"</span>,redirect=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<p>同设置超时时间一样，如果你需要对重试次数和重定向跟进次数做更加细粒度的控制的话，你需要使用一个Retry实例，例如下面的例子就是最多做三次重试，两次重定向跟进：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http.request(<span class="string">"GET"</span>,<span class="string">"http://www.google.com"</span>,retires=</span><br><span class="line">    urllib3.Retry(<span class="number">3</span>,redirect=<span class="number">2</span>))</span><br></pre></td></tr></table></figure>
+
+<p>你可以通过下面的配置，来禁掉应重定向次数过多而造成的抛出错误这一行为，转而返回302的状态码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">r=http.request(<span class="string">"GET"</span>,<span class="string">"http://www.baidu.com"</span>,</span><br><span class="line">    retries=urllib3.Retry(redirect=<span class="number">2</span>,raise_on_redirect=<span class="literal">False</span>))</span><br><span class="line">print(r.status)</span><br><span class="line"><span class="comment">#这里如果重定向到次数超过两次的话，程序不会抛出错误，而是状态码返回302</span></span><br></pre></td></tr></table></figure>
+
+<p>同样的，如果你想要为某一个PoolManager对象的所有request()配置同样的重试次数和重定向跟进次数的话，你可以在PoolManager层面上做配置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http1=urllib3.PoolManager(retries=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">http2=urllib3.PoolManager(retries=urllib3.Retry(<span class="number">5</span>,redirect=<span class="number">2</span>))</span><br></pre></td></tr></table></figure>
+
+<p>这样某一个PoolManager对象的所有的request()使用的默认重试次数和重定向跟进次数就是它的PoolManager的重定向次数和重定向跟进次数。<strong>当然你仍然可以在request()方法中重载这个配置。</strong></p>
+<h5 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    http.request(<span class="string">"GET"</span>,<span class="string">"http://www.google.com"</span>,retries=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">except</span> urllib3.exceptions.NewConnectorError <span class="keyword">as</span> f:</span><br><span class="line">    print(<span class="string">"Connection failed!"</span>,f)</span><br></pre></td></tr></table></figure>
+
+<p>异常处理在爬虫中非常重要!更多关于urllib3中的异常可以查看其源码或者<a href="https://urllib3.readthedocs.io/en/latest/reference/index.html#module-urllib3.exceptions" target="_blank" rel="noopener">看这里</a></p>
+<h5 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h5><p>依靠标准库的logging,可以实现日志的记录：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">logging.getLogger(<span class="string">"urllib3"</span>).setLevel(logging.WARNING)</span><br></pre></td></tr></table></figure>
+
+<h4 id="进阶话题"><a href="#进阶话题" class="headerlink" title="进阶话题"></a>进阶话题</h4><h5 id="自定义池行为"><a href="#自定义池行为" class="headerlink" title="自定义池行为"></a>自定义池行为</h5><p>PoolManager类自动帮你管理着ConnectionPool类的实例创建工作，一个ConnectionPool管理着发送给一个host的所有请求。默认情况下一个PoolManager最多管理10个ConnectionPool.如果在你的程序中需要向不止10个host同时发送请求的话，你可以更改以适量增加一个PoolManager最多可以管理的ConnectionPool数目，这样做可以提高urllib3的性能。但是同时这也会带来更多的内存和套接字消耗。更改的方法如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager(num_pools=<span class="number">50</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这样就把一个PoolManager实例最多可以管理的ConnectionPool数目从默认的10改为了50。</p>
+<p>同样的，一个ConnectionPool类管理着一个由多个HttpConnection实例组成的http连接池，每一个HttpConnection实例将会用于一个请求。当请求完成之后，连接就会返回到连接池中。默认情况下只有一个连接将会被保存以重用。如果你需要同时向一个host发送很多请求的话，你可以更改以适量增加一个连接池中将会被保存以重用的连接数目，这样有助于提高性能。更改的方法如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager(maxsize=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#或者,使用下面这种方式单独实例化一个对goole.com这一host的连</span></span><br><span class="line"><span class="comment">#接池,并且限定连接池中保存以重用的连接数为１０</span></span><br><span class="line">http=urllib3.HttpCoonnectionPool(<span class="string">"google.com"</span>,maxsize=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，对某一个host的一个新的请求发起了，如果此时这个host所对应的连接池中没有可用的连接，那么就会创建一个新的连接。然而如果此时连接池中被保存以重用的连接的数目不小于maxsize设定的值的话，这个新创建的连接将不会被保存以重用。也就是说，maxsize指定的数字不是决定一个连接池中最多可以存在的连接数目的多少，它仅仅指定了这个连接池中被保存以重用的连接数的最大值。但是，如果你指定了参数block=True的话，那么maxsize的值就也限制了某个host所对应的连接池中的最大连接个数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http = urllib3.PoolManager(maxsize=<span class="number">10</span>, block=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># Alternatively</span></span><br><span class="line">http = urllib3.HTTPConnectionPool(<span class="string">'google.com'</span>, maxsize=<span class="number">10</span>, block=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这样的话，每一个新的请求将会被阻塞直到对应连接池中有一个连接可用为止。这样可以有效防止在多线程应用中，请求某一host的连接过于泛滥(多)的问题。</p>
+<h5 id="流式处理大额响应"><a href="#流式处理大额响应" class="headerlink" title="流式处理大额响应"></a>流式处理大额响应</h5><p>当我们请求的是一个大文件，比方说是一部电影的数据的话，我们就需要对响应的内容做流式处理：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">http=urllib3.PoolManager()</span><br><span class="line">r=http.request(<span class="string">"GET"</span>,<span class="string">"http://httpbin.org/bytes/1024"</span>,</span><br><span class="line">    preload_content=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">for</span> chunk <span class="keyword">in</span> r.stream(<span class="number">32</span>):</span><br><span class="line">    print(chunk)</span><br><span class="line">r.release_conn()</span><br></pre></td></tr></table></figure>
+
+<p>在request()方法中，将preload_content参数设为False意味着urllib3将会流式处理响应的内容。request()方法返回的HTTPResponse对象的stream()方法可以让你对响应的内容做迭代。</p>
+<p>当你使用了<code>preload_content=False</code>这一选项时，你最后应该调用HTTPResponse对象的release_conn()方法来释放本次连接，让其返回连接池以重用。</p>
+<p>你也可以把这个HTTPResponse对象当做一个类文件对象，这允许你做缓冲处理。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">r = http.request(</span><br><span class="line">     <span class="string">'GET'</span>,</span><br><span class="line">     <span class="string">'http://httpbin.org/bytes/1024'</span>,</span><br><span class="line">     preload_content=<span class="literal">False</span>)</span><br><span class="line">r.read(<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+
+<p>直接对read()方法的调用将会阻塞，直到有更多的响应内容可用。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> io</span><br><span class="line">reader=io.BufferedReader(r,<span class="number">8</span>)</span><br><span class="line">reader.read(<span class="number">4</span>)</span><br><span class="line">r.release_conn()</span><br></pre></td></tr></table></figure>
+
+<p>你可以利用这个类文件对象来做一些事情，比如用codecs来解码响应内容：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> codecs,json</span><br><span class="line">reader=codecs.getreader(<span class="string">"utf-8"</span>)</span><br><span class="line">r=http.request(<span class="string">"GET"</span>,<span class="string">"http://httpbin.org/ip"</span>,preload_content=<span class="literal">False</span>)</span><br><span class="line">data=json.load(reader(r))</span><br><span class="line">r.release_conn()</span><br></pre></td></tr></table></figure>
+
+<h5 id="设置网络代理"><a href="#设置网络代理" class="headerlink" title="设置网络代理"></a>设置网络代理</h5><p>你可以使用ProxyManager通过HTTP代理来传输你的请求：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib3</span><br><span class="line">proxy=urllib3.ProxyManager(<span class="string">"http://localhost:3128"</span>)</span><br><span class="line">proxy.request(<span class="string">"GET"</span>,<span class="string">"http://google.com/"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>ProxyManager的用法和PoolManager是一样的</p>
+<p>你也可以使用SOCKSProxyManager来连接到SOCK4或者SOCKS5代理。为了启用SOCKS代理，你需要安装<a href="https://pypi.python.org/pypi/PySocks" target="_blank" rel="noopener">PySocks</a>或者安装urllib3的socks扩展:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ pip3 install PySocks</span><br><span class="line"><span class="comment">#或者</span></span><br><span class="line">$ pip3 install urllib3[socks]</span><br></pre></td></tr></table></figure>
+
+<p>一旦你安装了PySocks，你就可以在你的代码中使用SOCKSProxyManager:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> urllib3.contrib.socks <span class="keyword">import</span> SOCKSProxyManager</span><br><span class="line">proxy=SOCKSProxyManager(<span class="string">'socks5://localhost:8889/'</span>)</span><br><span class="line">proxy.request(<span class="string">'GET'</span>, <span class="string">'http://google.com/'</span>)</span><br></pre></td></tr></table></figure>
+
+<h5 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h5><p>剩下几个主题可能大家不会遇到，这里就不再介绍了，丢个<a href="https://urllib3.readthedocs.io/en/latest/advanced-usage.html#custom-ssl-certificates-and-client-certificates" target="_blank" rel="noopener">链接</a></p>
+<h3 id="神器－－requests"><a href="#神器－－requests" class="headerlink" title="神器－－requests"></a>神器－－requests</h3><p><a href="http://www.python-requests.org/en/master/" target="_blank" rel="noopener">requests</a>: HTTP for Humans<br>requests是另外一个HTTP客户端编程的神器，它构建在urllib3的基础之上，不仅继承了urllib3的优秀特质，并且全面自动的支持HTTP/1.1请求，带持久 Cookie和Session等,对我们用户来讲，它还拥有更加人性化的API设计。</p>
+<p><a href="http://docs.python-requests.org/zh_CN/latest/user/quickstart.html#cookie" target="_blank" rel="noopener">Cookie处理</a></p>
+<h2 id="反爬虫者与反反爬虫者之间的恩怨情仇"><a href="#反爬虫者与反反爬虫者之间的恩怨情仇" class="headerlink" title="反爬虫者与反反爬虫者之间的恩怨情仇"></a>反爬虫者与反反爬虫者之间的恩怨情仇</h2><p>爬虫对于网站拥有者来说并不是一个令人高兴的存在，因为爬虫的肆意横行意味着自己的网站资料泄露，资源消耗，甚至是自己刻意隐藏在网站的隐私的内容也会泄露。面对这样的状况，作为网站的维护者或者拥有者，要么抵御爬虫，通过各种反爬虫的手段阻挡爬虫，要么顺从爬虫，自动提供可供爬虫使用的接口。事实上，大多数的网站既会采取一些必要的反爬虫措施，也会提供一些开放的api供开发者获取数据。但是绝大多数的开放平台所提供的api都有各种各样的限制：无法完全满足你的需求，需要收费等。所以很多人更愿意自己到网站上去爬取数据，在这种情况之下伟大的反爬虫运动与反反爬虫运动之间的斗争就开始了。</p>
+<h3 id="各种反爬虫手段及因对措施"><a href="#各种反爬虫手段及因对措施" class="headerlink" title="各种反爬虫手段及因对措施"></a>各种反爬虫手段及因对措施</h3><h4 id="User-Agent"><a href="#User-Agent" class="headerlink" title="User-Agent"></a>User-Agent</h4><p><code>原理</code>：对于比较简陋的爬虫程序来讲一般没有设置请求头，而浏览器等客户端工具一般会自动帮我们加上请求头，那么服务器就可以检查客户端发来的请求的请求头中的某些字段是否存在从而识别出客户端是爬虫程序。一般情况下，服务器会检查请求头的User-Agent字段。</p>
+<p><code>应对</code>：这个应对的方法比较简单，我们只需要为请求添加请求头即可(主要是添加User-Agent字段)。这个过程在爬虫中叫做<strong>浏览器伪装</strong>。在这里给大家推荐一个简单实用的python包<a href="https://pypi.python.org/pypi/fake-useragent" target="_blank" rel="noopener">fake-useragent</a>，它可以方便的帮你生成User-Agent信息，这样你就不需要自己到处去复制了。</p>
+<h4 id="IP限制"><a href="#IP限制" class="headerlink" title="IP限制"></a>IP限制</h4><p><code>原理</code>：如果是个人编写的爬虫，没做特殊处理的话，IP是固定的，那么服务器发现某个IP请求的频率超过了某一阈值，就可以判断这个客户端是爬虫程序了，网站的管理或者运维人员，一般的处理方式就是暂时封掉该IP,那么也就是说这个IP发出的请求在短时间(一般是数小时)内不能再访问这个网站了，也就暂时挡住了爬虫。</p>
+<p><code>应对</code>：对于这种手段我们一般采取两种处理方式：设置延时和使用网络代理。<strong>设置延时</strong>很简单，就是让请求与请求之间停留一小段时间，让请求的频率降下来，这样就达不到请求频率的阈值，也就不会触发服务器的封IP行为了。使用<strong>HTTP代理</strong>之后，在服务器上显示的就是你的代理服务器的IP地址了，即使是封掉了IP封掉的也是代理服务器的地址，这时你换一个代理服务器就OK了。在实际中，我们会先准备大量的可用IP,从而建立一个IP池，每次请求都从IP池中任意选取一个IP去访问。<br>代理IP从<a href="http://www.xicidaili.com/wn/" target="_blank" rel="noopener">这儿</a>找,在选的时候大家尽量选择验证时间比较短，反应速度比较快的ip.</p>
+<h4 id="Ajax动态加载"><a href="#Ajax动态加载" class="headerlink" title="Ajax动态加载"></a>Ajax动态加载</h4><p><code>原理</code>：对于网站来说，使用Ajax动态加载技术可以提高网站的工作效率，提升用户体验，在用户需要某个数据时(某一特定条件发生时)才发送这些数据到客户端，然后通过js在不刷新整个页面的情况下将这些数据渲染到页面上。但对于数据采集者来说，这却带来了巨大的麻烦。使用传统的请求工具无法得到想要的完整的数据。下面给大家看几个动态加载页面的例子：<a href="http://pythonscraping.com/pages/javascript/ajaxDemo.html" target="_blank" rel="noopener">特定时间后页面变化</a>，<a href="https://www.zhihu.com/#signin" target="_blank" rel="noopener">用户点击后页面变化</a></p>
+<p><code>应对</code>：对于动态加载页面的爬取最好的处理方式是：<strong>PhantomJs+Selenium</strong>,这个在下面的高级主题中介绍。</p>
+<h4 id="验证码反爬虫"><a href="#验证码反爬虫" class="headerlink" title="验证码反爬虫"></a>验证码反爬虫</h4><p><code>原理</code>：有些网站会对站内特殊的数据做额外的保护，你只有正确填写验证码之后才能访问到该网页，在这种情况下爬取的难度就非常大了。但是也不是不能爬取，主要要看它使用的是何种验证方式。<br><code>应对</code>：如果是普通的填写它给出的图片上的字符，那么可以使用图像识别的技术来处理，但其实现在的验证码往往都加了许多的干扰线，噪点之类的，连人类有时候都有可能识别错误，何况是机器呢！更厉害的是像12306的那种请点击以下所有包含海洋的图片，或者知乎的请点击下图中所有倒立的汉字等等，我只能说遇到类似这样的爬虫任务的话，你就只能认命了！</p>
+<h1 id="处理"><a href="#处理" class="headerlink" title="处理"></a>处理</h1><p>在上面的一部分中，我们讨论了如何下载，下面要讨论的则是下载到网页之后我们怎样从网页中提取数据的问题了。</p>
+<h2 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h2><p>在计算机的世界中很多东西归根结底都可以归结到字符串的处理上，其中在某一字符串中提取另一种模式的字符串又是其中的重要组成部分。正则表达式解决的就是模式的描述的问题。python中的re模块提供了许多优秀的API,使Python语言拥有全部的正则表达式功能。详情参考<a href="http://cuiqingcai.com/977.html" target="_blank" rel="noopener">这里</a></p>
+<h2 id="BeautifulSoup"><a href="#BeautifulSoup" class="headerlink" title="BeautifulSoup"></a>BeautifulSoup</h2><p><a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/" target="_blank" rel="noopener">BeautifulSoup</a></p>
+<h2 id="Xpath"><a href="#Xpath" class="headerlink" title="Xpath"></a>Xpath</h2><p><a href="http://lxml.de/" target="_blank" rel="noopener">Xpath</a></p>
+<h1 id="高级主题"><a href="#高级主题" class="headerlink" title="高级主题"></a>高级主题</h1><h2 id="动态页面的爬取"><a href="#动态页面的爬取" class="headerlink" title="动态页面的爬取"></a>动态页面的爬取</h2><p>先看两个例子:<a href>自动登录发表文章</a>，<a href>搜索并下载歌曲</a>。体会下phantomjs+selenium可以做啥！</p>
+<h3 id="phantomJS"><a href="#phantomJS" class="headerlink" title="phantomJS"></a>phantomJS</h3><p><a href="http://phantomjs.org/quick-start.html" target="_blank" rel="noopener">phantomjs</a>是一个无界面的,可脚本编程的WebKit浏览器引擎。它原生支持多种web标准：DOM操作，CSS选择器，JSON，Canvas 以及SVG。可以帮助我们像浏览器一样渲染JS处理的页面。</p>
+<p>这么使用phantomjs呢？看－&gt;<a href="http://javascript.ruanyifeng.com/tool/phantomjs.html" target="_blank" rel="noopener">这里</a>或<a href="http://cuiqingcai.com/2577.html" target="_blank" rel="noopener">这里</a>.</p>
+<h3 id="selenium-python-bindings"><a href="#selenium-python-bindings" class="headerlink" title="selenium python bindings"></a>selenium python bindings</h3><p>首先推荐一个<a href="https://huilansame.github.io/huilansame.github.io/page3/" target="_blank" rel="noopener">博客</a>,这个人的博客写的全是selenium python的内容。</p>
+<p><a href="http://selenium-python.readthedocs.io/" target="_blank" rel="noopener">selenium</a>是一个web测试自动化的工具。Selenium Python bindings 提供了一个简单的API，让你使用Selenium WebDriver来编写功能/校验测试。通过Selenium Python的API，你可以非常直观的使用Selenium WebDriver的所有功能。Selenium Python bindings 使用非常简洁方便的API让你去使用像Firefox, IE, Chrome, Remote等等这样的Selenium WebDrivers（Selenium web驱动器）。在生产环境中我们一般使用phantomjs这样的轻量级浏览器作为selenium web驱动。</p>
+<h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><p>可以从PyPI的官方库中下载该selenium支持库：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pip3 install selenium</span><br></pre></td></tr></table></figure>
+
+<h4 id="你的第一个selenium应用"><a href="#你的第一个selenium应用" class="headerlink" title="你的第一个selenium应用"></a>你的第一个selenium应用</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.keys <span class="keyword">import</span> Keys</span><br><span class="line"></span><br><span class="line">driver = webdriver.PhantomJS(executable_path=<span class="string">'/usr/local/bin/phantomjs'</span>)</span><br><span class="line">driver.get(<span class="string">"http://www.python.org"</span>)</span><br><span class="line"><span class="keyword">assert</span> <span class="string">"Python"</span> <span class="keyword">in</span> driver.title</span><br><span class="line">elem = driver.find_element_by_name(<span class="string">"q"</span>)</span><br><span class="line">elem.clear()</span><br><span class="line">elem.send_keys(<span class="string">"pycon"</span>)</span><br><span class="line">elem.send_keys(Keys.RETURN)</span><br><span class="line"><span class="keyword">assert</span> <span class="string">"No results found."</span> <span class="keyword">not</span> <span class="keyword">in</span> driver.page_source</span><br><span class="line">driver.close()</span><br></pre></td></tr></table></figure>
+
+<h4 id="使用普通浏览器"><a href="#使用普通浏览器" class="headerlink" title="使用普通浏览器"></a>使用普通浏览器</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.keys <span class="keyword">import</span> Keys</span><br><span class="line"></span><br><span class="line">driver = webdriver.Chrome()</span><br><span class="line"><span class="comment"># driver = webdriver.FireFox()</span></span><br><span class="line"><span class="comment"># driver =webdriver.IE()</span></span><br><span class="line">driver.get(<span class="string">"http://www.python.org"</span>)</span><br><span class="line"><span class="keyword">assert</span> <span class="string">"Python"</span> <span class="keyword">in</span> driver.title</span><br><span class="line">elem = driver.find_element_by_name(<span class="string">"q"</span>)</span><br><span class="line">elem.clear()</span><br><span class="line">elem.send_keys(<span class="string">"pycon"</span>)</span><br><span class="line">elem.send_keys(Keys.RETURN)</span><br><span class="line"><span class="keyword">assert</span> <span class="string">"No results found."</span> <span class="keyword">not</span> <span class="keyword">in</span> driver.page_source</span><br><span class="line">driver.close()</span><br></pre></td></tr></table></figure>
+
+<p>使用普通的浏览器需要安装浏览器驱动程序，并且保证这些驱动程序在你的环境变量中。常见的浏览器及其驱动下载地址如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">浏览器</th>
+<th align="center">驱动下载地址</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Chrome</td>
+<td align="center"><a href="https://sites.google.com/a/chromium.org/chromedriver/downloads" target="_blank" rel="noopener">https://sites.google.com/a/chromium.org/chromedriver/downloads</a></td>
+</tr>
+<tr>
+<td align="center">Edge</td>
+<td align="center"><a href="https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/" target="_blank" rel="noopener">https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/</a></td>
+</tr>
+<tr>
+<td align="center">Firefox</td>
+<td align="center"><a href="https://github.com/mozilla/geckodriver/releases" target="_blank" rel="noopener">https://github.com/mozilla/geckodriver/releases</a></td>
+</tr>
+<tr>
+<td align="center">Safari</td>
+<td align="center"><a href="https://webkit.org/blog/6900/webdriver-support-in-safari-10/" target="_blank" rel="noopener">https://webkit.org/blog/6900/webdriver-support-in-safari-10/</a></td>
+</tr>
+<tr>
+<td align="center">#### 打开一个页面</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">你想做的第一件事也许是使用WebDriver打开一个链接。常规的方法是调用get方法:</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">driver.get(<span class="string">"http://www.google.com"</span>)</span><br></pre></td></tr></table></figure></td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<p>WebDriver 将等待，直到页面完全加载完毕（其实是等到 onload 方法执行完毕）， 然后返回继续执行你的脚本.</p>
+<h4 id="元素定位"><a href="#元素定位" class="headerlink" title="元素定位"></a>元素定位</h4><p>selenium with python给我们提供了大量的用于在页面中定位元素的API，有了这些API，你可以在页面上找到任何你需要的元素。详细内容看－&gt;<a href="https://selenium-python-zh.readthedocs.io/en/latest/locating-elements.html" target="_blank" rel="noopener">这里</a></p>
+<h4 id="页面交互"><a href="#页面交互" class="headerlink" title="页面交互"></a>页面交互</h4><h5 id="填写表单"><a href="#填写表单" class="headerlink" title="填写表单"></a>填写表单</h5><p>首先找到表单元素对象，然后对表单元素对象调用send_keys(data)方法就可以把data填写到input框中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">driver.get(<span class="string">"http://auth.muxixyz.com/login/"</span>)</span><br><span class="line">username_elem=driver.find_element_by_id(<span class="string">"username"</span>)</span><br><span class="line">username_elem.send_keys(<span class="string">"阿超"</span>)</span><br><span class="line">password_elem=driver.find_element_by_id(<span class="string">"password"</span>)</span><br><span class="line">password_elem.send_keys(<span class="string">"this is my pwd"</span>)</span><br><span class="line">driver.find_element_by_id(<span class="string">"submit"</span>).click()</span><br><span class="line">WebDriverWait(driver,<span class="number">3</span>).until(<span class="keyword">lambda</span> x:x.find_element_by_xpath(<span class="string">"//a[@href='http://share.muxixyz.com/']"</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">#截取当前页面的图片</span></span><br><span class="line">driver.driver.get_screenshot_as_file(<span class="string">"1.png"</span>)</span><br><span class="line"><span class="keyword">with</span> open(<span class="string">"1.html"</span>,<span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    <span class="comment">#获取当前页面的源码</span></span><br><span class="line">    f.write(driver.page_source)</span><br></pre></td></tr></table></figure>
+
+<p>上述代码就是以我的账号密码登录木犀内网，然后将跳转之后的页面的图截下来保存为1.png，将当前页面的源码保存为1.html.</p>
+<h4 id="键盘模拟"><a href="#键盘模拟" class="headerlink" title="键盘模拟"></a>键盘模拟</h4><p><a href="http://selenium-python-zh.readthedocs.io/en/latest/api.html#module-selenium.webdriver.common.keys" target="_blank" rel="noopener">键盘模拟</a><br>当调用一个元素对象的send_keys()方法的时候，不光可以向这个元素传递数据，也可以传递selenium.webdriver.common.keys．Keys的实例来模拟键盘的操作<br>，这可以用来测试网站的快捷键设置是否正确。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium.webdriver.common.keys <span class="keyword">import</span> Keys</span><br><span class="line">driver.get(<span class="string">"http://www.douban.com"</span>)</span><br><span class="line">driver.get_screenshot_as_file(<span class="string">"douban.png"</span>)</span><br><span class="line">username = driver.find_element_by_name(<span class="string">"form_email"</span>)</span><br><span class="line">password = driver.find_element_by_name(<span class="string">"form_password"</span>)</span><br><span class="line">submit=driver.find_element_by_class_name(<span class="string">"bn-submit"</span>)</span><br><span class="line">username.send_keys(<span class="string">"13636038496"</span>)</span><br><span class="line">password.send_keys(<span class="string">"this is my pwd"</span>)</span><br><span class="line">submit.click()</span><br><span class="line"></span><br><span class="line"><span class="comment">#上面的三行代码也可以写成下面这样</span></span><br><span class="line"><span class="comment"># username.send_keys("13636038496")</span></span><br><span class="line"><span class="comment"># password.send_keys("this is my pwd"，Keys.RETURN)</span></span><br></pre></td></tr></table></figure>
+
+<p>一般网站的表单填写完了之后，都可以直接通过按下回车键提交表单,上面注释的代码就是模拟了这个过程。</p>
+<h4 id="窗口切换"><a href="#窗口切换" class="headerlink" title="窗口切换"></a>窗口切换</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">currentWin = driver.current_window_handle</span><br><span class="line"><span class="comment">#跳转到另一个新页面</span></span><br><span class="line">driver.find_element_by_xpath(<span class="string">"//p[@id='nv']/a[3]"</span>).click()</span><br><span class="line">time.sleep(<span class="number">1</span>)</span><br><span class="line"><span class="comment">#获取所有窗口的句柄</span></span><br><span class="line">handles = driver.window_handles</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> handles:</span><br><span class="line">    <span class="keyword">if</span> currentWin == i:</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment">#将driver与新的页面绑定起来</span></span><br><span class="line">        driver = driver.switch_to_window(i)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">driver.switch_to_window(<span class="string">"windowName"</span>)</span><br><span class="line">driver.switch_to_frame(<span class="string">"frameName"</span>)</span><br><span class="line">alert = driver.switch_to_alert()</span><br></pre></td></tr></table></figure>
+
+<h4 id="历史记录和定位"><a href="#历史记录和定位" class="headerlink" title="历史记录和定位"></a>历史记录和定位</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">driver.forward()</span><br><span class="line">driver.back()</span><br></pre></td></tr></table></figure>
+
+<h4 id="cookie处理"><a href="#cookie处理" class="headerlink" title="cookie处理"></a>cookie处理</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#设置cookie</span></span><br><span class="line">cookie = &#123;<span class="string">'name'</span>:<span class="string">'foo'</span>,<span class="string">'value'</span>:<span class="string">'bar'</span>&#125;</span><br><span class="line">driver.add_cookie(cookie)</span><br><span class="line"></span><br><span class="line"><span class="comment">#输出当前url下可用的cookie</span></span><br><span class="line">driver.get_cookies()</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置等待"><a href="#设置等待" class="headerlink" title="设置等待"></a>设置等待</h4><p>现在的app有许多都在使用ajax(Asynchronous Javascript And XML)技术,这使得在一个页面中的元素的出现时间会产生差异，这给元素的定位带来了不小的困难。如果一个元素还没有出现在DOM中，那么你用一个定位函数去定位这个元素的时候就会产生<code>ElementNotVisibleException</code>的错误。使用等待可以解决这个问题。Selenium Webdriver提供了两种等待：显式等待(Explicit Waits)和隐式等待(Implicit Waits).</p>
+<h5 id="隐式等待"><a href="#隐式等待" class="headerlink" title="隐式等待"></a>隐式等待</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"></span><br><span class="line">driver = webdriver.Chrome()</span><br><span class="line">driver.implicitly_wait(<span class="number">30</span>)  <span class="comment"># 隐性等待，最长等30秒</span></span><br><span class="line">driver.get(<span class="string">'https://huilansame.github.io'</span>)</span><br><span class="line"></span><br><span class="line">print(driver.current_url)</span><br><span class="line">driver.quit()</span><br></pre></td></tr></table></figure>
+
+<p>隐形等待是设置了一个最长等待时间，如果在规定时间内网页加载完成，则执行下一步，否则一直等到时间截止，然后执行下一步。注意这里有一个弊端，那就是程序会一直等待整个页面加载完成，也就是一般情况下你看到浏览器标签栏那个小圈不再转，才会执行下一步，但有时候页面想要的元素早就在加载完成了，但是因为个别js之类的东西特别慢，我仍得等到页面全部完成才能执行下一步，我想等我要的元素出来之后就下一步怎么办？有办法，这就要看selenium提供的另一种等待方式——显性等待wait了。<br>Tip:隐性等待对整个driver的周期都起作用，所以只要设置一次即可</p>
+<h5 id="显式等待"><a href="#显式等待" class="headerlink" title="显式等待"></a>显式等待</h5><p>显示等待是你在你的代码中设置的等待某一个条件发生之后才继续向下执行的等待。selenium提供了一些方便的方法来帮助你设置你的等待，并且可以让等待只花所需要的时间。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.by <span class="keyword">import</span> By</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.support.ui <span class="keyword">import</span> WebDriverWait</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.support <span class="keyword">import</span> expected_conditions <span class="keyword">as</span> EC</span><br><span class="line"></span><br><span class="line">driver = webdriver.Chrome()</span><br><span class="line">driver.get(<span class="string">"http://somedomain/url_that_delays_loading"</span>)</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    element = WebDriverWait(driver, <span class="number">10</span>).until(</span><br><span class="line">        EC.presence_of_element_located((By.ID, <span class="string">"myDynamicElement"</span>))</span><br><span class="line">    )</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    driver.quit()</span><br></pre></td></tr></table></figure>
+
+<p>上面的例子中的意思是通过id来获取”myDynamicElement”元素，如果当前DOM中没有这个元素，那么就等待，最长等待的时间是10秒，如果十秒钟之后该元素仍然没有出现，则抛出<code>TimeoutException</code>错误。如果在等待的过程中该元素加载出来了，那么该函数就立即返回，停止等待。默认情况下，selenium webdriver每500毫秒，检查一下预期条件。</p>
+<p>selenium with python提供了许多的常用的期望条件来帮助你操控你的浏览器。常用的预期条件如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">selenium.webdriver.support.expected_conditions（模块）</span><br><span class="line"></span><br><span class="line">这两个条件类验证title，验证传入的参数title是否等于或包含于driver.title</span><br><span class="line">title_is</span><br><span class="line">title_contains</span><br><span class="line"></span><br><span class="line">这两个人条件验证元素是否出现，传入的参数都是元组类型的locator，如(By.ID, &apos;kw&apos;)</span><br><span class="line">顾名思义，一个只要一个符合条件的元素加载出来就通过；另一个必须所有符合条件的元素都加载出来才行</span><br><span class="line">presence_of_element_located</span><br><span class="line">presence_of_all_elements_located</span><br><span class="line"></span><br><span class="line">这三个条件验证元素是否可见，前两个传入参数是元组类型的locator，第三个传入WebElement</span><br><span class="line">第一个和第三个其实质是一样的</span><br><span class="line">visibility_of_element_located</span><br><span class="line">invisibility_of_element_located</span><br><span class="line">visibility_of</span><br><span class="line"></span><br><span class="line">这两个人条件判断某段文本是否出现在某元素中，一个判断元素的text，一个判断元素的value</span><br><span class="line">text_to_be_present_in_element</span><br><span class="line">text_to_be_present_in_element_value</span><br><span class="line"></span><br><span class="line">这个条件判断frame是否可切入，可传入locator元组或者直接传入定位方式：id、name、index或WebElement</span><br><span class="line">frame_to_be_available_and_switch_to_it</span><br><span class="line"></span><br><span class="line">这个条件判断是否有alert出现</span><br><span class="line">alert_is_present</span><br><span class="line"></span><br><span class="line">这个条件判断元素是否可点击，传入locator</span><br><span class="line">element_to_be_clickable</span><br><span class="line"></span><br><span class="line">这四个条件判断元素是否被选中，第一个条件传入WebElement对象，第二个传入locator元组</span><br><span class="line">第三个传入WebElement对象以及状态，相等返回True，否则返回False</span><br><span class="line">第四个传入locator以及状态，相等返回True，否则返回False</span><br><span class="line">element_to_be_selected</span><br><span class="line">element_located_to_be_selected</span><br><span class="line">element_selection_state_to_be</span><br><span class="line">element_located_selection_state_to_be</span><br><span class="line"></span><br><span class="line">最后一个条件判断一个元素是否仍在DOM中，传入WebElement对象，可以判断页面是否刷新了</span><br><span class="line">staleness_of</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium.webdriver.support <span class="keyword">import</span> expected_conditions <span class="keyword">as</span> EC</span><br><span class="line"></span><br><span class="line">wait = WebDriverWait(driver, <span class="number">10</span>)</span><br><span class="line">element = wait.until(EC.element_to_be_clickable((By.ID, <span class="string">'someid'</span>)))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.support.wait <span class="keyword">import</span> WebDriverWait</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.support <span class="keyword">import</span> expected_conditions <span class="keyword">as</span> EC</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.by <span class="keyword">import</span> By</span><br><span class="line"></span><br><span class="line">driver = webdriver.Firefox()</span><br><span class="line">driver.implicitly_wait(<span class="number">10</span>)  <span class="comment"># 隐性等待和显性等待可以同时用，但要注意：等待的最长时间取两者之中的大者</span></span><br><span class="line">driver.get(<span class="string">'https://huilansame.github.io'</span>)</span><br><span class="line">locator = (By.LINK_TEXT, <span class="string">'CSDN'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    WebDriverWait(driver, <span class="number">20</span>, <span class="number">0.2</span>).until(EC.presence_of_element_located(locator))</span><br><span class="line">    print(driver.find_element_by_link_text(<span class="string">'CSDN'</span>).get_attribute(<span class="string">'href'</span>))</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    driver.close()</span><br></pre></td></tr></table></figure>
+
+<p>如果上述提供的期待条件没有满足你的需求，你也可以自定义期望条件：可以通过一个实现了<code>__call__()</code>方法的类来自定义一个等待的期望条件。这个<code>__call__()</code>方法在不匹配的情况下，返回False即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">element_has_css_class</span><span class="params">(object)</span>:</span></span><br><span class="line">  <span class="string">"""An expectation for checking that an element has a particular css class.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  locator - used to find the element</span></span><br><span class="line"><span class="string">  returns the WebElement once it has the particular css class</span></span><br><span class="line"><span class="string">  """</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, locator, css_class)</span>:</span></span><br><span class="line">    self.locator = locator</span><br><span class="line">    self.css_class = css_class</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, driver)</span>:</span></span><br><span class="line">    element = driver.find_element(*self.locator)   <span class="comment"># Finding the referenced element</span></span><br><span class="line">    <span class="keyword">if</span> self.css_class <span class="keyword">in</span> element.get_attribute(<span class="string">"class"</span>):</span><br><span class="line">        <span class="keyword">return</span> element</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Wait until an element with id='myNewInput' has class 'myCSSClass'</span></span><br><span class="line">wait = WebDriverWait(driver, <span class="number">10</span>)</span><br><span class="line">element = wait.until(element_has_css_class((By.ID, <span class="string">'myNewInput'</span>), <span class="string">"myCSSClass"</span>))</span><br></pre></td></tr></table></figure>
+
+<p>除了上面介绍的几种等待的方式，使用<code>time.sleep()</code>也可以实现等待的效果，但是这种方法比较low,推荐不要使用。</p>
+<h4 id="PhantomJS请求配置"><a href="#PhantomJS请求配置" class="headerlink" title="PhantomJS请求配置"></a>PhantomJS请求配置</h4><p>一般来讲，如果是做爬虫的话，使用的web driver都是PhantomJS，相较于大家桌面上的浏览器的话，它更轻量级，所以速度更快。在使用PhantomJS时，可以对其进行一些配置,比如设置请求头，设置网络代理等。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> fake_useragent <span class="keyword">import</span> UserAgent</span><br><span class="line"><span class="keyword">from</span> selenium <span class="keyword">import</span> webdriver</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.keys <span class="keyword">import</span> Keys</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.by <span class="keyword">import</span> By</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.support.ui <span class="keyword">import</span> WebDriverWait</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.support <span class="keyword">import</span> expected_conditions <span class="keyword">as</span> EC</span><br><span class="line"><span class="keyword">from</span> selenium.webdriver.common.desired_capabilities <span class="keyword">import</span> DesiredCapabilities</span><br><span class="line">ua = UserAgent()</span><br><span class="line"><span class="comment">#配置对象DesiredCapabilities</span></span><br><span class="line">dcap = dict(DesiredCapabilities.PHANTOMJS)</span><br><span class="line"><span class="comment">#从USER_AGENTS列表中随机选一个浏览器头，伪装浏览器</span></span><br><span class="line">dcap[<span class="string">"phantomjs.page.settings.userAgent"</span>] = ua.random</span><br><span class="line"><span class="comment"># 不载入图片，爬页面速度会快很多</span></span><br><span class="line">dcap[<span class="string">"phantomjs.page.settings.loadImages"</span>] = <span class="literal">True</span></span><br><span class="line"><span class="comment"># 设置代理</span></span><br><span class="line">service_args = [<span class="string">'--proxy=127.0.0.1:9999'</span>,<span class="string">'--proxy-type=socks5'</span>]</span><br><span class="line"><span class="comment">#打开带配置信息的phantomJS浏览器</span></span><br><span class="line">driver = webdriver.PhantomJS(phantomjs_driver_path, desired_capabilities=dcap,service_args=service_args)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 隐式等待5秒，可以自己调节</span></span><br><span class="line">driver.implicitly_wait(<span class="number">5</span>)</span><br><span class="line"><span class="comment"># 设置10秒页面超时返回，类似于requests.get()的timeout选项，driver.get()没有timeout选项</span></span><br><span class="line"><span class="comment"># 以前遇到过driver.get(url)一直不返回，但也不报错的问题，这时程序会卡住，设置超时选项能解决这个问题。</span></span><br><span class="line">driver.set_page_load_timeout(<span class="number">10</span>)</span><br><span class="line"><span class="comment"># 设置10秒脚本超时时间</span></span><br><span class="line">driver.set_script_timeout(<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">driver.get(<span class="string">"http://www.baidu.com"</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="道德问题"><a href="#道德问题" class="headerlink" title="道德问题"></a>道德问题</h2><p>在互联网这个复杂的环境中，搜索引擎本身的爬虫，出于个人目的的爬虫，商业爬虫肆意横行，肆意掠夺网上的或者公共或者私人的资源。显然数据的收集并不是为所欲为，有一些协议或者原则还是需要每一个人注意。</p>
+<h3 id="robots协议"><a href="#robots协议" class="headerlink" title="robots协议"></a>robots协议</h3><p>一般情况下网站的根目录下存在着一个robots.txt的文件，用于告诉爬虫那些文件夹或者哪些文件是网站的拥有者或者管理员不希望被搜索引擎和爬虫浏览的，或者是不希望被非人类的东西查看的。但是不仅仅如此，在这个文件中，有时候还会指明sitemap的位置，爬虫可以直接寻找sitemap而不用费力去爬取网站。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/urllib/" rel="tag"># urllib</a>
+          
+            <a href="/tags/urllib3/" rel="tag"># urllib3</a>
+          
+            <a href="/tags/requests/" rel="tag"># requests</a>
+          
+            <a href="/tags/bs4/" rel="tag"># bs4</a>
+          
+            <a href="/tags/xpath/" rel="tag"># xpath</a>
+          
+            <a href="/tags/phantomjs/" rel="tag"># phantomjs</a>
+          
+            <a href="/tags/selenium/" rel="tag"># selenium</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/22/Sort-Algorithm/" rel="next" title="排序算法">
+                <i class="fa fa-chevron-left"></i> 排序算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/07/binary-search-tree/" rel="prev" title="二叉搜索树">
+                二叉搜索树 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#网络基础知识"><span class="nav-number">1.</span> <span class="nav-text">网络基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#先来两张图撑场子！"><span class="nav-number">1.1.</span> <span class="nav-text">先来两张图撑场子！</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP-IP协议"><span class="nav-number">1.2.</span> <span class="nav-text">TCP/IP协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP协议"><span class="nav-number">1.3.</span> <span class="nav-text">HTTP协议</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#网络爬虫简介"><span class="nav-number">2.</span> <span class="nav-text">网络爬虫简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#下载"><span class="nav-number">3.</span> <span class="nav-text">下载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#去哪里下载？"><span class="nav-number">3.1.</span> <span class="nav-text">去哪里下载？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#URL-URI-URN是什么鬼？"><span class="nav-number">3.1.1.</span> <span class="nav-text">URL,URI,URN是什么鬼？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#URL的组成"><span class="nav-number">3.1.2.</span> <span class="nav-text">URL的组成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用什么下载？"><span class="nav-number">3.2.</span> <span class="nav-text">用什么下载？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#urllib"><span class="nav-number">3.2.1.</span> <span class="nav-text">urllib</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#导入"><span class="nav-number">3.2.1.1.</span> <span class="nav-text">导入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#下载并保存你的第一个网页"><span class="nav-number">3.2.1.2.</span> <span class="nav-text">下载并保存你的第一个网页</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#更优雅的下载并保存"><span class="nav-number">3.2.1.3.</span> <span class="nav-text">更优雅的下载并保存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#url的编码"><span class="nav-number">3.2.1.4.</span> <span class="nav-text">url的编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#url参数的编码"><span class="nav-number">3.2.1.5.</span> <span class="nav-text">url参数的编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#urllib请求头的添加"><span class="nav-number">3.2.1.6.</span> <span class="nav-text">urllib请求头的添加</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代理服务器的设置"><span class="nav-number">3.2.1.7.</span> <span class="nav-text">代理服务器的设置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#神器——urllib3"><span class="nav-number">3.2.2.</span> <span class="nav-text">神器——urllib3</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基本使用"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">基本使用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#第一个urllib3例子"><span class="nav-number">3.2.2.1.1.</span> <span class="nav-text">第一个urllib3例子</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#发起请求"><span class="nav-number">3.2.2.1.2.</span> <span class="nav-text">发起请求</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#接收数据"><span class="nav-number">3.2.2.1.3.</span> <span class="nav-text">接收数据</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#请求头的设置"><span class="nav-number">3.2.2.1.4.</span> <span class="nav-text">请求头的设置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#查询参数的设置"><span class="nav-number">3.2.2.1.5.</span> <span class="nav-text">查询参数的设置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#提交表单数据"><span class="nav-number">3.2.2.1.6.</span> <span class="nav-text">提交表单数据</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#发送JSON给服务器"><span class="nav-number">3.2.2.1.7.</span> <span class="nav-text">发送JSON给服务器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#发送文件或二进制数据"><span class="nav-number">3.2.2.1.8.</span> <span class="nav-text">发送文件或二进制数据</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#设置证书验证"><span class="nav-number">3.2.2.1.9.</span> <span class="nav-text">设置证书验证</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#设置超时时间"><span class="nav-number">3.2.2.1.10.</span> <span class="nav-text">设置超时时间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#设置重试次数"><span class="nav-number">3.2.2.1.11.</span> <span class="nav-text">设置重试次数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#错误处理"><span class="nav-number">3.2.2.1.12.</span> <span class="nav-text">错误处理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#日志"><span class="nav-number">3.2.2.1.13.</span> <span class="nav-text">日志</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#进阶话题"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">进阶话题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#自定义池行为"><span class="nav-number">3.2.2.2.1.</span> <span class="nav-text">自定义池行为</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#流式处理大额响应"><span class="nav-number">3.2.2.2.2.</span> <span class="nav-text">流式处理大额响应</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#设置网络代理"><span class="nav-number">3.2.2.2.3.</span> <span class="nav-text">设置网络代理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#其他"><span class="nav-number">3.2.2.2.4.</span> <span class="nav-text">其他</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#神器－－requests"><span class="nav-number">3.2.3.</span> <span class="nav-text">神器－－requests</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反爬虫者与反反爬虫者之间的恩怨情仇"><span class="nav-number">3.3.</span> <span class="nav-text">反爬虫者与反反爬虫者之间的恩怨情仇</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#各种反爬虫手段及因对措施"><span class="nav-number">3.3.1.</span> <span class="nav-text">各种反爬虫手段及因对措施</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#User-Agent"><span class="nav-number">3.3.1.1.</span> <span class="nav-text">User-Agent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IP限制"><span class="nav-number">3.3.1.2.</span> <span class="nav-text">IP限制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ajax动态加载"><span class="nav-number">3.3.1.3.</span> <span class="nav-text">Ajax动态加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#验证码反爬虫"><span class="nav-number">3.3.1.4.</span> <span class="nav-text">验证码反爬虫</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#处理"><span class="nav-number">4.</span> <span class="nav-text">处理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#正则表达式"><span class="nav-number">4.1.</span> <span class="nav-text">正则表达式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BeautifulSoup"><span class="nav-number">4.2.</span> <span class="nav-text">BeautifulSoup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Xpath"><span class="nav-number">4.3.</span> <span class="nav-text">Xpath</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#高级主题"><span class="nav-number">5.</span> <span class="nav-text">高级主题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#动态页面的爬取"><span class="nav-number">5.1.</span> <span class="nav-text">动态页面的爬取</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#phantomJS"><span class="nav-number">5.1.1.</span> <span class="nav-text">phantomJS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#selenium-python-bindings"><span class="nav-number">5.1.2.</span> <span class="nav-text">selenium python bindings</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装"><span class="nav-number">5.1.2.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#你的第一个selenium应用"><span class="nav-number">5.1.2.2.</span> <span class="nav-text">你的第一个selenium应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用普通浏览器"><span class="nav-number">5.1.2.3.</span> <span class="nav-text">使用普通浏览器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#元素定位"><span class="nav-number">5.1.2.4.</span> <span class="nav-text">元素定位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#页面交互"><span class="nav-number">5.1.2.5.</span> <span class="nav-text">页面交互</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#填写表单"><span class="nav-number">5.1.2.5.1.</span> <span class="nav-text">填写表单</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#键盘模拟"><span class="nav-number">5.1.2.6.</span> <span class="nav-text">键盘模拟</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#窗口切换"><span class="nav-number">5.1.2.7.</span> <span class="nav-text">窗口切换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#历史记录和定位"><span class="nav-number">5.1.2.8.</span> <span class="nav-text">历史记录和定位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cookie处理"><span class="nav-number">5.1.2.9.</span> <span class="nav-text">cookie处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#设置等待"><span class="nav-number">5.1.2.10.</span> <span class="nav-text">设置等待</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#隐式等待"><span class="nav-number">5.1.2.10.1.</span> <span class="nav-text">隐式等待</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#显式等待"><span class="nav-number">5.1.2.10.2.</span> <span class="nav-text">显式等待</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PhantomJS请求配置"><span class="nav-number">5.1.2.11.</span> <span class="nav-text">PhantomJS请求配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#道德问题"><span class="nav-number">5.2.</span> <span class="nav-text">道德问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#robots协议"><span class="nav-number">5.2.1.</span> <span class="nav-text">robots协议</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

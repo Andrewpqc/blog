@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Dynamic array,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近在学数据结构，涉及到动态数组。我自己总结了一下，把与动态数组有关的基本操作用c和c++分别写了一遍。下面把总结的成果记录一下。 动态数组之所以称之为动态，关键就在于其可以在程序运行过程中自动增加分配的内存大小。要实现这一点的关键又在于下面两点：  实时记录数组的元素个数和分配的内存的大小 realloc()函数重新分配内存  数组中的数据是连续存放的，可以随机访问。在数组尾部增加删除元素效率很">
+<meta name="keywords" content="Dynamic array">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态数组">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/09/26/Dynamic-Array/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="最近在学数据结构，涉及到动态数组。我自己总结了一下，把与动态数组有关的基本操作用c和c++分别写了一遍。下面把总结的成果记录一下。 动态数组之所以称之为动态，关键就在于其可以在程序运行过程中自动增加分配的内存大小。要实现这一点的关键又在于下面两点：  实时记录数组的元素个数和分配的内存的大小 realloc()函数重新分配内存  数组中的数据是连续存放的，可以随机访问。在数组尾部增加删除元素效率很">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-11-16T04:59:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="动态数组">
+<meta name="twitter:description" content="最近在学数据结构，涉及到动态数组。我自己总结了一下，把与动态数组有关的基本操作用c和c++分别写了一遍。下面把总结的成果记录一下。 动态数组之所以称之为动态，关键就在于其可以在程序运行过程中自动增加分配的内存大小。要实现这一点的关键又在于下面两点：  实时记录数组的元素个数和分配的内存的大小 realloc()函数重新分配内存  数组中的数据是连续存放的，可以随机访问。在数组尾部增加删除元素效率很">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/09/26/Dynamic-Array/">
+
+
+
+
+
+  <title>动态数组 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/09/26/Dynamic-Array/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">动态数组</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-09-26T12:59:58+08:00">
+                2017-09-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Algorithm/" itemprop="url" rel="index">
+                    <span itemprop="name">Algorithm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/09/26/Dynamic-Array/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/09/26/Dynamic-Array/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近在学数据结构，涉及到动态数组。我自己总结了一下，把与动态数组有关的基本操作用c和c++分别写了一遍。下面把总结的成果记录一下。</p>
+<p>动态数组之所以称之为动态，关键就在于其可以在程序运行过程中自动增加分配的内存大小。要实现这一点的关键又在于下面两点：</p>
+<ul>
+<li>实时记录数组的元素个数和分配的内存的大小</li>
+<li>realloc()函数重新分配内存</li>
+</ul>
+<p>数组中的数据是连续存放的，可以随机访问。在数组尾部增加删除元素效率很高，但是在中间插入和删除元素则效率低下。</p>
+<h1 id="C语言动态数组操作"><a href="#C语言动态数组操作" class="headerlink" title="C语言动态数组操作"></a>C语言动态数组操作</h1><p>要实现实时记录数组的元素个数和分配的内存的大小可以使用下面的一个结构体：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">int</span> ElementType;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">DynamicArray</span>&#123;</span></span><br><span class="line">    ElementType* elems;</span><br><span class="line">    <span class="keyword">int</span> size;</span><br><span class="line">    <span class="keyword">int</span> capacity;</span><br><span class="line">&#125; *DynamicArrayPtr;</span><br></pre></td></tr></table></figure>
+
+<p>elems是数据所在地址块的首地址。size和capacity分别是所存储数据的个数和当前分配的容量，他们的值必须与当前数组的状况相对应。</p>
+<h2 id="初始化数组"><a href="#初始化数组" class="headerlink" title="初始化数组"></a>初始化数组</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(DynamicArrayPtr DAP)</span></span>&#123;</span><br><span class="line">    DAP-&gt;elems=(ElementType*)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(ElementType)*<span class="number">100</span>);</span><br><span class="line">    DAP-&gt;size=<span class="number">0</span>;</span><br><span class="line">    DAP-&gt;capacity=<span class="number">100</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>初始化的过程中我们为数据存储区域分配了初始的可以容纳100个元素的内存空间，所以当前的容量为100。此时数组中还没有数据，所以大小为0.</p>
+<h2 id="打印动态数组"><a href="#打印动态数组" class="headerlink" title="打印动态数组"></a>打印动态数组</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">print</span><span class="params">(DynamicArrayPtr DAP)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; DAP-&gt;size; i++) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"%d  "</span>, DAP-&gt;elems[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="内存重新分配"><a href="#内存重新分配" class="headerlink" title="内存重新分配"></a>内存重新分配</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">dealOverflow</span><span class="params">(DynamicArrayPtr DAP)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (DAP-&gt;size &gt;= DAP-&gt;capacity) &#123;</span><br><span class="line">        ElementType* newbase = (ElementType*)<span class="built_in">realloc</span>(DAP-&gt;elems, (<span class="number">50</span> + DAP-&gt;size)*<span class="keyword">sizeof</span>(ElementType));</span><br><span class="line">        <span class="keyword">if</span>(newbase==<span class="literal">NULL</span>)&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"重新分配内存失败！"</span>);</span><br><span class="line">            <span class="keyword">return</span> ;</span><br><span class="line">        &#125;</span><br><span class="line">        DAP-&gt;elems=newbase;</span><br><span class="line">		DAP-&gt;capacity += DELTA_CAPACITY;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>内存重新分配的条件就是当前数组中的元素个数大于或等于当前分配的容量时.重新分配使用的函数是realloc(),在原来的容量的基础之上新分配了可以容纳20个元素的空间,分配完成之后需要将记录当前容量大小的变量更新一下。这个函数主要进行的是容量是否够用的检测，如果不够用则增加容量。在每增加一个元素之前就应该调用一次该函数。</p>
+<h2 id="尾部追加元素"><a href="#尾部追加元素" class="headerlink" title="尾部追加元素"></a>尾部追加元素</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">append</span><span class="params">(DynamicArrayPtr DAP,ElementType e)</span></span>&#123;</span><br><span class="line">    dealOverflow(DAP);</span><br><span class="line">    DAP-&gt;elems[DAP-&gt;size]=e;</span><br><span class="line">    DAP-&gt;size++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>向尾部追加元素效率是比较高的。在追加之前首先要检测容量够不够用，追加之后要更新记录数组大小的变量的值。</p>
+<h2 id="插入元素"><a href="#插入元素" class="headerlink" title="插入元素"></a>插入元素</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">insert</span><span class="params">(DynamicArrayPtr DAP,<span class="keyword">int</span> pos,ElementType e)</span></span>&#123;</span><br><span class="line">    <span class="comment">//若容量不够则重新分配内存</span></span><br><span class="line">    dealOverflow(DAP);</span><br><span class="line">    <span class="comment">//下标超界的处理</span></span><br><span class="line">    <span class="keyword">if</span>(pos&gt;DAP-&gt;size||pos&lt;<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    <span class="comment">//移动元素</span></span><br><span class="line">    <span class="keyword">for</span>(i=DAP-&gt;size;i&gt;pos;i--)&#123;</span><br><span class="line">        DAP-&gt;elems[i]=DAP-&gt;elems[i<span class="number">-1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//插入元素</span></span><br><span class="line">    DAP-&gt;elems[i]=e;</span><br><span class="line">    <span class="comment">//更新sie</span></span><br><span class="line">    DAP-&gt;size++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>插入元素效率较低，在所插入位置的元素之后的所有元素都必须向后移动一个位置。</p>
+<h2 id="删除元素"><a href="#删除元素" class="headerlink" title="删除元素"></a>删除元素</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">myremove</span><span class="params">(DynamicArrayPtr DAP,<span class="keyword">int</span> pos)</span></span>&#123;</span><br><span class="line">    <span class="comment">//下标超界的处理</span></span><br><span class="line">    <span class="keyword">if</span>(pos&gt;=DAP-&gt;size||pos&lt;<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">     <span class="comment">//删除数据</span></span><br><span class="line">     <span class="keyword">int</span> i;</span><br><span class="line">     <span class="keyword">for</span>(i=pos;i&lt;DAP-&gt;size;i++)&#123;</span><br><span class="line">         DAP-&gt;elems[i]=DAP-&gt;elems[i+<span class="number">1</span>];</span><br><span class="line">     &#125;</span><br><span class="line">     更新size</span><br><span class="line">     DAP-&gt;size--;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="元素排序"><a href="#元素排序" class="headerlink" title="元素排序"></a>元素排序</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sort</span><span class="params">(DynamicArrayPtr DAP,<span class="keyword">char</span> rule=<span class="string">'&lt;'</span>)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(rule==<span class="string">'&lt;'</span>)&#123;<span class="comment">//从小到大排序</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;DAP-&gt;size;i++)&#123;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> j=i+<span class="number">1</span>;j&lt;DAP-&gt;size;j++)&#123;</span><br><span class="line">                    <span class="keyword">if</span>(DAP-&gt;elems[i]&gt;DAP-&gt;elems[j])&#123;</span><br><span class="line">                        <span class="keyword">int</span> temp=DAP-&gt;elems[i];</span><br><span class="line">                        DAP-&gt;elems[i]=DAP-&gt;elems[j];</span><br><span class="line">                        DAP-&gt;elems[j]=temp;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(rule==<span class="string">'&gt;'</span>)&#123;<span class="comment">//从大到小排序</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;DAP-&gt;size;i++)&#123;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> j=i+<span class="number">1</span>;j&lt;DAP-&gt;size;j++)&#123;</span><br><span class="line">                    <span class="keyword">if</span>(DAP-&gt;elems[i]&lt;DAP-&gt;elems[j])&#123;</span><br><span class="line">                        <span class="keyword">int</span> temp=DAP-&gt;elems[i];</span><br><span class="line">                        DAP-&gt;elems[i]=DAP-&gt;elems[j];</span><br><span class="line">                        DAP-&gt;elems[j]=temp;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;<span class="comment">//rule参数输入错误</span></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"请输入正确的排序规则('&lt;' or '&gt;')!!!"</span>);</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面使用冒泡法则对元素进行排序，rule参数指定排序规则，默认按照从小到大排序。</p>
+<h2 id="合并两个数组并排序"><a href="#合并两个数组并排序" class="headerlink" title="合并两个数组并排序"></a>合并两个数组并排序</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">mergeAndsort</span><span class="params">(DynamicArrayPtr DAP1,DynamicArrayPtr DAP2,<span class="keyword">char</span> rule=<span class="string">'&lt;'</span>)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;DAP2-&gt;size;i++)&#123;</span><br><span class="line">        append(DAP1,DAP2-&gt;elems[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//排序</span></span><br><span class="line">    sort(DAP1,rule);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="两个有序数组合并排序"><a href="#两个有序数组合并排序" class="headerlink" title="两个有序数组合并排序"></a>两个有序数组合并排序</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 功能:对两个已经按照相同规则排好序的动态数组合并并按照指定规则排序排序，</span></span><br><span class="line"><span class="comment"> * 根据原始规则与指定的规则的不同有四种排列组合</span></span><br><span class="line"><span class="comment"> * ＠para:DA１，DA2是两个原始的已有序的动态数组</span></span><br><span class="line"><span class="comment"> * ＠para:DA3是最终生成的结果动态数组</span></span><br><span class="line"><span class="comment"> * ＠para:originrule是原始的已排序的动态数组的排序规则('&lt;' or '&gt;')</span></span><br><span class="line"><span class="comment"> * ＠para:rule是合并后的的动态数组的排序规则('&lt;' or '&gt;')</span></span><br><span class="line"><span class="comment"> */</span> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">mergeAndsort_for_sorted</span><span class="params">(DynamicArrayPtr DA1,DynamicArrayPtr DA2,DynamicArrayPtr DA3,<span class="keyword">char</span> originrule,<span class="keyword">char</span> rule=<span class="string">'&lt;'</span>)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(originrule==<span class="string">'&lt;'</span>&amp;&amp;rule==<span class="string">'&lt;'</span>)&#123;</span><br><span class="line">            <span class="keyword">int</span> i=<span class="number">0</span>,j=<span class="number">0</span>;</span><br><span class="line">            <span class="keyword">while</span>(i!=DA1-&gt;size&amp;&amp;j!=DA2-&gt;size)&#123;</span><br><span class="line">                <span class="keyword">if</span>(DA1-&gt;elems[i]&lt;DA2-&gt;elems[j])&#123;</span><br><span class="line">                    append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">                    i++;</span><br><span class="line">                &#125;<span class="keyword">else</span> <span class="keyword">if</span>(DA1-&gt;elems[i]==DA2-&gt;elems[j]) &#123;</span><br><span class="line">                    <span class="comment">//防止循环的最后一个相同的时候漏掉一个</span></span><br><span class="line">                    append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">                    i++;</span><br><span class="line">                    append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">                    j++;</span><br><span class="line">                &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                    append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">                    j++;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(DA1-&gt;size==i)&#123;</span><br><span class="line">                <span class="keyword">while</span>(j&lt;DA2-&gt;size)&#123;</span><br><span class="line">                   append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">                    j++;</span><br><span class="line">                &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(DA2-&gt;size==j)&#123;</span><br><span class="line">                <span class="keyword">while</span>(i&lt;DA1-&gt;size)&#123;</span><br><span class="line">                   append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">                    i++;</span><br><span class="line">                &#125;</span><br><span class="line">                &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(originrule==<span class="string">'&gt;'</span>&amp;&amp;rule==<span class="string">'&gt;'</span>)&#123;</span><br><span class="line">       <span class="keyword">int</span> i=<span class="number">0</span>,j=<span class="number">0</span>;</span><br><span class="line">       <span class="keyword">while</span>(i!=DA1-&gt;size&amp;&amp;j!=DA2-&gt;size)&#123;</span><br><span class="line">           <span class="keyword">if</span>(DA1-&gt;elems[i]&lt;DA2-&gt;elems[j])&#123;</span><br><span class="line">               append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">               j++;</span><br><span class="line">           &#125;<span class="keyword">else</span> <span class="keyword">if</span>(DA1-&gt;elems[i]==DA2-&gt;elems[j]) &#123;</span><br><span class="line">               <span class="comment">//防止循环的最后一个相同的时候漏掉一个</span></span><br><span class="line">               append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">               i++;</span><br><span class="line">               append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">               j++;</span><br><span class="line">           &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">               append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">               i++;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span>(DA1-&gt;size==i)&#123;</span><br><span class="line">           <span class="keyword">while</span>(j&lt;DA2-&gt;size)&#123;</span><br><span class="line">              append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">               j++;</span><br><span class="line">           &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       <span class="keyword">else</span> <span class="keyword">if</span>(DA2-&gt;size==j)&#123;</span><br><span class="line">           <span class="keyword">while</span>(i&lt;DA1-&gt;size)&#123;</span><br><span class="line">              append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">               i++;</span><br><span class="line">           &#125;</span><br><span class="line">           &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(originrule==<span class="string">'&lt;'</span>&amp;&amp;rule==<span class="string">'&gt;'</span>)&#123;</span><br><span class="line">       <span class="keyword">int</span> i=DA1-&gt;size<span class="number">-1</span>,j=DA2-&gt;size<span class="number">-1</span>;</span><br><span class="line">       <span class="keyword">while</span>(i!=<span class="number">-1</span>&amp;&amp;j!=<span class="number">-1</span>)&#123;</span><br><span class="line">           <span class="keyword">if</span>(DA1-&gt;elems[i]&lt;DA2-&gt;elems[j])&#123;</span><br><span class="line">               append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">               j--;</span><br><span class="line">           &#125;<span class="keyword">else</span> <span class="keyword">if</span>(DA1-&gt;elems[i]==DA2-&gt;elems[j]) &#123;</span><br><span class="line">               <span class="comment">//防止循环的最后一个相同的时候漏掉一个</span></span><br><span class="line">               append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">               i--;</span><br><span class="line">               append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">               j--;</span><br><span class="line">           &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">               append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">               i--;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span>(<span class="number">-1</span>==i)&#123;</span><br><span class="line">           <span class="keyword">while</span>(j!=<span class="number">-1</span>)&#123;</span><br><span class="line">              append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">               j--;</span><br><span class="line">           &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       <span class="keyword">else</span> <span class="keyword">if</span>(<span class="number">-1</span>==j)&#123;</span><br><span class="line">           <span class="keyword">while</span>(i!=<span class="number">-1</span>)&#123;</span><br><span class="line">              append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">               i--;</span><br><span class="line">           &#125;</span><br><span class="line">           &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(originrule==<span class="string">'&gt;'</span>&amp;&amp;rule==<span class="string">'&lt;'</span>)&#123;</span><br><span class="line">       <span class="keyword">int</span> i=DA1-&gt;size<span class="number">-1</span>,j=DA2-&gt;size<span class="number">-1</span>;</span><br><span class="line">       <span class="keyword">while</span>(i!=<span class="number">-1</span>&amp;&amp;j!=<span class="number">-1</span>)&#123;</span><br><span class="line">           <span class="keyword">if</span>(DA1-&gt;elems[i]&lt;DA2-&gt;elems[j])&#123;</span><br><span class="line">               append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">               i--;</span><br><span class="line">           &#125;<span class="keyword">else</span> <span class="keyword">if</span>(DA1-&gt;elems[i]==DA2-&gt;elems[j]) &#123;</span><br><span class="line">               <span class="comment">//防止循环的最后一个相同的时候漏掉一个</span></span><br><span class="line">               append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">               i--;</span><br><span class="line">               append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">               j--;</span><br><span class="line">           &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">               append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">               j--;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span>(<span class="number">-1</span>==i)&#123;</span><br><span class="line">           <span class="keyword">while</span>(j!=<span class="number">-1</span>)&#123;</span><br><span class="line">              append(DA3,DA2-&gt;elems[j]);</span><br><span class="line">               j--;</span><br><span class="line">           &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       <span class="keyword">else</span> <span class="keyword">if</span>(<span class="number">-1</span>==j)&#123;</span><br><span class="line">           <span class="keyword">while</span>(i!=<span class="number">-1</span>)&#123;</span><br><span class="line">              append(DA3,DA1-&gt;elems[i]);</span><br><span class="line">               i--;</span><br><span class="line">           &#125;</span><br><span class="line">           &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"原始规则或指定的规则不正确"</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">``` </span><br><span class="line"># C++版动态数组</span><br><span class="line">我用c++把上面的c的内容封装了一下，下面的是全部的内容。</span><br><span class="line"></span><br><span class="line">## DynamicArray.h的内容</span><br><span class="line">``` c++</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 接口文件</span></span><br><span class="line"><span class="comment"> */</span> </span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> DYNAMICARRAY_H</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DYNAMICARRAY_H</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INIT_CAPACITY 100</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DELTA_CAPACITY 100</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">int</span> ElementType;</span><br><span class="line"><span class="keyword">namespace</span> mydynamicarray&#123;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">DynamicArray</span>;</span></span><br><span class="line">    <span class="comment">//定义这个类</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">DynamicArray</span>&#123;</span></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="comment">//构造函数</span></span><br><span class="line">        DynamicArray();</span><br><span class="line">        <span class="comment">//获取长度</span></span><br><span class="line">        <span class="function"><span class="keyword">int</span> <span class="title">getSize</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="comment">//获取容量</span></span><br><span class="line">        <span class="function"><span class="keyword">int</span> <span class="title">getCapacity</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="comment">//最大值的索引</span></span><br><span class="line">        <span class="function"><span class="keyword">int</span> <span class="title">max</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="comment">//最小值的索引</span></span><br><span class="line">        <span class="function"><span class="keyword">int</span> <span class="title">min</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="comment">//打印输出</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">print</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="comment">//在末尾追加数据</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">append</span><span class="params">(ElementType e)</span></span>;</span><br><span class="line">        <span class="comment">//在指定下标的前面插入指定的数据</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">insert</span><span class="params">(<span class="keyword">int</span> pos,ElementType e)</span></span>;</span><br><span class="line">        <span class="comment">//移除指定下标的数据</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">remove</span><span class="params">(<span class="keyword">int</span> pos)</span></span>;</span><br><span class="line">        <span class="comment">//销毁</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">todestroy</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="comment">//按照指定规则排序，默认从小到大</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">sort</span><span class="params">(charneirong rule=<span class="string">'&lt;'</span>)</span></span>;</span><br><span class="line">        <span class="comment">//合并两个动态数组，并且按照规则排序</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">mergeAndsort</span><span class="params">(DynamicArray&amp;,<span class="keyword">char</span> rule)</span></span>;</span><br><span class="line">        <span class="comment">//对两个已经具有相同顺序的动态数组进行合并并且排序</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">mergeAndsort_for_sorted</span><span class="params">(DynamicArray&amp;,DynamicArray&amp;,<span class="keyword">char</span> originrule,<span class="keyword">char</span> rule=<span class="string">'&lt;'</span>)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">dealOverflow</span><span class="params">()</span></span>;<span class="comment">//重新分配内存</span></span><br><span class="line">        ElementType* elems;</span><br><span class="line">        <span class="keyword">int</span> size;</span><br><span class="line">        <span class="keyword">int</span> capacity;</span><br><span class="line">    &#125;;<span class="comment">//注意类的定义的末尾需要有分号</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="DynamicArray-cpp的内容"><a href="#DynamicArray-cpp的内容" class="headerlink" title="DynamicArray.cpp的内容"></a>DynamicArray.cpp的内容</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 实现文件</span></span><br><span class="line"><span class="comment"> */</span> </span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdlib&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"DynamicArray.h"</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">namespace</span> mydynamicarray&#123;</span><br><span class="line">    <span class="comment">//构造函数</span></span><br><span class="line">    DynamicArray::DynamicArray()&#123;</span><br><span class="line">        elems=<span class="keyword">new</span> ElementType[INIT_CAPACITY];</span><br><span class="line">        size=<span class="number">0</span>;</span><br><span class="line">        capacity=INIT_CAPACITY;</span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="comment">//获取长度</span></span><br><span class="line">    <span class="keyword">int</span> DynamicArray::getSize()&#123;</span><br><span class="line">        <span class="keyword">return</span> size;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//获取容量</span></span><br><span class="line">    <span class="keyword">int</span> DynamicArray::getCapacity()&#123;</span><br><span class="line">        <span class="keyword">return</span> capacity;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//最大值</span></span><br><span class="line">    <span class="keyword">int</span> DynamicArray::max()&#123;</span><br><span class="line">        <span class="keyword">int</span> result=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;size<span class="number">-1</span>;i++)&#123;</span><br><span class="line">            result=(elems[i]&gt;elems[i+<span class="number">1</span>])?i:i+<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//最小值</span></span><br><span class="line">    <span class="keyword">int</span> DynamicArray::min()&#123;</span><br><span class="line">        <span class="keyword">int</span> result=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;size<span class="number">-1</span>;i++)&#123;</span><br><span class="line">            result=(elems[i]&lt;elems[i+<span class="number">1</span>])?i:i+<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//打印</span></span><br><span class="line">    <span class="keyword">void</span> DynamicArray::print()&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;size;i++)&#123;</span><br><span class="line">            <span class="built_in">cout</span>&lt;&lt;elems[i]&lt;&lt;<span class="string">" "</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//处理重新分配问题</span></span><br><span class="line">    <span class="keyword">void</span> DynamicArray::dealOverflow()&#123;</span><br><span class="line">        <span class="keyword">if</span>(size&gt;=capacity)&#123;</span><br><span class="line">            <span class="built_in">cout</span>&lt;&lt;<span class="string">"&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">            ElementType* newbase=(ElementType*)<span class="built_in">realloc</span>(elems,size+DELTA_CAPACITY);</span><br><span class="line">            <span class="keyword">if</span>(newbase==<span class="literal">NULL</span>)&#123;</span><br><span class="line">                <span class="built_in">cout</span>&lt;&lt;<span class="string">"重新分配内存失败！"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            elems=newbase;</span><br><span class="line">            capacity+=DELTA_CAPACITY;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//尾部追加</span></span><br><span class="line">    <span class="keyword">void</span> DynamicArray::append(ElementType e)&#123;</span><br><span class="line">        dealOverflow();</span><br><span class="line">        elems[size]=e;</span><br><span class="line">        size++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//在指定下表位置插入</span></span><br><span class="line">    <span class="keyword">void</span> DynamicArray::insert(<span class="keyword">int</span> pos,ElementType e)&#123;</span><br><span class="line">        dealOverflow();</span><br><span class="line">        <span class="keyword">if</span>(pos&lt;<span class="number">0</span>||pos&gt;size)&#123;</span><br><span class="line">            <span class="built_in">cout</span>&lt;&lt;<span class="string">"指定的位置不合法！"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> i;</span><br><span class="line">        <span class="keyword">for</span>(i=size;i&gt;pos;i--)&#123;</span><br><span class="line">            elems[i]=elems[i<span class="number">-1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        elems[i]=e;</span><br><span class="line">        size++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//删除指定下表的元素</span></span><br><span class="line">    <span class="keyword">void</span> DynamicArray::remove(<span class="keyword">int</span> pos)&#123;</span><br><span class="line">        <span class="keyword">if</span>(pos&lt;<span class="number">0</span>||pos&gt;size)&#123;</span><br><span class="line">            <span class="built_in">cout</span>&lt;&lt;<span class="string">"指定的位置不合法！"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> i;</span><br><span class="line">        <span class="keyword">for</span>(i=pos;i&lt;size;i++)&#123;</span><br><span class="line">            elems[i]=elems[i+<span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        size--;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//销毁</span></span><br><span class="line">    <span class="keyword">void</span> DynamicArray::todestroy()&#123;</span><br><span class="line">        <span class="keyword">delete</span> [] elems;</span><br><span class="line">        size=<span class="number">0</span>;</span><br><span class="line">        capacity=<span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">void</span> DynamicArray::sort(<span class="keyword">char</span> rule)&#123;</span><br><span class="line">        <span class="keyword">if</span>(rule==<span class="string">'&lt;'</span>)&#123;<span class="comment">//从小到大排序</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;size;i++)&#123;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> j=i+<span class="number">1</span>;j&lt;size;j++)&#123;</span><br><span class="line">                    <span class="keyword">if</span>(elems[i]&gt;elems[j])&#123;</span><br><span class="line">                        <span class="keyword">int</span> temp=elems[i];</span><br><span class="line">                        elems[i]=elems[j];</span><br><span class="line">                        elems[j]=temp;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(rule==<span class="string">'&gt;'</span>)&#123;<span class="comment">//从大到小排序</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;size;i++)&#123;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> j=i+<span class="number">1</span>;j&lt;size;j++)&#123;</span><br><span class="line">                    <span class="keyword">if</span>(elems[i]&lt;elems[j])&#123;</span><br><span class="line">                        <span class="keyword">int</span> temp=elems[i];</span><br><span class="line">                        elems[i]=elems[j];</span><br><span class="line">                        elems[j]=temp;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;<span class="comment">//rule参数输入错误</span></span><br><span class="line">            <span class="built_in">cout</span>&lt;&lt;<span class="string">"请输入正确的排序规则('&lt;' or '&gt;')!!!"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">void</span> DynamicArray::mergeAndsort(DynamicArray&amp; dyArray,<span class="keyword">char</span> rule=<span class="string">'&lt;'</span>)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;dyArray.size;i++)&#123;</span><br><span class="line">            append(dyArray.elems[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//销毁DA2,注意不能够两次释放，如果这里释放了，那么在其他的地方</span></span><br><span class="line">        <span class="comment">//不能再次释放</span></span><br><span class="line">        <span class="comment">// dyArray.todestroy();</span></span><br><span class="line">        <span class="comment">//排序</span></span><br><span class="line">        sort(rule);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//对两个已经有序的动态数组进行合并排序</span></span><br><span class="line">    <span class="keyword">void</span> DynamicArray::mergeAndsort_for_sorted(DynamicArray&amp; DA2,DynamicArray&amp; DA3,<span class="keyword">char</span> originrule,<span class="keyword">char</span> rule)&#123;</span><br><span class="line">        <span class="keyword">if</span>(originrule==<span class="string">'&lt;'</span>&amp;&amp;rule==<span class="string">'&lt;'</span>)&#123;</span><br><span class="line">                <span class="keyword">int</span> i=<span class="number">0</span>,j=<span class="number">0</span>;</span><br><span class="line">                <span class="keyword">while</span>(i!=size&amp;&amp;j!=DA2.size)&#123;</span><br><span class="line">                    <span class="keyword">if</span>(elems[i]&lt;DA2.elems[j])&#123;</span><br><span class="line">                        DA3.append(elems[i]);</span><br><span class="line">                        i++;</span><br><span class="line">                    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(elems[i]==DA2.elems[j]) &#123;</span><br><span class="line">                        <span class="comment">//防止循环的最后一个相同的时候漏掉一个</span></span><br><span class="line">                        DA3.append(elems[i]);</span><br><span class="line">                        i++;</span><br><span class="line">                        DA3.append(DA2.elems[j]);</span><br><span class="line">                        j++;</span><br><span class="line">                    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                        DA3.append(DA2.elems[j]);</span><br><span class="line">                        j++;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span>(size==i)&#123;</span><br><span class="line">                    <span class="keyword">while</span>(j&lt;DA2.size)&#123;</span><br><span class="line">                       DA3.append(DA2.elems[j]);</span><br><span class="line">                        j++;</span><br><span class="line">                    &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span>(DA2.size==j)&#123;</span><br><span class="line">                    <span class="keyword">while</span>(i&lt;size)&#123;</span><br><span class="line">                       DA3.append(elems[i]);</span><br><span class="line">                        i++;</span><br><span class="line">                    &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(originrule==<span class="string">'&gt;'</span>&amp;&amp;rule==<span class="string">'&gt;'</span>)&#123;</span><br><span class="line">           <span class="keyword">int</span> i=<span class="number">0</span>,j=<span class="number">0</span>;</span><br><span class="line">           <span class="keyword">while</span>(i!=size&amp;&amp;j!=DA2.size)&#123;</span><br><span class="line">               <span class="keyword">if</span>(elems[i]&lt;DA2.elems[j])&#123;</span><br><span class="line">                   DA3.append(DA2.elems[j]);</span><br><span class="line">                   j++;</span><br><span class="line">               &#125;<span class="keyword">else</span> <span class="keyword">if</span>(elems[i]==DA2.elems[j]) &#123;</span><br><span class="line">                   <span class="comment">//防止循环的最后一个相同的时候漏掉一个</span></span><br><span class="line">                   DA3.append(elems[i]);</span><br><span class="line">                   i++;</span><br><span class="line">                   DA3.append(DA2.elems[j]);</span><br><span class="line">                   j++;</span><br><span class="line">               &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                   DA3.append(elems[i]);</span><br><span class="line">                   i++;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">if</span>(size==i)&#123;</span><br><span class="line">               <span class="keyword">while</span>(j&lt;DA2.size)&#123;</span><br><span class="line">                  DA3.append(DA2.elems[j]);</span><br><span class="line">                   j++;</span><br><span class="line">               &#125;</span><br><span class="line">               &#125;</span><br><span class="line">           <span class="keyword">else</span> <span class="keyword">if</span>(DA2.size==j)&#123;</span><br><span class="line">               <span class="keyword">while</span>(i&lt;size)&#123;</span><br><span class="line">                  DA3.append(elems[i]);</span><br><span class="line">                   i++;</span><br><span class="line">               &#125;</span><br><span class="line">               &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(originrule==<span class="string">'&lt;'</span>&amp;&amp;rule==<span class="string">'&gt;'</span>)&#123;</span><br><span class="line">           <span class="keyword">int</span> i=size<span class="number">-1</span>,j=DA2.size<span class="number">-1</span>;</span><br><span class="line">           <span class="keyword">while</span>(i!=<span class="number">-1</span>&amp;&amp;j!=<span class="number">-1</span>)&#123;</span><br><span class="line">               <span class="keyword">if</span>(elems[i]&lt;DA2.elems[j])&#123;</span><br><span class="line">                   DA3.append(DA2.elems[j]);</span><br><span class="line">                   j--;</span><br><span class="line">               &#125;<span class="keyword">else</span> <span class="keyword">if</span>(elems[i]==DA2.elems[j]) &#123;</span><br><span class="line">                   <span class="comment">//防止循环的最后一个相同的时候漏掉一个</span></span><br><span class="line">                   DA3.append(elems[i]);</span><br><span class="line">                   i--;</span><br><span class="line">                   DA3.append(DA2.elems[j]);</span><br><span class="line">                   j--;</span><br><span class="line">               &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                   DA3.append(elems[i]);</span><br><span class="line">                   i--;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">if</span>(<span class="number">-1</span>==i)&#123;</span><br><span class="line">               <span class="keyword">while</span>(j!=<span class="number">-1</span>)&#123;</span><br><span class="line">                  DA3.append(DA2.elems[j]);</span><br><span class="line">                   j--;</span><br><span class="line">               &#125;</span><br><span class="line">               &#125;</span><br><span class="line">           <span class="keyword">else</span> <span class="keyword">if</span>(<span class="number">-1</span>==j)&#123;</span><br><span class="line">               <span class="keyword">while</span>(i!=<span class="number">-1</span>)&#123;</span><br><span class="line">                  DA3.append(elems[i]);</span><br><span class="line">                   i--;</span><br><span class="line">               &#125;</span><br><span class="line">               &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(originrule==<span class="string">'&gt;'</span>&amp;&amp;rule==<span class="string">'&lt;'</span>)&#123;</span><br><span class="line">           <span class="keyword">int</span> i=size<span class="number">-1</span>,j=DA2.size<span class="number">-1</span>;</span><br><span class="line">           <span class="keyword">while</span>(i!=<span class="number">-1</span>&amp;&amp;j!=<span class="number">-1</span>)&#123;</span><br><span class="line">               <span class="keyword">if</span>(elems[i]&lt;DA2.elems[j])&#123;</span><br><span class="line">                   DA3.append(elems[i]);</span><br><span class="line">                   i--;</span><br><span class="line">               &#125;<span class="keyword">else</span> <span class="keyword">if</span>(elems[i]==DA2.elems[j]) &#123;</span><br><span class="line">                   <span class="comment">//防止循环的最后一个相同的时候漏掉一个</span></span><br><span class="line">                   DA3.append(elems[i]);</span><br><span class="line">                   i--;</span><br><span class="line">                   DA3.append(DA2.elems[j]);</span><br><span class="line">                   j--;</span><br><span class="line">               &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                   DA3.append(DA2.elems[j]);</span><br><span class="line">                   j--;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">if</span>(<span class="number">-1</span>==i)&#123;</span><br><span class="line">               <span class="keyword">while</span>(j!=<span class="number">-1</span>)&#123;</span><br><span class="line">                  DA3.append(DA2.elems[j]);</span><br><span class="line">                   j--;</span><br><span class="line">               &#125;</span><br><span class="line">               &#125;</span><br><span class="line">           <span class="keyword">else</span> <span class="keyword">if</span>(<span class="number">-1</span>==j)&#123;</span><br><span class="line">               <span class="keyword">while</span>(i!=<span class="number">-1</span>)&#123;</span><br><span class="line">                  DA3.append(elems[i]);</span><br><span class="line">                   i--;</span><br><span class="line">               &#125;</span><br><span class="line">               &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"原始规则或指定的规则不正确"</span>);</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="main-cpp-测试-的内容"><a href="#main-cpp-测试-的内容" class="headerlink" title="main.cpp(测试)的内容"></a>main.cpp(测试)的内容</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 测试文件</span></span><br><span class="line"><span class="comment"> */</span> </span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"DynamicArray.h"</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> mydynamicarray;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   DynamicArray array1=DynamicArray();</span><br><span class="line">   array1.append(<span class="number">1</span>);</span><br><span class="line">   array1.append(<span class="number">3</span>);</span><br><span class="line">   array1.append(<span class="number">2</span>);</span><br><span class="line">   array1.print();</span><br><span class="line">   array1.insert(<span class="number">0</span>,<span class="number">100</span>);</span><br><span class="line">   array1.insert(<span class="number">2</span>,<span class="number">200</span>);</span><br><span class="line">   array1.print();</span><br><span class="line">   <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">       array1.append(i);</span><br><span class="line">   &#125;</span><br><span class="line">   array1.print();</span><br><span class="line">   array1.sort(<span class="string">'&gt;'</span>);</span><br><span class="line">   array1.print();</span><br><span class="line">   array1.sort();</span><br><span class="line">   array1.print();</span><br><span class="line">   DynamicArray array2=DynamicArray();</span><br><span class="line">   array2.append(<span class="number">1000</span>);</span><br><span class="line">   array2.append(<span class="number">3000</span>);</span><br><span class="line">   array2.append(<span class="number">2000</span>);</span><br><span class="line">   array2.append(<span class="number">250</span>);</span><br><span class="line">   array2.append(<span class="number">9000</span>);</span><br><span class="line">   array2.sort();</span><br><span class="line">   <span class="built_in">cout</span>&lt;&lt;array2.getSize()&lt;&lt;<span class="string">"||||||||||||"</span>&lt;&lt;array2.getCapacity()&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">   array2.print();</span><br><span class="line">   array1.mergeAndsort(array2,<span class="string">'&lt;'</span>);</span><br><span class="line">   array1.print();</span><br><span class="line">   DynamicArray array3=DynamicArray();</span><br><span class="line">   array1.mergeAndsort_for_sorted(array2,array3,<span class="string">'&lt;'</span>);</span><br><span class="line">   array3.print();</span><br><span class="line">   <span class="built_in">cout</span>&lt;&lt;array3.max()&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">   <span class="built_in">cout</span>&lt;&lt;array3.min()&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">   array1.todestroy();</span><br><span class="line">   array2.todestroy();</span><br><span class="line">   array3.todestroy();</span><br><span class="line">   <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="makefile"><a href="#makefile" class="headerlink" title="makefile"></a>makefile</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">main.exe:DynamicArray.o main.o</span><br><span class="line">    g++ -o main.exe DynamicArray.o main.o</span><br><span class="line">DynamicArray.o:DynamicArray.cpp DynamicArray.h</span><br><span class="line">    g++ -c DynamicArray.cpp DynamicArray.h</span><br><span class="line">main.o:main.cpp</span><br><span class="line">    g++ -c main.cpp</span><br><span class="line">clean:</span><br><span class="line">    rm main.exe main.o DynamicArray.o DynamicArray.h.gch</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Dynamic-array/" rel="tag"># Dynamic array</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/26/Vector-in-STL/" rel="next" title="Vector in STL">
+                <i class="fa fa-chevron-left"></i> Vector in STL
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/28/Linked-List/" rel="prev" title="单链表">
+                单链表 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#C语言动态数组操作"><span class="nav-number">1.</span> <span class="nav-text">C语言动态数组操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化数组"><span class="nav-number">1.1.</span> <span class="nav-text">初始化数组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#打印动态数组"><span class="nav-number">1.2.</span> <span class="nav-text">打印动态数组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存重新分配"><span class="nav-number">1.3.</span> <span class="nav-text">内存重新分配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#尾部追加元素"><span class="nav-number">1.4.</span> <span class="nav-text">尾部追加元素</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入元素"><span class="nav-number">1.5.</span> <span class="nav-text">插入元素</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除元素"><span class="nav-number">1.6.</span> <span class="nav-text">删除元素</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#元素排序"><span class="nav-number">1.7.</span> <span class="nav-text">元素排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#合并两个数组并排序"><span class="nav-number">1.8.</span> <span class="nav-text">合并两个数组并排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#两个有序数组合并排序"><span class="nav-number">1.9.</span> <span class="nav-text">两个有序数组合并排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DynamicArray-cpp的内容"><span class="nav-number">1.10.</span> <span class="nav-text">DynamicArray.cpp的内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#main-cpp-测试-的内容"><span class="nav-number">1.11.</span> <span class="nav-text">main.cpp(测试)的内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#makefile"><span class="nav-number">1.12.</span> <span class="nav-text">makefile</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

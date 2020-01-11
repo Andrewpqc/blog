@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="TCP,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在上一节讲到TCP报文段结构的时候讲到TCP首部中有两个字段序号和确认号，这一节里面我们就详细的讲讲TCP序号和确认号是如何在TCP的可靠数据传输服务中发挥重要作用的。在我们实际了解序号和确认号之前我们先要了解一下可靠数据传输原理。 可靠数据传输原理TCP协议是运行在网络层IP协议之上的，这里我们需要直接给出的是:IP协议提供了单一的服务，称为尽力而为服务，数据在IP协议上传输是不可靠的。我们要研">
+<meta name="keywords" content="TCP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP中的序号和确认号">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/07/17/sequence-number-and-ack-number-in-tcp/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="在上一节讲到TCP报文段结构的时候讲到TCP首部中有两个字段序号和确认号，这一节里面我们就详细的讲讲TCP序号和确认号是如何在TCP的可靠数据传输服务中发挥重要作用的。在我们实际了解序号和确认号之前我们先要了解一下可靠数据传输原理。 可靠数据传输原理TCP协议是运行在网络层IP协议之上的，这里我们需要直接给出的是:IP协议提供了单一的服务，称为尽力而为服务，数据在IP协议上传输是不可靠的。我们要研">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/segment-lost.jpeg">
+<meta property="og:image" content="http://andrewpqc.github.io/images/ack-lost.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/byte-stream.png">
+<meta property="og:updated_time" content="2018-07-17T07:09:19.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TCP中的序号和确认号">
+<meta name="twitter:description" content="在上一节讲到TCP报文段结构的时候讲到TCP首部中有两个字段序号和确认号，这一节里面我们就详细的讲讲TCP序号和确认号是如何在TCP的可靠数据传输服务中发挥重要作用的。在我们实际了解序号和确认号之前我们先要了解一下可靠数据传输原理。 可靠数据传输原理TCP协议是运行在网络层IP协议之上的，这里我们需要直接给出的是:IP协议提供了单一的服务，称为尽力而为服务，数据在IP协议上传输是不可靠的。我们要研">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/segment-lost.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/07/17/sequence-number-and-ack-number-in-tcp/">
+
+
+
+
+
+  <title>TCP中的序号和确认号 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/07/17/sequence-number-and-ack-number-in-tcp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">TCP中的序号和确认号</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-17T15:09:19+08:00">
+                2018-07-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Network/" itemprop="url" rel="index">
+                    <span itemprop="name">Network</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/17/sequence-number-and-ack-number-in-tcp/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/07/17/sequence-number-and-ack-number-in-tcp/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在上一节讲到TCP报文段结构的时候讲到TCP首部中有两个字段序号和确认号，这一节里面我们就详细的讲讲TCP序号和确认号是如何在TCP的可靠数据传输服务中发挥重要作用的。在我们实际了解序号和确认号之前我们先要了解一下可靠数据传输原理。</p>
+<h1 id="可靠数据传输原理"><a href="#可靠数据传输原理" class="headerlink" title="可靠数据传输原理"></a>可靠数据传输原理</h1><p>TCP协议是运行在网络层IP协议之上的，这里我们需要直接给出的是:IP协议提供了单一的服务，称为<strong>尽力而为服务</strong>，数据在IP协议上传输是不可靠的。我们要研究可靠数据传输，那么就需要知道数据直接在IP协议上传输怎么就不可靠了呢?会出现那些问题呢?数据在网络中传输会出现下列问题:</p>
+<ul>
+<li><strong>比特错误</strong></li>
+<li><strong>分组丢失</strong></li>
+<li><strong>接收顺序错乱</strong></li>
+</ul>
+<p>可靠数据传输的目的就是要解决上面的三个问题。</p>
+<h2 id="比特错误"><a href="#比特错误" class="headerlink" title="比特错误"></a>比特错误</h2><p>对于比特错误，TCP首部中有检验和字段，接收方在接收到数据之后，通过检查检验和字段就可以判断传输的数据中是否发生了比特错误。如果发生了比特错误，接收方可以进行纠错，如果纠错无法恢复那么接收方就只能给发送方以反馈，把这个消息告诉发送方。发送方这时就会重传该分组。</p>
+<p>上面描述中的给发送方以反馈的过程就是发送一个ACK分组，即确认的过程(事实上，无论接收到的分组是否出现了错误，接收方都应该给发送方以反馈，让发送方时刻知道当前数据发送是否正常。也就是说每发送一个分组，发送方和接收方之间都会有一个确认的过程)。而发送方重传则是当传输出现问题时的唯一解决办法。</p>
+<p>这里我们忽略了一个问题，确认分组(ACK分组)也可能会发生比特错误。这时候该怎么办呢?首先我们要明白的一点是确认分组也是一个TCP报文段，也包含了检验和字段，也就是说发送方可以根据这个检验和字段判断出该确认分组是否出现了比特错误。基于这一点，这个问题或许有下面的三中解决办法:</p>
+<p>1.当发送方接收到发生比特错误的确认分组时，需要向接收方也发过去一个类似确认分组的分组，以告诉接收方重新发送确认分组。但是这个类似于确认分组的分组也是可能会发生比特错误的。这这样的话我们明显陷入了一个循环问题，如果选择这种方法，无疑我们走上了一条困难重重之路。这种方法显然是行不通的。</p>
+<p>2.第二种可能的方法是增加足够的检验和比特，使发送方不仅可以检测到比特错误，还可以自动纠正比特错误。这种方法对于会产生比特错误，但是不会丢失数据的情况来说是可以直接解决问题的。但真实的情景中丢失数据是存在的。所以这种方法在真实的情景中也是无能为力。</p>
+<p>3.第三种方法是，当发送方检查到表明传送成功的确认分组和检查到由于比特错误而意义含糊不清的确认分组时，都重传最近分组。这种方法逻辑很清晰，但是却引入了一个新问题。由于比特错误而意义含糊不清的确认分组里面有一部分是表明传送成功，还有一部分是表明传送失败，而发送方都将其看做是传送失败的意思，从而重传最近分组。这样就在网络传输中引入了冗余分组。接收方不知道接收到的分组是新的还是一次重传。也就是说，接收方可能会两次或以上的接收到同一个分组，并且将他们当做新的分组处理。这样的话，发送方发送的数据与接收方接收到的数据就不一致，所以这也违背了可靠数据传输的原则。</p>
+<p>解决这一个问题其实也很简单，我们只需要对第三种方法稍加改进即可。也就是在数据分组中添加一个新字段，让发送发对其数据分组编号，即将发送发数据分组的序号放入该分组中。于是，接收方只需要检查序号即可确定收到的分组是否是一次重传。(几乎所有现有的数据传输协议中，包括TCP，都采用了这种方法)</p>
+<h2 id="分组丢失"><a href="#分组丢失" class="headerlink" title="分组丢失"></a>分组丢失</h2><p>下面我们来考虑分组丢失的问题。在丢失分组这个层面来讲，<strong>发送方将一个分组发送出去有可能发生发送的分组丢失或者接收方发送给发送方的用于确认的分组丢失</strong>,如下:<br><img src="/images/segment-lost.jpeg" alt><br><img src="/images/ack-lost.png" alt></p>
+<p>上面的两种丢失情况，对于发送方来说是一样的－－接收不到确认分组。所以发送方采取的措施也是统一的－－重传。</p>
+<p>但是，这里我们还需要考虑一些细节。发送方怎样确认自己接收不到一个分组的确认分组的呢？发送方需要等待足够长的时间以便确认分组丢失。<strong>显然发送方至少需要等待一个这样长的时间:即发送方与接收方之间的一个往返时延加上接收方处理一个分组的时间。</strong>在许多网络环境下，最欢情况下的最大时延是很难估算的，确定的因素非常少。在实际的处理是发送方明智的选择一个时间　值，以判定可能发生了丢包(尽管不能确保)，如果在这个时间内没有收到ACK，则重传该分组。这就是TCP的<strong>超时重传机制</strong>。注意到如果一个分组经历了一个特别大的时延，发送方可能会重传该分组，即使该数据分组及其ACK都没有丢失。这样就可能在发送方与接收方的信道中引入<strong>冗余数据分组</strong>,好在，上面讲到的<strong>序号</strong>可以成功解决这一个问题。</p>
+<p>从发送方的观点看，重传是一种万能灵药。<strong>发送方不知道是一个数据分组丢失，还是一个ACK丢失，或者只是该分组或ACK过度时延。在所有这些情况下，动作都是一样的:重传</strong>。为了实现基于时间的重传机制，我们需要一个<strong>倒计时定时器</strong>。</p>
+<h2 id="接收顺序错乱"><a href="#接收顺序错乱" class="headerlink" title="接收顺序错乱"></a>接收顺序错乱</h2><p>经过上面的讨论，解决接收顺序错乱也就简单了，依然是<strong>序号</strong>，接收方有了每一个分组的需要，那么不发生数据错误和数据丢失就可以装配出完整的数据。</p>
+<h1 id="序号和确认号的工作细节"><a href="#序号和确认号的工作细节" class="headerlink" title="序号和确认号的工作细节"></a>序号和确认号的工作细节</h1><p>在了解了可靠数据传输所采取的一般策略之后，我们就来仔细看看序号和确认号具体是怎样协同工作的。<strong>TCP报文段首部中两个最重要的字段就是序号字段和确认字段</strong>,这两个字段是TCP可靠传输服务的关键部分。</p>
+<p>TCP把数据看做看成一个无结构的、有序的字节流。序号是建立在传送的字节流上，而不是建立在传送的报文段的序列之上。因此，<strong>一个报文段的序号是该报文段首字节的字节流编号</strong>。</p>
+<p>假设主机A上的一个进程想通过一条TCP连接向主机B上的一个进程发送一个数据流。主机A中的TCP将隐式的对数据流中的每一个字节编号。假定数据流由一个包含500000字节的文件组成，其MSS为1000字节，数据流的首字节编号是0。如图所示，该TCP将为该数据流构建500个报文段，给第一个报文段分配序号0,第二个报文段分配序号1000,第三个报文段分配序号2000,以此类推。每一个序号被填入到相应TCP报文段首部的序号字段。</p>
+<p><img src="/images/byte-stream.png" alt></p>
+<p>确认号要比序号要难处理一些。<strong>主机A填充进报文段的确认号是主机A期望从主机B收到的下一个字节的序号</strong>。看一个例子有助于实际发生的事情。假设主机A已收到了来自主机B的编号为0–535的所有字节，同时假设它打算发送一个报文段给主机B。主机A等待主机B的数据流中字节536及之后的所有字节。所以主机A就会在它发往主机B的报文段的确认号字段中填上536.</p>
+<!-- ![](/images/seq-ack.gif) -->
+
+<h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><ul>
+<li>数据在网络中传输会出现:比特错误、分组丢失、接收顺序错乱三种错误</li>
+<li>序号是建立在传送的字节流上，而不是建立在传送的报文段的序列之上。因此，一个报文段的序号是该报文段首字节的字节流编号</li>
+<li>主机A填充进报文段的确认号是主机A期望从主机B收到的下一个字节的序号</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/TCP/" rel="tag"># TCP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/16/introduction-to-tcp/" rel="next" title="TCP简介">
+                <i class="fa fa-chevron-left"></i> TCP简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/17/tcp-connection-manage/" rel="prev" title="TCP连接的建立与断开">
+                TCP连接的建立与断开 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#可靠数据传输原理"><span class="nav-number">1.</span> <span class="nav-text">可靠数据传输原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#比特错误"><span class="nav-number">1.1.</span> <span class="nav-text">比特错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分组丢失"><span class="nav-number">1.2.</span> <span class="nav-text">分组丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接收顺序错乱"><span class="nav-number">1.3.</span> <span class="nav-text">接收顺序错乱</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#序号和确认号的工作细节"><span class="nav-number">2.</span> <span class="nav-text">序号和确认号的工作细节</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结论"><span class="nav-number">3.</span> <span class="nav-text">结论</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

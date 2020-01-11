@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Fluent Python,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近在读一本python的书Fluent Python,收获很多。如果你是一个有一定python编程经验,并且想让自己的代码变的更加pythonic,那么这本书就非常适合你。就我个人而言，看了这本书前面的几章，感觉自己以前写的东西都不是python,之前自己对python的理解太过于肤浅了。这本书打开了我重新认识python的大门。 书中在深入介绍许多重要的主题时还穿插着介绍了许多我自己编程时很少">
+<meta name="keywords" content="Fluent Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python数据模型">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/10/28/chapter-one-of-fluent-python/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="最近在读一本python的书Fluent Python,收获很多。如果你是一个有一定python编程经验,并且想让自己的代码变的更加pythonic,那么这本书就非常适合你。就我个人而言，看了这本书前面的几章，感觉自己以前写的东西都不是python,之前自己对python的理解太过于肤浅了。这本书打开了我重新认识python的大门。 书中在深入介绍许多重要的主题时还穿插着介绍了许多我自己编程时很少">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/fp.jpg">
+<meta property="og:updated_time" content="2017-11-16T07:27:13.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python数据模型">
+<meta name="twitter:description" content="最近在读一本python的书Fluent Python,收获很多。如果你是一个有一定python编程经验,并且想让自己的代码变的更加pythonic,那么这本书就非常适合你。就我个人而言，看了这本书前面的几章，感觉自己以前写的东西都不是python,之前自己对python的理解太过于肤浅了。这本书打开了我重新认识python的大门。 书中在深入介绍许多重要的主题时还穿插着介绍了许多我自己编程时很少">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/fp.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/10/28/chapter-one-of-fluent-python/">
+
+
+
+
+
+  <title>Python数据模型 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/10/28/chapter-one-of-fluent-python/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python数据模型</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-28T15:27:13+08:00">
+                2017-10-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/10/28/chapter-one-of-fluent-python/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/10/28/chapter-one-of-fluent-python/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近在读一本python的书Fluent Python,收获很多。如果你是一个有一定python编程经验,并且想让自己的代码变的更加pythonic,那么这本书就非常适合你。就我个人而言，看了这本书前面的几章，感觉自己以前写的东西都不是python,之前自己对python的理解太过于肤浅了。这本书打开了我重新认识python的大门。</p>
+<p><img src="/images/fp.jpg" alt="fluent python"><br>书中在深入介绍许多重要的主题时还穿插着介绍了许多我自己编程时很少用到的但是又非常有用的tips，全书行文逻辑比较复杂，感觉自己无法把每一部分的内容都理清，所以干脆就按照原书中的章节和知识点记录并介绍。下面就开始第一章的内容。</p>
+<h1 id="一摞python风格的纸牌"><a href="#一摞python风格的纸牌" class="headerlink" title="一摞python风格的纸牌"></a>一摞python风格的纸牌</h1><p>第一章里作者就以一摞python风格的纸牌这个例子向我们展示了python语言的强大和优美。其中涉及到python的命名元组，列表推导，<code>__len__</code>,<code>__getitem__</code>两个特殊方法等知识点。</p>
+<p>下面话不多说，直接拿出代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> collections</span><br><span class="line"><span class="comment">#创建了一个命名元祖Card</span></span><br><span class="line">Card=collections.namedtuple(<span class="string">"Card"</span>,[<span class="string">"value"</span>,<span class="string">"style"</span>])</span><br><span class="line"><span class="comment">#创建了一个纸牌类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FrenchDeck</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="comment">#准备纸牌的牌面值和花色，使用了列表推导和字符串分割</span></span><br><span class="line">    values=[str(i) <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">2</span>,<span class="number">11</span>)]+list(<span class="string">"JQKA"</span>)</span><br><span class="line">    styles=<span class="string">"spades diamonds clubs hearts"</span>.split()</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self._cards=[Card(value,style) <span class="keyword">for</span> value <span class="keyword">in</span> self.values</span><br><span class="line">                     <span class="keyword">for</span> style <span class="keyword">in</span> self.styles]</span><br><span class="line">    <span class="comment">#实现__len__魔术方法，使得我们的FrenchDeck的对象支持len()求元素个数</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> len(self._cards)</span><br><span class="line">    <span class="comment">#实现了__getitem__魔术方法，使得我们的FrenchDeck的对象支持切片</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, position)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self._cards[position]</span><br></pre></td></tr></table></figure>
+
+<p>经过上面的简单定义，我们就得到了一个功能非常强大的类，下面我们就可以使用这个类了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">T=FrenchDeck()</span><br><span class="line"><span class="comment">#源于__len__方法</span></span><br><span class="line">length=len(T)</span><br><span class="line">print(length)</span><br><span class="line"><span class="comment">#源于__getitem__方法</span></span><br><span class="line">print(T[<span class="number">2</span>])</span><br><span class="line">print(T[<span class="number">1</span>:<span class="number">5</span>])</span><br><span class="line">print(T[<span class="number">1</span>:<span class="number">5</span>:<span class="number">2</span>])</span><br><span class="line"><span class="keyword">from</span> random <span class="keyword">import</span> choice</span><br><span class="line">a=choice(T)</span><br><span class="line">print(a)</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Card(value=<span class="string">'2'</span>, style=<span class="string">'clubs'</span>)</span><br><span class="line">[Card(value=<span class="string">'2'</span>, style=<span class="string">'diamonds'</span>), Card(value=<span class="string">'2'</span>, style=<span class="string">'clubs'</span>), Card(value=<span class="string">'2'</span>,style=<span class="string">'hearts'</span>), Card(value=<span class="string">'3'</span>, style=<span class="string">'spades'</span>)]</span><br><span class="line">[Card(value=<span class="string">'2'</span>, style=<span class="string">'diamonds'</span>), Card(value=<span class="string">'2'</span>, style=<span class="string">'hearts'</span>)]</span><br><span class="line">Card(value=<span class="string">'10'</span>, style=<span class="string">'clubs'</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="命名元组"><a href="#命名元组" class="headerlink" title="命名元组"></a>命名元组</h2><p>我们可以使用collections.namedtuple(命名元组)来构建一个简单的类，这个简单的类可以用来构建只有少数属性而没有方法的对象。比如上面的Card=collections.namedtuple(“Card”,[“value”,”style”])语句就是创建了一个只有vaule,style两个属性的类Card.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> collections</span><br><span class="line"><span class="comment">#比如下面就是构建了HH类，他有a,b两个属性</span></span><br><span class="line">HH=collections.namedtuple(<span class="string">"HH"</span>,[<span class="string">'a'</span>,<span class="string">'b'</span>])</span><br><span class="line"><span class="comment">#实例化H1这个对象</span></span><br><span class="line">H1=HH(<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line">print(H1.a+H1.b)<span class="comment">#输出３</span></span><br></pre></td></tr></table></figure>
+
+<p>现在就可以简单的将命名元组理解为只有属性没有方法的类，虽然在绝大多数的时候我们也是这样做的。关于命名元组的更多介绍将在介绍元组时讲到。</p>
+<h2 id="len和getitem"><a href="#len和getitem" class="headerlink" title="len和getitem"></a><strong>len</strong>和<strong>getitem</strong></h2><p>在这个例子中第二个重要的知识点就是<code>__len__</code>和<code>__getitem__</code>两个魔术方法的使用，使用了<code>__len__</code>就让我们的对象直接支持内置的len()方法求元素的个数。而<code>__getitem__</code>直接就让我们的对象支持了和列表等可迭代对象同等的切片操作，并且让我们的对象直接成为可迭代对象。关于特殊方法的介绍是本书的重点，后面会介绍许多这样的方法。</p>
+<h1 id="如何使用特殊方法"><a href="#如何使用特殊方法" class="headerlink" title="如何使用特殊方法"></a>如何使用特殊方法</h1><p>首先要明确的是，特殊方法的实现是为了被python解释器调用，你自己并不需要调用他们，也就是说没有<code>object.__len__()</code>这种写法，而应该写成<code>len(object)</code>。如果object是你自己定义的类的对象，那么<code>len(object)</code>执行时，python解释器就会自己去调用由你实现的<code>__len__()</code>方法。对于python的内置类型来说，比如list,str等，Cpython会抄个近路，<code>__len__()</code>会直接读取底层结构体中存储用来表示当前元素个数的变量的值并且返回，这就比逐个计数快许多。</p>
+<h2 id="模拟数值类型"><a href="#模拟数值类型" class="headerlink" title="模拟数值类型"></a>模拟数值类型</h2><p>下面我们通过一个特殊方法实现一个二维向量类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> math <span class="keyword">import</span> hypot</span><br><span class="line"><span class="comment">#hypot(x,y)返回x**2+y**2的和开平方</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Vector</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,x=<span class="number">0</span>,y=<span class="number">0</span>)</span>:</span></span><br><span class="line">        self.x=x</span><br><span class="line">        self.y=y</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__add__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""支持加法"""</span></span><br><span class="line">        <span class="keyword">return</span> Vector(self.x+other.x,self.y+other.y)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__mul__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""支持乘法"""</span></span><br><span class="line">        <span class="keyword">return</span> Vector(self.x*other,self.y*other)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__abs__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""支持求绝对值(求模)"""</span></span><br><span class="line">        <span class="keyword">return</span> hypot(self.x,self.y)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Vector Object Vector(%s,%s)"</span>%(self.x,self.y)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__bool__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""长度是否为０"""</span></span><br><span class="line">        <span class="keyword">return</span> bool(abs(self))</span><br></pre></td></tr></table></figure>
+
+<p>下面我们就可以使用这个Vector类了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">v1=Vector(<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line">v2=Vector(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">v3=v1+v2</span><br><span class="line">print(v3)</span><br><span class="line">v4=v1*<span class="number">3</span></span><br><span class="line">print(v4)</span><br><span class="line">print(abs(v1))</span><br><span class="line">v5=Vector()</span><br><span class="line">print(bool(v1))</span><br><span class="line">print(bool(v5))</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Vector Object Vector(<span class="number">3</span>,<span class="number">5</span>)</span><br><span class="line">Vector Object Vector(<span class="number">3</span>,<span class="number">6</span>)</span><br><span class="line"><span class="number">2.23606797749979</span></span><br><span class="line"><span class="literal">True</span></span><br><span class="line"><span class="literal">False</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="字符串的表示形式"><a href="#字符串的表示形式" class="headerlink" title="字符串的表示形式"></a>字符串的表示形式</h2><p>python中有两个内置函数repr()和str()两者都可以把一个对象用字符串的形式表达出来以便于辨认。当然，str()还有着类型转换的作用。对于自定义类的对象来说，他们两个分别依赖于<strong>repr</strong>(),<strong>str</strong>()两个特殊方法。交互式控制台和调试程序用repr函数来获得对象的字符串表示形式。而在程序中使用str(object)函数或者print(object)的时候会调用<strong>str</strong>().如果你只想实现两个特殊方法中的一个，<strong>repr</strong>()是个更好的选择，因为一个对象没有<strong>str</strong>()函数的时候，而python又需要调用它的时候，解释器会用<strong>repr</strong>()作为替代。</p>
+<h2 id="算术运算符"><a href="#算术运算符" class="headerlink" title="算术运算符"></a>算术运算符</h2><p>在Vector的例子中，我们通过<strong>add</strong>()和<strong>mul</strong>()为Vector类带来了+和*这两个运算符。需要注意的是，这两个方法的返回值都是新创建的向量对象，被操作的对象本身并没有发生变化，在程序中只是读取了他们的值而已。</p>
+<h2 id="自定义的布尔值"><a href="#自定义的布尔值" class="headerlink" title="自定义的布尔值"></a>自定义的布尔值</h2><p>尽管python里有bool类型，但是实际上任何的对象都可以用于需要布尔值的上下文中。为了判断一个值x是真是假，python会调用bool(x),这个函数只能返回True或者False.</p>
+<p>默认情况下，我们自己定义的类的实例总被认为是真，除非这个类对<strong>bool</strong>()或者<strong>len</strong>()函数有自己的实现。bool(x)的背后是调用x.<strong>bool</strong>()的结果，如果不存在这个方法，那么bool(x)会尝试调用x.<strong>len</strong>()如果返回0,则bool(x)会返回False,否则返回True.</p>
+<h1 id="python之禅-The-Zen-of-Python"><a href="#python之禅-The-Zen-of-Python" class="headerlink" title="python之禅(The Zen of Python)"></a>python之禅(The Zen of Python)</h1><p>在python交互式控制台中输入import this即可看到。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">The Zen of Python, by Tim Peters</span><br><span class="line">Beautiful is better than ugly.</span><br><span class="line">Explicit is better than implicit.</span><br><span class="line">Simple is better than complex.</span><br><span class="line">Complex is better than complicated.</span><br><span class="line">Flat is better than nested.</span><br><span class="line">Sparse is better than dense.</span><br><span class="line">Readability counts.</span><br><span class="line">Special cases aren&apos;t special enough to break the rules.</span><br><span class="line">Although practicality beats purity.</span><br><span class="line">Errors should never pass silently.</span><br><span class="line">Unless explicitly silenced.</span><br><span class="line">In the face of ambiguity, refuse the temptation to guess.</span><br><span class="line">There should be one-- and preferably only one --obvious way to do it.</span><br><span class="line">Although that way may not be obvious at first unless you&apos;re Dutch.</span><br><span class="line">Now is better than never.</span><br><span class="line">Although never is often better than *right* now.</span><br><span class="line">If the implementation is hard to explain, it&apos;s a bad idea.</span><br><span class="line">If the implementation is easy to explain, it may be a good idea.</span><br><span class="line">Namespaces are one honking great idea -- let&apos;s do more of those!</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Fluent-Python/" rel="tag"># Fluent Python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/24/something-about-c/" rel="next" title="C++总结1">
+                <i class="fa fa-chevron-left"></i> C++总结1
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/29/chapter-two-of-fluent-python/" rel="prev" title="Python内置的序列类型">
+                Python内置的序列类型 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一摞python风格的纸牌"><span class="nav-number">1.</span> <span class="nav-text">一摞python风格的纸牌</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#命名元组"><span class="nav-number">1.1.</span> <span class="nav-text">命名元组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#len和getitem"><span class="nav-number">1.2.</span> <span class="nav-text">len和getitem</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何使用特殊方法"><span class="nav-number">2.</span> <span class="nav-text">如何使用特殊方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#模拟数值类型"><span class="nav-number">2.1.</span> <span class="nav-text">模拟数值类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字符串的表示形式"><span class="nav-number">2.2.</span> <span class="nav-text">字符串的表示形式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#算术运算符"><span class="nav-number">2.3.</span> <span class="nav-text">算术运算符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义的布尔值"><span class="nav-number">2.4.</span> <span class="nav-text">自定义的布尔值</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#python之禅-The-Zen-of-Python"><span class="nav-number">3.</span> <span class="nav-text">python之禅(The Zen of Python)</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

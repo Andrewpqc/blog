@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Docker Data Manage,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="生产环境中使用docker，往往需要对数据进行持久化，或者在多个容器之间进行数据共享，这必然涉及容器的数据管理操作。容器中管理数据主要有两种方式：  数据卷 数据卷容器  数据卷什么是数据卷？数据卷是经过特殊设计的目录，可以绕过联合文件系统，为一个或多个容器提供访问。数据卷设计的目的，在于数据的永久化，它完全独立于容器的生存周期，因此docker不会在容器删除时删除其挂载的数据卷，也不会存在垃圾收">
+<meta name="keywords" content="Docker Data Manage">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker数据管理">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/09/20/Data-manage-in-Docker/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="生产环境中使用docker，往往需要对数据进行持久化，或者在多个容器之间进行数据共享，这必然涉及容器的数据管理操作。容器中管理数据主要有两种方式：  数据卷 数据卷容器  数据卷什么是数据卷？数据卷是经过特殊设计的目录，可以绕过联合文件系统，为一个或多个容器提供访问。数据卷设计的目的，在于数据的永久化，它完全独立于容器的生存周期，因此docker不会在容器删除时删除其挂载的数据卷，也不会存在垃圾收">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/datavolume.jpg">
+<meta property="og:image" content="http://andrewpqc.github.io/images/datavolume2.jpg">
+<meta property="og:updated_time" content="2017-11-15T01:23:01.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker数据管理">
+<meta name="twitter:description" content="生产环境中使用docker，往往需要对数据进行持久化，或者在多个容器之间进行数据共享，这必然涉及容器的数据管理操作。容器中管理数据主要有两种方式：  数据卷 数据卷容器  数据卷什么是数据卷？数据卷是经过特殊设计的目录，可以绕过联合文件系统，为一个或多个容器提供访问。数据卷设计的目的，在于数据的永久化，它完全独立于容器的生存周期，因此docker不会在容器删除时删除其挂载的数据卷，也不会存在垃圾收">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/datavolume.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/09/20/Data-manage-in-Docker/">
+
+
+
+
+
+  <title>Docker数据管理 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/09/20/Data-manage-in-Docker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Docker数据管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-09-20T09:23:01+08:00">
+                2017-09-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index">
+                    <span itemprop="name">Docker</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/09/20/Data-manage-in-Docker/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/09/20/Data-manage-in-Docker/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>生产环境中使用docker，往往需要对数据进行持久化，或者在多个容器之间进行数据共享，这必然涉及容器的数据管理操作。容器中管理数据主要有两种方式：</p>
+<ul>
+<li>数据卷</li>
+<li>数据卷容器</li>
+</ul>
+<h1 id="数据卷"><a href="#数据卷" class="headerlink" title="数据卷"></a>数据卷</h1><h2 id="什么是数据卷？"><a href="#什么是数据卷？" class="headerlink" title="什么是数据卷？"></a>什么是数据卷？</h2><p>数据卷是经过特殊设计的目录，可以绕过联合文件系统，为一个或多个容器提供访问。数据卷设计的目的，在于数据的永久化，它完全独立于容器的生存周期，因此docker不会在容器删除时删除其挂载的数据卷，也不会存在垃圾收集机制，对容器引用的数据卷进行处理.</p>
+<p><img src="/images/datavolume.jpg" alt="数据卷示意图"></p>
+<p>上图可以告诉我们：</p>
+<ul>
+<li>docker的数据卷是独立于docker的存在，他存在于dockerhost也就是宿主机中，因此他与docker容器的生存周期是分离的。</li>
+<li>docker数据卷本质上是存在于docker宿主机的文件系统中</li>
+<li>docker数据卷可以是目录也可以是文件</li>
+<li>docker容器可以利用数据卷的技术与宿主机进行数据共享</li>
+<li>同一个目录或文件可以支持多个容器的访问，这样其实实现了容器间数据的共享和交换。</li>
+</ul>
+<h2 id="数据卷的特点"><a href="#数据卷的特点" class="headerlink" title="数据卷的特点"></a>数据卷的特点</h2><ul>
+<li>数据卷在容器启动时初始化，如果容器使用的镜像在挂载点包含了数据，这些数据会可拷贝到新初始化的数据卷中。</li>
+<li>数据卷可以在容器之间共享和重用</li>
+<li>可以对数据卷中的内容直接进行修改</li>
+<li>数据卷的变化不会影响镜像的更新</li>
+<li>卷会一直存在，即使挂载数据卷的容器已经删除</li>
+</ul>
+<h2 id="创建数据卷"><a href="#创建数据卷" class="headerlink" title="创建数据卷"></a>创建数据卷</h2><h3 id="docker-volume子命令"><a href="#docker-volume子命令" class="headerlink" title="docker volume子命令"></a>docker volume子命令</h3><p>docker 1.9引入了新的子命令docker volume,用户可以使用这个命令创建查看和删除数据卷，与此同时，传统的-v参数创建volume的方式也得到了保留。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Usage:	docker volume COMMAND</span><br><span class="line">Options:</span><br><span class="line">      --<span class="built_in">help</span>   Print usage</span><br><span class="line">Commands:</span><br><span class="line">  create      Create a volume</span><br><span class="line">  inspect     Display detailed information on one or more volumes</span><br><span class="line">  ls          List volumes</span><br><span class="line">  prune       Remove all unused volumes</span><br><span class="line">  rm          Remove one or more volumes</span><br></pre></td></tr></table></figure>
+
+<p>创建</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker volume create --name volume1</span><br></pre></td></tr></table></figure>
+
+<p>在用户使用docker创建volume的时候，采用的是默认的local volumedriver,所以volume的文件系统默认使用宿主机的文件系统，如果用户需要创建其他文件系统的volume，则需要使用其他的volumedriver.</p>
+<p>docker在创建volume的时候会在宿主机的/var/lib/docker/volume/中创建一个以volume ID为名的目录，并且将volume中的内容存储在名为_data的目录下。</p>
+<p>使用docker volume inspect <volume name>命令可以获得该volume包括其在宿主机中该文件夹的位置等信息。</volume></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker volume inspect volume1</span><br></pre></td></tr></table></figure>
+
+<p>输出:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">"Driver"</span>: <span class="string">"local"</span>,</span><br><span class="line">        <span class="string">"Labels"</span>: &#123;&#125;,</span><br><span class="line">        <span class="string">"Mountpoint"</span>: <span class="string">"/var/lib/docker/volumes/volume1/_data"</span>,</span><br><span class="line">        <span class="string">"Name"</span>: <span class="string">"volume1"</span>,</span><br><span class="line">        <span class="string">"Options"</span>: &#123;&#125;,</span><br><span class="line">        <span class="string">"Scope"</span>: <span class="string">"local"</span></span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<h3 id="为容器添加数据卷"><a href="#为容器添加数据卷" class="headerlink" title="为容器添加数据卷"></a>为容器添加数据卷</h3><p>用户在使用docker run或者docker create创建新容器的时候，可以使用-v选项为容器添加volume(可以多次使用-v选项，为容器添加多个数据卷),用户可以将自行创建或者由docker创建的的volume挂载到容器中，也可以将宿主机上的目录或者文件作为volume挂载到容器中。</p>
+<h4 id="宿主机的目录或文件作为数据卷"><a href="#宿主机的目录或文件作为数据卷" class="headerlink" title="宿主机的目录或文件作为数据卷"></a>宿主机的目录或文件作为数据卷</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run  –v  ~/datavolume:/data –it Ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>-v选项就可以为启动的容器添加数据卷，~/datavolume为宿主机中的目录（这里也可以是一个文件，但是不管值文件夹还是文件都必须使用绝对路径），如果当前宿主机中没有这样的目录，那么容器启动时会自动在当前创建这个目录，这里的话，就是在当前用户的家目录下创建名为datavolume的目录。冒号后面的/data就是对应的容器中的目录。</p>
+<p>我们如果在启动的容器的/data目录创建一个文件，并且在文件内写上一些内容。然后退出容器，查看宿主机的~/datavolume目录，则会发现，其中的内容就和我们在容器的/data目录中创建的内容一毛一样。也就是说两者之间的数据实现了同步的共享。</p>
+<h4 id="随机名字的数据卷"><a href="#随机名字的数据卷" class="headerlink" title="随机名字的数据卷"></a>随机名字的数据卷</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -d -v /data ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>以上的命令创建了一个随机名字的volume,并挂载到容器中的/data目录。要想知道它所挂载的数据卷在宿主机中的位置，可以通过docker volume inspect <volume name>查看。</volume></p>
+<h4 id="指定名字的数据卷"><a href="#指定名字的数据卷" class="headerlink" title="指定名字的数据卷"></a>指定名字的数据卷</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker volume create --name volume1</span><br><span class="line">$ docker run -d -v volume1:/data ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>以上两条命令首先是创建了一个名为volume1的数据卷，然后将其挂载在容器的/data目录。如果不执行第一条命令，直接执行第二条命令的话，docker会代替用户创建名为volume1的volume，并且将其挂载在容器中的/data目录。</p>
+<h4 id="为数据卷添加访问权限"><a href="#为数据卷添加访问权限" class="headerlink" title="为数据卷添加访问权限"></a>为数据卷添加访问权限</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run  –v  ~/datavolume:/data:ro Ubuntu  /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>在-v选项的参数后面添加了一个：ro(read only),这样的话就让这个数据卷变得只读了。<br>注：在退出容器后，可以用docker的inspect命令来查看数据卷的情况，以及读写权限</p>
+<h3 id="在dockerfile中创建数据卷"><a href="#在dockerfile中创建数据卷" class="headerlink" title="在dockerfile中创建数据卷"></a>在dockerfile中创建数据卷</h3><p>VOLUME命令<br>如：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#添加多个数据卷</span></span><br><span class="line"><span class="keyword">VOLUME</span><span class="bash">[“/datavolume1”,”/datavolume2”]</span></span><br><span class="line"><span class="comment">#添加一个数据卷</span></span><br><span class="line"><span class="keyword">VOLUME</span><span class="bash"> /date</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的命令所构建的镜像在创建容器时就会在容器的根目录挂载对应数据卷，并且在宿主机的文件系统中随机创建目录分别与容器内的数据卷对应。</p>
+<p>与docker run -v不同的是VOLUME不能挂载主机中指定的文件夹，这主要是为了Dockerfile的可移植性。因为不能保证所有的宿主机都有对应的文件夹。</p>
+<p>可以用docker inspect命令来查看宿主机上与这两个数据卷对应的目录。但是每次用此镜像运行的容器中的数据卷对应的宿主机的目录是不相同的。这样的话这个镜像所构建的容器们之间就无法进行数据共享。这就有了docker的数据卷容器。</p>
+<h1 id="数据卷容器"><a href="#数据卷容器" class="headerlink" title="数据卷容器"></a>数据卷容器</h1><p><img src="/images/datavolume2.jpg" alt="数据卷容器示意图"></p>
+<h2 id="什么是数据卷容器？"><a href="#什么是数据卷容器？" class="headerlink" title="什么是数据卷容器？"></a>什么是数据卷容器？</h2><p>一个容器挂载数据卷，其他容器通过挂载这个容器实现数据共享，前面的挂载数据卷的容器就叫做数据卷容器。</p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#data volume container experience image</span></span><br><span class="line">FORM Ubuntu:latest</span><br><span class="line">VALUME[“/datavolume1”,”/datavolume2”]</span><br><span class="line"><span class="keyword">CMD</span><span class="bash">[“/bin/bash”]</span></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<p>如上，我们创建了这样的dockerfile，我们再根据这一dockerfile构建一个镜像image1<br>然后：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -it --name ct1 image1</span><br></pre></td></tr></table></figure>
+
+<p>我们根据这个镜像创建了一个容器ct1，由上面的内容可知ct1内挂载了两个数据卷/datavolume1,/datavolume2.并且现在docker宿主机上也有两个目录与这两个数据卷相对应。下面我们以ct1为数据卷容器在运行两个容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -it --volumes-from:ct1 --name ct2 ubuntu /bin/bash	</span><br><span class="line">$ docker run -it --volumes-from:ct1 --name ct3 ubuntu /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>这样ct1，ct2，ct3就都拥有了数据卷，他们之间包括和宿主机之间就可以实现数据的共享。并且容器创建好之后，我们可以删除此中的数据卷容器ct1，那么ct2和ct3中的数据卷仍然可以正常使用。虽然数据卷容器在这个容器集群的构建中扮演着重要的角色，但是他只是进行了配置的传递，而容器ct1本身却不起作用，所以即使删除ct1，其他容器可以照样使用。</p>
+<p>事实上，当这个集群建好之后，我们删除任意的一个容器，都不会对数据卷产生任何影响。即使删除了所有的挂载的容器，包括ct1,ct2,ct3，数据卷也不会被自动删除，如果要删除一个数据卷，必须在删除最后一个还挂载着它的容器时显式使用docker rm -v　CONTAINER_ID命令来指定。</p>
+<h2 id="删除数据卷"><a href="#删除数据卷" class="headerlink" title="删除数据卷"></a>删除数据卷</h2><p>如果创建容器时从容器中挂载了volume，在/var/lib/docker/volumes/下会生成与volume对应的目录，使用docker rm删除容器并不会删除与volume对应的目录，这些目录会占据不必要的空间。即使可以手动删除，但是由于这些随机生成的目录名称是无意义的随机字符串，要知道他们是否与被删除的容器对应也是十分麻烦的。所以在删除容器时需要对容器中的volume妥善处理。在删除容器时，一并删除volume有一下几种方法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#对于自己命名的volume,可以直接像下面这样删除即可,这里只有当没有任何容器使用该volume的时候才会删除成功</span></span><br><span class="line">$ docker volume rm &lt;volume name&gt;</span><br><span class="line"><span class="comment">#在删除容器时，一并删除其volume(推荐使用)</span></span><br><span class="line">$ docker rm -v &lt;container_name&gt;</span><br><span class="line"><span class="comment">#在运行容器时使用`docker run --rm`,--rm选项会在容器停止运行时删除容器以及容器所挂载的volume</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="容器与宿主机的数据交换"><a href="#容器与宿主机的数据交换" class="headerlink" title="容器与宿主机的数据交换"></a>容器与宿主机的数据交换</h2><p>使用docker cp命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Usage:	docker cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-</span><br><span class="line">	docker cp [OPTIONS] SRC_PATH|- CONTAINER:DEST_PATH</span><br><span class="line">Copy files/folders between a container and the <span class="built_in">local</span> filesystem</span><br><span class="line">Options:</span><br><span class="line">  -L, --follow-link   Always follow symbol link <span class="keyword">in</span> SRC_PATH</span><br><span class="line">      --<span class="built_in">help</span>          Print usage</span><br></pre></td></tr></table></figure>
+
+<p>上述的docker cp命令只适合纯粹的在容器与宿主机之间交换数据，但是它的灵活性比volume小得多，它不支持数据在容器和宿主机之间的同步。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Docker-Data-Manage/" rel="tag"># Docker Data Manage</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/17/cookie-and-session-in-Express-use-redis-to-make-it-work-better/" rel="next" title="Express框架中的Cookie，Session，以及Redis使用">
+                <i class="fa fa-chevron-left"></i> Express框架中的Cookie，Session，以及Redis使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/20/Network-management-of-Docker/" rel="prev" title="Docker网络管理">
+                Docker网络管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据卷"><span class="nav-number">1.</span> <span class="nav-text">数据卷</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是数据卷？"><span class="nav-number">1.1.</span> <span class="nav-text">什么是数据卷？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据卷的特点"><span class="nav-number">1.2.</span> <span class="nav-text">数据卷的特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建数据卷"><span class="nav-number">1.3.</span> <span class="nav-text">创建数据卷</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#docker-volume子命令"><span class="nav-number">1.3.1.</span> <span class="nav-text">docker volume子命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为容器添加数据卷"><span class="nav-number">1.3.2.</span> <span class="nav-text">为容器添加数据卷</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#宿主机的目录或文件作为数据卷"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">宿主机的目录或文件作为数据卷</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#随机名字的数据卷"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">随机名字的数据卷</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指定名字的数据卷"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">指定名字的数据卷</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为数据卷添加访问权限"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">为数据卷添加访问权限</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在dockerfile中创建数据卷"><span class="nav-number">1.3.3.</span> <span class="nav-text">在dockerfile中创建数据卷</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据卷容器"><span class="nav-number">2.</span> <span class="nav-text">数据卷容器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是数据卷容器？"><span class="nav-number">2.1.</span> <span class="nav-text">什么是数据卷容器？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实验"><span class="nav-number">2.2.</span> <span class="nav-text">实验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除数据卷"><span class="nav-number">2.3.</span> <span class="nav-text">删除数据卷</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容器与宿主机的数据交换"><span class="nav-number">2.4.</span> <span class="nav-text">容器与宿主机的数据交换</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

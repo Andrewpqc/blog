@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="install Docker,Docker images,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Docker简介Docker是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的容器中，然后发布到任何流行的 Linux 机器上.Docker容器完全使用沙箱机制，相互之间不会有任何接口。使用docker容器可以实现开发，测试，部署环境的一致化，缩短产品的开发周期。Docker是以Docker容器为资源分割和调度的基本单位，封装整个软件的运行时环境，为开发者和系统管理员设">
+<meta name="keywords" content="install Docker,Docker images">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker简介,安装及镜像基本操作">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/08/24/Docker-introduction-and-basic-operation/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="Docker简介Docker是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的容器中，然后发布到任何流行的 Linux 机器上.Docker容器完全使用沙箱机制，相互之间不会有任何接口。使用docker容器可以实现开发，测试，部署环境的一致化，缩短产品的开发周期。Docker是以Docker容器为资源分割和调度的基本单位，封装整个软件的运行时环境，为开发者和系统管理员设">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/docker.jpeg">
+<meta property="og:updated_time" content="2017-11-14T09:05:31.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker简介,安装及镜像基本操作">
+<meta name="twitter:description" content="Docker简介Docker是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的容器中，然后发布到任何流行的 Linux 机器上.Docker容器完全使用沙箱机制，相互之间不会有任何接口。使用docker容器可以实现开发，测试，部署环境的一致化，缩短产品的开发周期。Docker是以Docker容器为资源分割和调度的基本单位，封装整个软件的运行时环境，为开发者和系统管理员设">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/docker.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/08/24/Docker-introduction-and-basic-operation/">
+
+
+
+
+
+  <title>Docker简介,安装及镜像基本操作 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/08/24/Docker-introduction-and-basic-operation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Docker简介,安装及镜像基本操作</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-08-24T17:05:31+08:00">
+                2017-08-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index">
+                    <span itemprop="name">Docker</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/08/24/Docker-introduction-and-basic-operation/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/08/24/Docker-introduction-and-basic-operation/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="/images/docker.jpeg" alt="docker"></p>
+<h1 id="Docker简介"><a href="#Docker简介" class="headerlink" title="Docker简介"></a>Docker简介</h1><p>Docker是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的容器中，然后发布到任何流行的 Linux 机器上.Docker容器完全使用沙箱机制，相互之间不会有任何接口。使用docker容器可以实现开发，测试，部署环境的一致化，缩短产品的开发周期。Docker是以Docker容器为资源分割和调度的基本单位，封装整个软件的运行时环境，为开发者和系统管理员设计的，用于构建，发布和运行分布式应用的平台。</p>
+<p>docker是按照C/S架构设计而成，由docker客户端（docker client）,docker守护进程（docker doamonn,充当着server的角色，响应docker客户端的指令），docker　registry组成。docker里面还有两个重要的概念：镜像（image）与容器(container)。镜像是容器的基础。而docker的容器技术是基于Linux内核的namespace和cgroups实现的。两者分别实现了资源的隔离和限制。镜像存放在registry(注册服务器)中。</p>
+<h1 id="Docker安装"><a href="#Docker安装" class="headerlink" title="Docker安装"></a>Docker安装</h1><h2 id="查看系统情况"><a href="#查看系统情况" class="headerlink" title="查看系统情况"></a>查看系统情况</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ uname -r</span><br></pre></td></tr></table></figure>
+
+<p>Docker要求Ubuntu系统的内核版本高于３．１０。只有满足这一条件方可继续下面的步骤。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ wget -qO- https://get.docker.com/ | sh</span><br></pre></td></tr></table></figure>
+
+<p>上面的命令会下载并安装最新版本的docker</p>
+<h2 id="查看是否安装成功"><a href="#查看是否安装成功" class="headerlink" title="查看是否安装成功"></a>查看是否安装成功</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker run hello-world</span><br></pre></td></tr></table></figure>
+
+<p>如果docker安装成功，上面的命令就会在docker　hub的公共仓库中去拉取hello-world这个镜像，并且启动镜像，生成一个容器，执行容器中预设的命令，然后立即退出容器。如果在这条命令的输出结果中出现的是关于docker的相关说明的话，那么你就安装成功了。注意：这里我们一定要以超级用户的身份运行这一命令，如果运行上述命令时漏掉了sudo,则会报下面的错误：docker:Connot not connect to the docker deamon.Is the docker deamon runing on this host? See ”docker run –help”，要想解决这个问题，请往下看。</p>
+<h2 id="在Docker用户组中添加自己"><a href="#在Docker用户组中添加自己" class="headerlink" title="在Docker用户组中添加自己"></a>在Docker用户组中添加自己</h2><p>默认情况下，我们在执行docker命令的时候都要开启超级用户的权限，也就是说，每条命令都要输入sudo,这显然太麻烦了。好在docker在安装的时候给我们的系统中建了一个名为docker的用户组，只要是用户组中的用户，就可以直接使用docker了。方法是运行下面的这条命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$  sudo usermod -aG docker &lt;your name&gt;</span><br></pre></td></tr></table></figure>
+
+<p>然后重启docker服务（$ sudo servire docker restart），注销,重新登录系统，这样以后输入dcoker命令就不用每次都输入sudo了。</p>
+<h2 id="配置镜像加速服务"><a href="#配置镜像加速服务" class="headerlink" title="配置镜像加速服务"></a>配置镜像加速服务</h2><p>现在我们已经完全安装好了docker,但是如果要想愉快的使用docker的话，还需要配置镜像加速服务。默认情况下，我们在拉取镜像时是在docker　hub这一个仓库中拉取的，由于docker hub仓库在国外，所以在国内拉取镜像时，速度及其的慢（翻墙除外）。好在国内有docker hub的镜像，我们可以通过简单的配置docker守护进程的启动选项即可免费使用这一镜像加速服务了。具体的配置就不讲了，因为在daocloud的网站上有配置脚本，并且提供了获取和启动脚本的命令，大家只需要到daocloud的网站上复制下这条命令，然后粘贴到终端并回车即可配置好，之后我们拉取镜像就用的是国内的镜像仓库，不用翻墙速度也超快。<br>下面的是我在daocloud上复制下的linux版本的加速命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s</span><br></pre></td></tr></table></figure>
+
+<p>大家在配置的时候最好不要直接抄我这个，还是自己到daocloud网站上去复制吧，在加速器中。因为还存在版本的升级问题。</p>
+<h1 id="Docker镜像基本操作"><a href="#Docker镜像基本操作" class="headerlink" title="Docker镜像基本操作"></a>Docker镜像基本操作</h1><p>Docker镜像是一个只读的Docker容器模板，含有启动Docker容器所需文件系统结构及其内容，因此是启动Docker容器的基础。docker镜像的文件内容以及一些运行Docker容器的配置文件组成了Docker容器的静态文件系统运行环境——rootfs。可以这么理解，Docker镜像是Docker容器的静态视角，Docker容器是Dokcer镜像的运行状态。</p>
+<h2 id="获取镜像"><a href="#获取镜像" class="headerlink" title="获取镜像"></a>获取镜像</h2><p>获取镜像的方式有两种：<br>１．在docker hub或某个私有镜像仓库中拉取镜像(即下载镜像到本地)。<br>２．自己在基础镜像的基础上构建镜像。<br>由于即使是自己构建镜像也需要一个镜像作为基础镜像，而这个基础镜像一般是从docker hub的公共仓库中拉取的。所以我们在这里讲如何在docker hub中拉取镜像。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull [OPTIONS] NAME [:TAG]</span><br></pre></td></tr></table></figure>
+
+<p>常用选项OPTIONS:-a,–all-tags 会下载所有此仓库中的打了标签的镜像<br>如果拉取镜像的速度极慢，那么请参考docker的安装及基本概念中的镜像加速部分。</p>
+<h2 id="搜索镜像"><a href="#搜索镜像" class="headerlink" title="搜索镜像"></a>搜索镜像</h2><p>其实我们一般在拉取镜像之前，会先以我们想要的镜像名字做一个搜索，然后更具搜索出来的信息来决定我们想要拉取的镜像。搜索的信息一般会包括这个镜像的星级，镜像是否为官方镜像以及此镜像的一个简短的描述。这些信息都可以作为我们拉取镜像的一个参考。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker search [OPTIONS] TERM</span><br></pre></td></tr></table></figure>
+
+<p>常用选项OPTIONS: –automated 只显示自动化构建出的镜像<br>         –no-trunc    不使用截断输出<br>         -s,–stars=0  规定显示结果的最低星级</p>
+<p>由于构建镜像是docker中的一个非常重要的一部分，所以我在后面会专门写一篇博客来介绍。</p>
+<h2 id="推送镜像"><a href="#推送镜像" class="headerlink" title="推送镜像"></a>推送镜像</h2><p>我们不仅可以构建自己的镜像，还可以把我们构建的有适用性的高质量的镜像推送到docker hub上，贡献给社区的其他小伙伴(public)，或者自己保存(private),以便以后接着使用。说明:dockerhub的共公镜像存储服务是完全免费的。但仅支持每个用户一个私有仓库，如果你想保存更多的私有镜像的话，就可以使用docker hub的付费服务。在推送镜像之前，必须要有docker hub的账号。</p>
+<p>命令行登录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker login -p &lt;docker hub <span class="built_in">pwd</span> &gt; -u &lt;docker hub username&gt;</span><br></pre></td></tr></table></figure>
+
+<p>或者</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker login</span><br></pre></td></tr></table></figure>
+
+<p>下面会提示你输入用户名和密码。<br>登录成功之后就可以推送自己的镜像了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker push NAME[:TAG]</span><br></pre></td></tr></table></figure>
+
+<p>成功之后，你可以登录docker hub,就可以看到这个镜像了，默认他是公开的，你可以把他转为私有。如果公开的话，你还可以在命令行搜索到你的镜像。当然，社区的其他人也可以搜索到。</p>
+<p>这条命令并不会把整个镜像都提交上去，而是提交你在基础镜像的基础上所作出的修改的那一部分。</p>
+<h2 id="tag命令添加镜像标签"><a href="#tag命令添加镜像标签" class="headerlink" title="tag命令添加镜像标签"></a>tag命令添加镜像标签</h2><p>为了方便在后续工作中使用特定的镜像，可以使用docker tag命令来为本地镜像任意添加新的标签，例如将ubuntu:latest打上标签：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker tag ubuntu:latest myubuntu:latest</span><br></pre></td></tr></table></figure>
+
+<p>当我们使用docker images列出本地主机上的镜像信息的时候，可以看到多了一个拥有myubuntu:latest标签的镜像，之后我们就可以直接使用myubuntu:latest来表示这个镜像了。尝试一下就可以发现，打上新标签的镜像与原来的镜像的id是一样的，加入我们要删除原镜像ubuntu:latest,那么myubuntu:latest也就跟着不见了。事实上打上新的标签并没有复制一个新的镜像，实际上只是给原镜像去了一个别名而已，他们实际指向的是同一个镜像，docker tag命令添加的标签实际上起到了类似链接的作用。</p>
+<h2 id="镜像历史"><a href="#镜像历史" class="headerlink" title="镜像历史"></a>镜像历史</h2><p>镜像文件由多个层组成，我们可以通过history子命令来查看各个层的创建信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker <span class="built_in">history</span> ubuntu:latest</span><br></pre></td></tr></table></figure>
+
+<h2 id="导出镜像"><a href="#导出镜像" class="headerlink" title="导出镜像"></a>导出镜像</h2><p>如果要导出镜像到本地文件，可以使用docker save命令，例如：导出本地的ubuntu:latest镜像为文件ubuntu_latest.tar,使用如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker save -o ubuntu_latest ubuntu:latest</span><br></pre></td></tr></table></figure>
+
+<p>之后就可以通过复制ubuntu_latest.tar文件将该镜像分享给别人。</p>
+<h2 id="载入镜像"><a href="#载入镜像" class="headerlink" title="载入镜像"></a>载入镜像</h2><p>可以使用docker load将导出的tar文件再导入到本地镜像库，例如从文件ubuntu_latest.tar导入镜像到本地镜像列表，如下所示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker load --input ubuntu_latest.tar</span><br><span class="line">或者：</span><br><span class="line">$ docker load &lt; ubuntu_latest.tar</span><br></pre></td></tr></table></figure>
+
+<p>这将导入镜像及其相关的元数据信息(包括标签等)</p>
+<h2 id="查看镜像"><a href="#查看镜像" class="headerlink" title="查看镜像"></a>查看镜像</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker images [OPTIONS] [REPOSITORY]</span><br></pre></td></tr></table></figure>
+
+<p>上面的命令会列出我们系统中已经有的镜像，有下面这些条件：<br>　　　　　OPTIONS: -a,–all=false 默认为false,为true时会显示所有的镜像，包括中间层镜像<br>-f,–filter=[] 默认不过滤某个镜像<br>-q,–quit=false 为true时只显示镜像的唯一ＩＤ<br>REPOSITORY:　仓库名，制定要显示那个仓库的镜像</p>
+<h2 id="查看镜像的详细信息"><a href="#查看镜像的详细信息" class="headerlink" title="查看镜像的详细信息"></a>查看镜像的详细信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker inspect [OPTIONS] IMAGE [IMAGE2.....]</span><br></pre></td></tr></table></figure>
+
+<p>docker的inspect命令可以输出所查看镜像的完整的详细的信息。其实这个命令也可以用来查看容器的信息。</p>
+<h2 id="删除镜像"><a href="#删除镜像" class="headerlink" title="删除镜像"></a>删除镜像</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker rmi [OPTIONS] IMAGE [IMAGE2….]</span><br></pre></td></tr></table></figure>
+
+<p>个选项会删除所指定的一个或多个镜像<br>OPTIONS: -f,–force 强制删除镜像<br>有时候我们想要删除某个仓库中的所有镜像，如过使用上面的这条命令的话就太麻烦了，这是我们可以使用下面这条命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker rmi $(docker images –q ubuntu)</span><br></pre></td></tr></table></figure>
+
+<p>上面的命令删除了ubuntu仓库中的所有镜像，$ docker images -q ubuntu 这条命令就会输出ubuntu仓库中的所有镜像的唯一id,而输出结果更好作为docker rmi命令的参数了。</p>
+<h1 id="正确区分registry和repository"><a href="#正确区分registry和repository" class="headerlink" title="正确区分registry和repository"></a>正确区分registry和repository</h1><p>Repository：仓库，一个repository里面存放的着相同种类不同标签的镜像，比如Tomcat下面有很多个版本的镜像，它们共同组成了Tomcat的Repository。粗浅的理解：比如一个基础镜像ubuntu分别制作成了各种不同的功能，而打上了不同的标签，这样每一个镜像就是不同的镜像，而他们都共同组成了ubuntu的repository</p>
+<p>Registry：镜像注册服务器，比如DockerHub网站就是一个registry,Registry上有很多的Repository，Redis、Tomcat、MySQL等等Repository组成了Registry。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/install-Docker/" rel="tag"># install Docker</a>
+          
+            <a href="/tags/Docker-images/" rel="tag"># Docker images</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/08/25/Docker-container-operation/" rel="prev" title="Docker容器操作">
+                Docker容器操作 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker简介"><span class="nav-number">1.</span> <span class="nav-text">Docker简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker安装"><span class="nav-number">2.</span> <span class="nav-text">Docker安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#查看系统情况"><span class="nav-number">2.1.</span> <span class="nav-text">查看系统情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">2.2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看是否安装成功"><span class="nav-number">2.3.</span> <span class="nav-text">查看是否安装成功</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在Docker用户组中添加自己"><span class="nav-number">2.4.</span> <span class="nav-text">在Docker用户组中添加自己</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置镜像加速服务"><span class="nav-number">2.5.</span> <span class="nav-text">配置镜像加速服务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker镜像基本操作"><span class="nav-number">3.</span> <span class="nav-text">Docker镜像基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#获取镜像"><span class="nav-number">3.1.</span> <span class="nav-text">获取镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#搜索镜像"><span class="nav-number">3.2.</span> <span class="nav-text">搜索镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#推送镜像"><span class="nav-number">3.3.</span> <span class="nav-text">推送镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tag命令添加镜像标签"><span class="nav-number">3.4.</span> <span class="nav-text">tag命令添加镜像标签</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#镜像历史"><span class="nav-number">3.5.</span> <span class="nav-text">镜像历史</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#导出镜像"><span class="nav-number">3.6.</span> <span class="nav-text">导出镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#载入镜像"><span class="nav-number">3.7.</span> <span class="nav-text">载入镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看镜像"><span class="nav-number">3.8.</span> <span class="nav-text">查看镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看镜像的详细信息"><span class="nav-number">3.9.</span> <span class="nav-text">查看镜像的详细信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除镜像"><span class="nav-number">3.10.</span> <span class="nav-text">删除镜像</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#正确区分registry和repository"><span class="nav-number">4.</span> <span class="nav-text">正确区分registry和repository</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

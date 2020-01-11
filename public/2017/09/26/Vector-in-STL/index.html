@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="STL Vector,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在c++的标准模板库中有许多模板容器，他们封装了底层的数据结构，并且可以用来装几乎所有的已有数据类型以及用户自定义的数据类型。vector(向量)就是其中一个非常好用的序列式的容器。vector是最简单的序列容器，支持元素的随机访问，当然有时候显得效率低一些。 vector类基础vector对象定义vector对象定义之前需要使用std命名空间和vector这一个头文件。 12345678#inc">
+<meta name="keywords" content="STL Vector">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vector in STL">
+<meta property="og:url" content="http://andrewpqc.github.io/2017/09/26/Vector-in-STL/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="在c++的标准模板库中有许多模板容器，他们封装了底层的数据结构，并且可以用来装几乎所有的已有数据类型以及用户自定义的数据类型。vector(向量)就是其中一个非常好用的序列式的容器。vector是最简单的序列容器，支持元素的随机访问，当然有时候显得效率低一些。 vector类基础vector对象定义vector对象定义之前需要使用std命名空间和vector这一个头文件。 12345678#inc">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-11-15T01:03:39.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Vector in STL">
+<meta name="twitter:description" content="在c++的标准模板库中有许多模板容器，他们封装了底层的数据结构，并且可以用来装几乎所有的已有数据类型以及用户自定义的数据类型。vector(向量)就是其中一个非常好用的序列式的容器。vector是最简单的序列容器，支持元素的随机访问，当然有时候显得效率低一些。 vector类基础vector对象定义vector对象定义之前需要使用std命名空间和vector这一个头文件。 12345678#inc">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2017/09/26/Vector-in-STL/">
+
+
+
+
+
+  <title>Vector in STL | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2017/09/26/Vector-in-STL/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Vector in STL</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-09-26T09:03:39+08:00">
+                2017-09-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/09/26/Vector-in-STL/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2017/09/26/Vector-in-STL/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在c++的标准模板库中有许多模板容器，他们封装了底层的数据结构，并且可以用来装几乎所有的已有数据类型以及用户自定义的数据类型。vector(向量)就是其中一个非常好用的序列式的容器。vector是最简单的序列容器，支持元素的随机访问，当然有时候显得效率低一些。</p>
+<h1 id="vector类基础"><a href="#vector类基础" class="headerlink" title="vector类基础"></a>vector类基础</h1><h2 id="vector对象定义"><a href="#vector对象定义" class="headerlink" title="vector对象定义"></a>vector对象定义</h2><p>vector对象定义之前需要使用std命名空间和vector这一个头文件。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span> <span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; myIntVec;</span><br><span class="line">	<span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; myStrVec;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面就是定义了两个vector对象，一个是用来装int类型的数据，一个是用来装string类型的数据。</p>
+<h2 id="vector类对象初始化"><a href="#vector类对象初始化" class="headerlink" title="vector类对象初始化"></a>vector类对象初始化</h2><p>vector对象的常用的初始化方法有以下几种：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;T&gt; v1          <span class="comment">//v1是一个空vector，它潜在的元素是T类型的，执行默认初始化</span></span><br><span class="line"><span class="built_in">vector</span>&lt;T&gt; v2(v1)       <span class="comment">//v2中包含有v1所有元素的副本</span></span><br><span class="line"><span class="built_in">vector</span>&lt;T&gt; v2 = v1       <span class="comment">//等价于v2(v1)，v2中包含有v1所有元素的副本</span></span><br><span class="line"><span class="built_in">vector</span>&lt;T&gt; v3(n, val)      <span class="comment">//v3包含了n个重复的元素，每个元素的值都是val</span></span><br><span class="line"><span class="built_in">vector</span>&lt;T&gt; v4(n)          <span class="comment">//v4包含了n个重复地执行了值初始化的对象</span></span><br><span class="line"><span class="built_in">vector</span>&lt;T&gt; v5&#123;a,b,c...&#125;　<span class="comment">//v5包含了初始值个数的元素，每个元素被赋予相应的初始值</span></span><br><span class="line"><span class="built_in">vector</span>&lt;T&gt; v5=&#123;a,b,c...&#125;　<span class="comment">//等价于v5&#123;a,b,c...&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>vector对象在没有初始化之前不能够用赋值符号对其进行赋值，但是可以用push_back()成员函数对其赋值例如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; myIntVec;</span><br><span class="line">myIntVec[<span class="number">0</span>]=<span class="number">0</span>;  <span class="comment">//错误</span></span><br><span class="line">myIntVec.push_back(<span class="number">1</span>); <span class="comment">//正确</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="容器的大小和容量"><a href="#容器的大小和容量" class="headerlink" title="容器的大小和容量"></a>容器的大小和容量</h2><p>vector类定义了size()和capacity()两个函数来实现对当前容器元素的个数统计和对容器当前分配的内存数量的统计，同时也提供了reserve()和resize()两个成员函数来预先设置容器的大小和修改容器的大小。</p>
+<h2 id="vector类的成员函数"><a href="#vector类的成员函数" class="headerlink" title="vector类的成员函数"></a>vector类的成员函数</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; myvec;</span><br><span class="line">myvec.push_back(<span class="number">1</span>);　<span class="comment">//向向量中推进去一个数</span></span><br><span class="line">myvec.pop_back();　　<span class="comment">//弹出（删除）向量末尾的元素</span></span><br><span class="line">myvec.empty() <span class="comment">//判断向量是否为空</span></span><br><span class="line">myvec.front()  <span class="comment">//获得向量中的第一个元素</span></span><br><span class="line">myvec.back()  <span class="comment">//获得向量中的最后一个元素</span></span><br><span class="line">myvec.clear() <span class="comment">//将容器清空</span></span><br><span class="line">myvec.at()   <span class="comment">//访问指定的下标的元素</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="遍历vector容器"><a href="#遍历vector容器" class="headerlink" title="遍历vector容器"></a>遍历vector容器</h2><p>遍历vector容器可以使用迭代器方式，也可以通过使用at()成员函数和循环语句实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//迭代器加for循环来遍历vector对象</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">for_iter</span><span class="params">(<span class="built_in">vector</span>&lt;TYPE&gt;&amp; myvec)</span></span>&#123;</span><br><span class="line">	<span class="built_in">vector</span>&lt;TYPE&gt;::iterator iter;</span><br><span class="line">	<span class="keyword">for</span>(iter=myvec.begin();iter!=myvec.end();iter++)&#123;</span><br><span class="line">	temp=*iter;</span><br><span class="line">	<span class="comment">//do somnthing with temp here...</span></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//for循环加size()和at()成员函数来遍历</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">for_at_size</span><span class="params">(<span class="built_in">vector</span>&lt;TYPE&gt;&amp; myvec)</span></span>&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;myvec.size();i++)&#123;</span><br><span class="line">	temp=myvec.at(i);</span><br><span class="line">	<span class="comment">//do something with temp here...</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用count-if算法和for-each算法操作vector对象"><a href="#使用count-if算法和for-each算法操作vector对象" class="headerlink" title="使用count_if算法和for_each算法操作vector对象"></a>使用<code>count_if</code>算法和<code>for_each</code>算法操作vector对象</h2><p><code>for_each</code>和<code>count_if</code>算法在algorithm头文件中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">print</span><span class="params">(<span class="keyword">int</span>&amp; x)</span></span>&#123;</span><br><span class="line">	<span class="built_in">cout</span>&lt;&lt;x&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">if_bigger_than_3</span><span class="params">(<span class="keyword">int</span>&amp; x)</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> x&gt;<span class="number">3</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">int</span> main(<span class="keyword">void</span>)&#123;</span><br><span class="line">	<span class="comment">//定义并初始化含有是个元素的vector对象</span></span><br><span class="line">	<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; myvec=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>,<span class="number">10</span>&#125;;</span><br><span class="line">	<span class="comment">//for_each算法将指定区间的元素的引用逐一传递到print函数中</span></span><br><span class="line">	<span class="comment">//被print函数中的形参x接收并执行</span></span><br><span class="line">	for_each(myvec.begin(),myvec.end(),print);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//count_if算法将指定区间的元素的引用逐一传递到if_bigger_than_3函数中</span></span><br><span class="line">	<span class="comment">//返回值为if_bigger_than_3中返回true的次数</span></span><br><span class="line">	<span class="keyword">auto</span> count=count_if(myvec.begin(),myvec.end(),if_bigger_than_3);</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">cout</span>&lt;&lt;count&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="vector高级主题"><a href="#vector高级主题" class="headerlink" title="vector高级主题"></a>vector高级主题</h1><h2 id="元素访问方法"><a href="#元素访问方法" class="headerlink" title="元素访问方法"></a>元素访问方法</h2><p>可以直接访问vector对象的操作方法主要包括以下４中：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;MyType&gt; myvector;</span><br><span class="line">myvector[index];</span><br><span class="line">myvector.at(index);</span><br><span class="line">myvector.front();</span><br><span class="line">myvector.back();</span><br></pre></td></tr></table></figure>
+
+<p>myvector[index]和myvector.at(index)两种访问方式返回的都是对象的引用类型，所以既可以取其中的元素，也可以对其赋值。前提是下标值必须有效。front()和back()分别返回第一个元素和最后一个元素。</p>
+<h2 id="迭代器相关函数"><a href="#迭代器相关函数" class="headerlink" title="迭代器相关函数"></a>迭代器相关函数</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; myvect=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>&#125;;</span><br><span class="line"><span class="comment">//返回值类型均为迭代器类型，分别指向第一个元素和最后一个元素的下一个元素</span></span><br><span class="line">myvect.begin();</span><br><span class="line">myvect.end();</span><br><span class="line"><span class="comment">//返回值类型均为逆向迭代器类型，分别指向逆向迭代的第一个元素和逆向迭代的最后一个元素的下一个元素</span></span><br><span class="line">myvect.rbegin();</span><br><span class="line">myvect.rend();</span><br></pre></td></tr></table></figure>
+
+<h2 id="元素查找和搜索"><a href="#元素查找和搜索" class="headerlink" title="元素查找和搜索"></a>元素查找和搜索</h2><p>STL通用算法find()和find_if()</p>
+<h2 id="容器中元素的排序"><a href="#容器中元素的排序" class="headerlink" title="容器中元素的排序"></a>容器中元素的排序</h2><p>sort算法：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">	<span class="keyword">int</span> score;</span><br><span class="line">	<span class="built_in">string</span> name;</span><br><span class="line">&#125;Student;</span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">sort_by_score</span><span class="params">(Student&amp; s1,Student&amp; s2)</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> s1.score&gt;s2.score;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">print</span><span class="params">(Student &amp; s)</span></span>&#123;</span><br><span class="line">	<span class="built_in">cout</span>&lt;&lt;s.name&lt;&lt;<span class="string">":"</span>&lt;&lt;s.score&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span>&#123;</span><br><span class="line">	<span class="built_in">vector</span>&lt;Student&gt; myvec=&#123;&#123;<span class="number">25</span>,<span class="string">"mary"</span>&#125;,&#123;<span class="number">35</span>,<span class="string">"jack"</span>&#125;,&#123;<span class="number">10</span>,<span class="string">"Lily"</span>&#125;&#125;;</span><br><span class="line">	<span class="built_in">cout</span>&lt;&lt;<span class="string">"排序前："</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">	for_each(myvec.begin(),myvec.end(),print);</span><br><span class="line">	sort(myvec.begin(),myvec.end(),sort_by_score);</span><br><span class="line">	<span class="built_in">cout</span>&lt;&lt;<span class="string">"排序后："</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">	for_each(myvec.begin(),myvec.end(),print);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面程序的输出结果为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">排序前：</span><br><span class="line">mary:25</span><br><span class="line">jack:35</span><br><span class="line">Lily:10</span><br><span class="line">排序后：</span><br><span class="line">jack:35</span><br><span class="line">mary:25</span><br><span class="line">Lily:10</span><br></pre></td></tr></table></figure>
+
+<h2 id="插入元素"><a href="#插入元素" class="headerlink" title="插入元素"></a>插入元素</h2><p>push_back()可以在vector对象的末尾插入元素，insert()函数可以在vector的任意位置插入元素。下面看演示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">print</span><span class="params">(<span class="keyword">int</span>&amp; x)</span></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;x&lt;&lt;<span class="string">" "</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span>&#123;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;myIntvec=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>&#125;;</span><br><span class="line">    for_each(myIntvec.begin(),myIntvec.end(),print);</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    <span class="comment">//在开始位置前面插入０</span></span><br><span class="line">    myIntvec.insert(myIntvec.begin(),<span class="number">0</span>);</span><br><span class="line">    for_each(myIntvec.begin(),myIntvec.end(),print);</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">     <span class="comment">//在末尾位置前面插入０</span></span><br><span class="line">     myIntvec.insert(myIntvec.end(),<span class="number">0</span>);</span><br><span class="line">     for_each(myIntvec.begin(),myIntvec.end(),print);</span><br><span class="line">     <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">     <span class="comment">//创建一个新向量</span></span><br><span class="line">     <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;myIntvec2;</span><br><span class="line">     <span class="comment">//用push_back()依次向末尾添加数据</span></span><br><span class="line">     myIntvec2.push_back(<span class="number">6</span>);</span><br><span class="line">     myIntvec2.push_back(<span class="number">5</span>);</span><br><span class="line">     myIntvec2.push_back(<span class="number">2</span>);</span><br><span class="line">     for_each(myIntvec2.begin(),myIntvec2.end(),print);</span><br><span class="line">     <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">     <span class="comment">//用pop_back()依次从末尾移除数据</span></span><br><span class="line">     myIntvec2.pop_back();</span><br><span class="line">     for_each(myIntvec2.begin(),myIntvec2.end(),print);</span><br><span class="line">     <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">     <span class="comment">//将myIntvec2中的全部元素插入到myIntvec的开始元素的前面</span></span><br><span class="line">     myIntvec.insert(myIntvec.begin(),myIntvec2.begin(),myIntvec2.end());</span><br><span class="line">     for_each(myIntvec.begin(),myIntvec.end(),print);</span><br><span class="line">     <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">     <span class="comment">//插入多个相同的值,这里是在myIntvec的开始元素的前面插入两个５</span></span><br><span class="line">     myIntvec.insert(myIntvec.begin(),<span class="number">2</span>,<span class="number">5</span>);</span><br><span class="line">     for_each(myIntvec.begin(),myIntvec.end(),print);</span><br><span class="line">     <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1 2 3 4 5 6 7</span><br><span class="line">0 1 2 3 4 5 6 7</span><br><span class="line">0 1 2 3 4 5 6 7 0</span><br><span class="line">6 5 2</span><br><span class="line">6 5</span><br><span class="line">6 5 0 1 2 3 4 5 6 7 0</span><br><span class="line">5 5 6 5 0 1 2 3 4 5 6 7 0</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除元素"><a href="#删除元素" class="headerlink" title="删除元素"></a>删除元素</h2><p>在vector删除元素可以使用３个成员函数：pop_back(),erase(),和clear().还可以使用算法库的算法remove()来实现。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">print</span><span class="params">(<span class="keyword">int</span>&amp; x)</span></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;x&lt;&lt;<span class="string">" "</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span>&#123;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;myIntvec=&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>&#125;;</span><br><span class="line">    for_each(myIntvec.begin(),myIntvec.end(),print);</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    myIntVec.erase(myIntVec.begin());</span><br><span class="line">    for_each(myIntvec.begin(),myIntvec.end(),print);</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    myIntVec.clear();</span><br><span class="line">    for_each(myIntvec.begin(),myIntvec.end(),print);</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1 2 3 4 5 6 7</span><br><span class="line">2 3 4 5 6 7</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/STL-Vector/" rel="tag"># STL Vector</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/25/Build-your-own-images/" rel="next" title="构建镜像">
+                <i class="fa fa-chevron-left"></i> 构建镜像
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/26/Dynamic-Array/" rel="prev" title="动态数组">
+                动态数组 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#vector类基础"><span class="nav-number">1.</span> <span class="nav-text">vector类基础</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#vector对象定义"><span class="nav-number">1.1.</span> <span class="nav-text">vector对象定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector类对象初始化"><span class="nav-number">1.2.</span> <span class="nav-text">vector类对象初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容器的大小和容量"><span class="nav-number">1.3.</span> <span class="nav-text">容器的大小和容量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector类的成员函数"><span class="nav-number">1.4.</span> <span class="nav-text">vector类的成员函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#遍历vector容器"><span class="nav-number">1.5.</span> <span class="nav-text">遍历vector容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用count-if算法和for-each算法操作vector对象"><span class="nav-number">1.6.</span> <span class="nav-text">使用count_if算法和for_each算法操作vector对象</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vector高级主题"><span class="nav-number">2.</span> <span class="nav-text">vector高级主题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#元素访问方法"><span class="nav-number">2.1.</span> <span class="nav-text">元素访问方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#迭代器相关函数"><span class="nav-number">2.2.</span> <span class="nav-text">迭代器相关函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#元素查找和搜索"><span class="nav-number">2.3.</span> <span class="nav-text">元素查找和搜索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容器中元素的排序"><span class="nav-number">2.4.</span> <span class="nav-text">容器中元素的排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入元素"><span class="nav-number">2.5.</span> <span class="nav-text">插入元素</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除元素"><span class="nav-number">2.6.</span> <span class="nav-text">删除元素</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

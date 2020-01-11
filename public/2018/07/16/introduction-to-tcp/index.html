@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="TCP,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="上一篇文章，我们讲了UDP。UDP最大的缺点就是无法提供可靠数据传输，这使得数据发送出去之后可能丢失。在一些对数据完整性要求十分严格的场景下，UDP就无用武之地了。而TCP就是用来解决数据完整传输这一问题的。 －－图　泰国TCP Group(เกี่ยวกับ TCP),貌似是卖饮料的。 TCP是因特网传输层的面向连接的可靠数据传输。为了实现可靠数据传输，TCP使用了许多措施:差错检测、超时重传、">
+<meta name="keywords" content="TCP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP简介">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/07/16/introduction-to-tcp/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="上一篇文章，我们讲了UDP。UDP最大的缺点就是无法提供可靠数据传输，这使得数据发送出去之后可能丢失。在一些对数据完整性要求十分严格的场景下，UDP就无用武之地了。而TCP就是用来解决数据完整传输这一问题的。 －－图　泰国TCP Group(เกี่ยวกับ TCP),貌似是卖饮料的。 TCP是因特网传输层的面向连接的可靠数据传输。为了实现可靠数据传输，TCP使用了许多措施:差错检测、超时重传、">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/tcp.jpg">
+<meta property="og:image" content="http://andrewpqc.github.io/images/io-buf.jpeg">
+<meta property="og:image" content="http://andrewpqc.github.io/images/tcp-segment-struct.JPG">
+<meta property="og:updated_time" content="2018-07-17T07:26:25.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TCP简介">
+<meta name="twitter:description" content="上一篇文章，我们讲了UDP。UDP最大的缺点就是无法提供可靠数据传输，这使得数据发送出去之后可能丢失。在一些对数据完整性要求十分严格的场景下，UDP就无用武之地了。而TCP就是用来解决数据完整传输这一问题的。 －－图　泰国TCP Group(เกี่ยวกับ TCP),貌似是卖饮料的。 TCP是因特网传输层的面向连接的可靠数据传输。为了实现可靠数据传输，TCP使用了许多措施:差错检测、超时重传、">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/tcp.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/07/16/introduction-to-tcp/">
+
+
+
+
+
+  <title>TCP简介 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/07/16/introduction-to-tcp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">TCP简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-16T17:57:07+08:00">
+                2018-07-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Network/" itemprop="url" rel="index">
+                    <span itemprop="name">Network</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/16/introduction-to-tcp/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/07/16/introduction-to-tcp/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上一篇文章，我们讲了UDP。UDP最大的缺点就是无法提供可靠数据传输，这使得数据发送出去之后可能丢失。在一些对数据完整性要求十分严格的场景下，UDP就无用武之地了。而TCP就是用来解决数据完整传输这一问题的。</p>
+<p><img src="/images/tcp.jpg" alt><br>－－图　泰国TCP Group(เกี่ยวกับ TCP),貌似是卖饮料的。</p>
+<p>TCP是因特网传输层的<strong>面向连接</strong>的<strong>可靠数据传输</strong>。为了实现可靠数据传输，TCP使用了许多措施:<strong>差错检测、超时重传、累积确认、定时器以及用于序号和确认号的首部字段</strong>。</p>
+<h1 id="可靠数据传输机制"><a href="#可靠数据传输机制" class="headerlink" title="可靠数据传输机制"></a>可靠数据传输机制</h1><table>
+<thead>
+<tr>
+<th align="center">机制</th>
+<th align="center">用途和说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">检验和</td>
+<td align="center">用于监测在一个传输分组中的比特错误</td>
+</tr>
+<tr>
+<td align="center">定时器</td>
+<td align="center">用于超时/重传一个分组,可能因为该分组(或其ACK)在信道中丢失了.由于当一个分组延时但未丢失,或当一个分组已被接收方接收但从接收方到发送方的ACK丢失时,可能产生超时事件,所以接收方可能会收到一个分组的多个冗余副本.</td>
+</tr>
+<tr>
+<td align="center">序号</td>
+<td align="center">用于为从发送方流向接收方的数据分组按序号编号.所接受分组的序号的空隙可是的接收方检测除丢失的分组.具有相同序号的分组可使接收方检测出一个分组的冗余副本.</td>
+</tr>
+<tr>
+<td align="center">确认</td>
+<td align="center">接收方用于告诉发送方一个分组或一组分组已经被正确地接收到了.确认报文通常携带着被确认的分组或多个分组的序号.确认可以是逐个的或积累的,这取决于协议.</td>
+</tr>
+<tr>
+<td align="center">否定确认</td>
+<td align="center">收方用于告诉发送方某个分组未被正确的接收.否则人确定报文通常携带着未被正确接收的分组的序号.</td>
+</tr>
+<tr>
+<td align="center">窗口、流水线</td>
+<td align="center">发送方也许被限制仅发送那些序号落在一个指定范围内的分组.通过允许一次发送多个分组但未被确认,发送方的利用率可以在停等操作模式上得到增加.我们很快将会看到,窗口长度可根据接收方接收和缓存报文的能力/网络中的拥塞程度或两者的情况来进行设置.</td>
+</tr>
+</tbody></table>
+<p>在这里，我首先给出TCP可靠数据传输所采取的机制，关于这些机制的原理我后面还会有陆续几篇文章介绍。</p>
+<h1 id="TCP通信的过程"><a href="#TCP通信的过程" class="headerlink" title="TCP通信的过程"></a>TCP通信的过程</h1><p>TCP是面向连接的,这是因为在一个应用进程可以开始向另一个应用进程发送数据之前，这两个进程必须先相互“握手”，即它们必须先相互发送某些预备报文段，以建立确保数据传输的参数。在握手的过程中，连接的双方都将初始化与TCP连接的许多TCP状态变量，例如<strong>初始化发送缓存和接收缓存，交换确定彼此的序号和确认号等</strong>。</p>
+<p>一旦建立起一条TCP连接，两个应用进程之间就可以相互发送数据了。在介绍发送接收数据之前我们先介绍TCP连接的两个基本特点:</p>
+<ul>
+<li><strong>TCP连接提供的是全双工服务</strong><br>如果一台主机上的进程A与另一台主机上的进程B存在一条TCP连接，那么应用层数据可以在从进程B流向进程A的同时，也从进程A流向进程B。</li>
+<li><strong>TCP连接是点对点的</strong><br>也即是TCP连接是单个发送方和单个接收方之间的连接。多播(在一次发送操作中，从一个发送方将数据传送给多个接收方)对于TCP来说是不可能的。</li>
+</ul>
+<p><img src="/images/io-buf.jpeg" alt></p>
+<p>我们考虑一下从客户进程向服务进程发送数据的情况。客户端进程通过套接字(该进程之门)传递数据流。数据一旦通过该门，它就由客户端中运行的TCP控制了.TCP经这些数据引导到该链接的发送缓存里，发送缓存是在三次握手初期设置的设置的缓存之一。接下来TCP就会不时从发送缓存里取出一块数据。<strong>取出数据的大小受限于最大报文段长度</strong>(Maximum Segment Size,MSS)。然后，TCP会为每块应用层数据配上一个TCP首部，从而形成多个TCP报文段，这些报文段被下传到网络层，网络层将其封装在网络层的IP数据包中，然后这些IP数据报被发送到网络中。当TCP在另一端接收到一个报文段后，该报文段的数据就被放入该TCP连接的接收缓存，应用程序从此缓存中读取数据流。由于TCP提供的是全双工服务，所以<strong>TCP连接的每一端都有各自的发送缓存和接收缓存</strong>。</p>
+<p>由上面的讨论我们可以看出，<strong>TCP连接的组成包括:一台主机上的缓存、变量和与进程连接的套接字，以及另一台主机上的另一组缓存、变量和与进程连接的套接字</strong>。两台主机之间的网络元素(路由器、交换机和中继器)没有为该TCP连接分配任何缓存与变量。</p>
+<h1 id="TCP报文段结构"><a href="#TCP报文段结构" class="headerlink" title="TCP报文段结构"></a>TCP报文段结构</h1><p>为了便于后面介绍TCP可靠数据传输的实现，这里我们先介绍一下TCP报文段的结构:</p>
+<p><img src="/images/tcp-segment-struct.JPG" alt></p>
+<p><strong>TCP报文段由首部字段和一个数据字段组成</strong>。数据字段包含一块应用数据。如前所述，MSS限制报文段数据字段的最大长度。当TCP发送一个大文件时，通常是将该文件划分为长度为MSS的若干块(最后一块除外，它通常小于MSS).然而对于很多交互式应用来说，其TCP报文的数据字段通常很小。例如像Telnet这样的远程登录应用，其TCP报文段的数据字段经常只有一个字节，由于TCP的首部一般是20个字节(比UDP首部多12字节)，所以Telnet发送的报文段也许只有21字节。</p>
+<p>如上图，TCP报文段由下列部分组成:</p>
+<ul>
+<li><p><strong>源端口号(source port)和目的端口号(dest port)</strong><br>被用来多路复用/分解来自或送到上层应用的数据。协助实现进程间的数据交付功能。</p>
+</li>
+<li><p><strong>检验和字段(checksum)</strong><br>同UDP一样，检验和字段也是用来检查报文中可能发生的比特错误。</p>
+</li>
+<li><p><strong>32比特的序号字段(sequence number)和32比特的确认号字段(acknowledgement number)</strong><br>这两个字段被TCP发送方和接收方用来实现可靠数据传输服务。</p>
+</li>
+<li><p><strong>16比特的接收窗口字段(receive window)</strong><br>该字段用来实现流量控制，即匹配发送方的发送速度与接收方的接收速度。</p>
+</li>
+<li><p><strong>4比特的首部长度字段</strong><br>该字段指示了以32比特的字为单位的TCP首部长度。由于TCP选项字段的原因，TCP首部字段的长度是可变的，所以发送方需要计算首部的长度，以方便接收方处理。</p>
+</li>
+<li><p><strong>可选与变长的选项字段(options,variable length)</strong><br>该字段用于发送方与接收方协商最大报文段长度时，或者在高速网络环境下用作窗口调节因子时使用</p>
+</li>
+<li><p><strong>6比特的标志字段(flag field)</strong><br>标志字段的6个比特分别为:URG、ACK、PSH、RST、SYN、FIN。ACK比特置为1，则表明这是一个确认报文，包含一个对已成功接收报文段的确认。RST、SYN、FIN用于连接的建立和拆除。当PSH比特设置为1,就指示接收方应立即将数据交给上层。URG比特用来指示报文段里存在着被发送端上层的实体置为紧急的数据，紧急数据的最后一个字节由16比特的<strong>应急数据指针</strong>指出。当紧急数据存在并给定指向紧急数据尾的指针的时候，TCP必须通知接收端的上层实体。(在实践中，PSH,URG和紧急数据指针并没有使用。为了讨论的完整性，这里才提到这些字段)</p>
+</li>
+</ul>
+<p>了解TCP报文段的结构对于后面我们讨论TCP可靠数据传输来说至关重要。</p>
+<h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><ul>
+<li>TCP是因特网传输层的面向连接的可靠数据传输。</li>
+<li>TCP为了实现可靠数据传输，采用了:差错检测、超时重传、累积确认、定时器以及用于序号和确认号的首部字段等措施。</li>
+<li>TCP连接提供的是全双工服务,点对点通信。“多播”对TCP协议来说是不可能的。</li>
+<li>TCP在通信之前需要先握手，以初始化与TCP连接的许多TCP状态变量。这也是TCP称为面向连接的原因。</li>
+<li>TCP连接的每一端都有各自的发送缓存和接收缓存。</li>
+<li>TCP连接的组成包括:一台主机上的缓存、变量和与进程连接的套接字，以及另一台主机上的另一组缓存、变量和与进程连接的套接字。</li>
+<li>TCP报文段由首部字段和一个数据字段组成，数据字段的大小受限于最大报文段长度(MSS)。</li>
+<li>TCP报文由源端口号(source port)和目的端口号(dest port)、检验和字段(checksum)、32比特的序号字段(sequence number)和32比特的确认号字段(acknowledgement number)、16比特的接收窗口字段(receive window)、4比特的首部长度字段、可选与变长的选项字段(options,variable length)、6比特的标志字段(flag field)等部分组成。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/TCP/" rel="tag"># TCP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/16/udp-and-its-features/" rel="next" title="UDP协议及其功能">
+                <i class="fa fa-chevron-left"></i> UDP协议及其功能
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/17/sequence-number-and-ack-number-in-tcp/" rel="prev" title="TCP中的序号和确认号">
+                TCP中的序号和确认号 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#可靠数据传输机制"><span class="nav-number">1.</span> <span class="nav-text">可靠数据传输机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP通信的过程"><span class="nav-number">2.</span> <span class="nav-text">TCP通信的过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP报文段结构"><span class="nav-number">3.</span> <span class="nav-text">TCP报文段结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结论"><span class="nav-number">4.</span> <span class="nav-text">结论</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

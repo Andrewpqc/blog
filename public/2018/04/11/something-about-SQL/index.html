@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="SQL,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近在看数据库的书籍，对数据库的操作，尤其是SQL语言更加熟悉了，概念方面理顺了许多。对以前比较陌生的东西也不再有畏惧感。所以写这篇博客把重难点的部分一并总结一下。 以下的SQL基于SQL必知必会书上的五张表:Vendors,Products,Customers,Orders,OrderItems. 分组数据数据分组如下我们可以计算供应商DLL01提供的产品数目： 123SELECT COUNT(">
+<meta name="keywords" content="SQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL重难点总结">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/04/11/something-about-SQL/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="最近在看数据库的书籍，对数据库的操作，尤其是SQL语言更加熟悉了，概念方面理顺了许多。对以前比较陌生的东西也不再有畏惧感。所以写这篇博客把重难点的部分一并总结一下。 以下的SQL基于SQL必知必会书上的五张表:Vendors,Products,Customers,Orders,OrderItems. 分组数据数据分组如下我们可以计算供应商DLL01提供的产品数目： 123SELECT COUNT(">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-04-11T15:04:17.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SQL重难点总结">
+<meta name="twitter:description" content="最近在看数据库的书籍，对数据库的操作，尤其是SQL语言更加熟悉了，概念方面理顺了许多。对以前比较陌生的东西也不再有畏惧感。所以写这篇博客把重难点的部分一并总结一下。 以下的SQL基于SQL必知必会书上的五张表:Vendors,Products,Customers,Orders,OrderItems. 分组数据数据分组如下我们可以计算供应商DLL01提供的产品数目： 123SELECT COUNT(">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/04/11/something-about-SQL/">
+
+
+
+
+
+  <title>SQL重难点总结 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/04/11/something-about-SQL/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SQL重难点总结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-11T23:04:17+08:00">
+                2018-04-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Database/" itemprop="url" rel="index">
+                    <span itemprop="name">Database</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/04/11/something-about-SQL/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/04/11/something-about-SQL/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近在看数据库的书籍，对数据库的操作，尤其是SQL语言更加熟悉了，概念方面理顺了许多。对以前比较陌生的东西也不再有畏惧感。所以写这篇博客把重难点的部分一并总结一下。</p>
+<p>以下的SQL基于<strong>SQL必知必会</strong>书上的五张表:Vendors,Products,Customers,Orders,OrderItems.</p>
+<h1 id="分组数据"><a href="#分组数据" class="headerlink" title="分组数据"></a>分组数据</h1><h2 id="数据分组"><a href="#数据分组" class="headerlink" title="数据分组"></a>数据分组</h2><p>如下我们可以计算供应商DLL01提供的产品数目：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> num_prods </span><br><span class="line"><span class="keyword">FROM</span> Products </span><br><span class="line"><span class="keyword">WHERE</span> vend_id = <span class="string">"DLL01"</span>;</span><br></pre></td></tr></table></figure>
+
+<p>那如果我们需要分别计算每一个供应商的提供的产品的数量呢?这个时候就是分组大显身手的时候了。<strong>使用分组可以将数据分为多个逻辑组，对每个组进行聚集计算</strong>。如下:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> vend_id,<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> num_prods </span><br><span class="line"><span class="keyword">FROM</span> Products </span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> vend_id;</span><br></pre></td></tr></table></figure>
+
+<p>上面的SELECT语句指定了两个列：vend_id包含产品供应商的ID,num_prods为计算字段(用COUNT(*)函数建立)。<code>GROUP BY</code>子句指示DBMS按照vend_id排序并分组数据。这就会对每个vend_id而不是整个表计算一次num_prods.</p>
+<h2 id="过滤分组"><a href="#过滤分组" class="headerlink" title="过滤分组"></a>过滤分组</h2><p>除了可以使用<code>GROUP BY</code>进行分组之外，还可以过滤分组，决定那些分组需要，那些分组可以滤去。过滤分组通过HAVING子句进行。例如下面过滤出产品数大于等于2的分组:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> vend_id,<span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> num_prods </span><br><span class="line"><span class="keyword">FROM</span> Products </span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> vend_id </span><br><span class="line"><span class="keyword">HAVING</span> <span class="keyword">COUNT</span>(*) &gt;= <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+
+<p>上面的语句中只有产品数目大于等于2的分组才能够被选择出来。</p>
+<h2 id="HAVING-VS-WHERE"><a href="#HAVING-VS-WHERE" class="headerlink" title="HAVING VS WHERE"></a>HAVING VS WHERE</h2><p>众所周知，<code>WHERE</code>子句具有过滤的作用，但是<code>WHERE</code>子句指定的是过滤而不是分组，事实上<code>WHERE</code>没有分组的概念。<code>HAVING</code>非常类似于<code>WHERE</code>,目前绝大多数的<code>WHERE</code>子句都可以用<code>HAVING</code>来替代，唯一的差别是，<code>WHERE</code>过滤行，而<code>HAVING</code>过滤分组。另一种理解方式是：<code>WHERE</code>在数据分组前进行过滤，<code>HAVING</code>在数据分组后进行过滤。<code>WHERE</code>排除的行不包括在分组中。这可能会改变计算值，从而影响<code>HAVING</code>子句中基于这些值过滤掉的分组。<code>HAVING</code>与<code>WHERE</code>非常类似，如果不指定<code>GROUP BY</code>,则大多数的DBMS会同等的对待他们。不过我们自己还是需要区分这一点的，使用<strong>HAVING时应该结合GROUP BY子句，而WHERE子句用于标准的行级过滤</strong>。</p>
+<h2 id="SELECT子句顺序"><a href="#SELECT子句顺序" class="headerlink" title="SELECT子句顺序"></a>SELECT子句顺序</h2><table>
+<thead>
+<tr>
+<th align="center">子句</th>
+<th align="center">说明</th>
+<th align="center">是否必须使用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">SELECT</td>
+<td align="center">要返回的列或表达式</td>
+<td align="center">是</td>
+</tr>
+<tr>
+<td align="center">FROM</td>
+<td align="center">从中检索数据的表</td>
+<td align="center">仅在从表选择数据时使用</td>
+</tr>
+<tr>
+<td align="center">WHERE</td>
+<td align="center">行级过滤</td>
+<td align="center">否</td>
+</tr>
+<tr>
+<td align="center">GROUP BY</td>
+<td align="center">分组说明</td>
+<td align="center">仅在按组计算聚集时使用</td>
+</tr>
+<tr>
+<td align="center">HAVING</td>
+<td align="center">组级过滤</td>
+<td align="center">否</td>
+</tr>
+<tr>
+<td align="center">ORDER BY</td>
+<td align="center">输出排序顺序</td>
+<td align="center">否</td>
+</tr>
+</tbody></table>
+<h1 id="联结表"><a href="#联结表" class="headerlink" title="联结表"></a>联结表</h1><p>SQL最强大的功能之一就是能在数据查询的执行中联结(join)表，联结是利用SQL的SELECT能执行的最重要的操作。为什么要使用联结操作呢？将数据分解为多个表能更有效的存储，更方便的处理，并且可伸缩性更好，这是关系型数据库的最大的特点。但是这些好处是有代价的。我们需要通过联结多个表返回一组输出，联结在运行时关联表中的正确的行。</p>
+<h2 id="内联结"><a href="#内联结" class="headerlink" title="内联结"></a>内联结</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> vend_name,prod_name,prod_price</span><br><span class="line"><span class="keyword">FROM</span> Vendors,Products</span><br><span class="line"><span class="keyword">WHERE</span> Vendors.vend_id = Products.vend_id;</span><br></pre></td></tr></table></figure>
+
+<p>如上，我们用<code>WHERE</code>子句将Products表的外键vend_id与它所引用的Vendors表的主键vend_id关联起来,这样就建立了这两张表的联结。上面的联结的大致执行过程是这样的：首先对于Vendors表中的每一个元组，都去比对Products表中的每一个元组，如果满足Vendors.vend_id = Products.vend_id,就从这两个元组中提取出指定的列，然后放到输出中，接着就去取Vendors表中的下一个元组，重复上面的过程。Vendors表中的所有元组执行完毕。这里有一个问题需要注意：对于Vendors表中的一个元组，如果在Products表中找不到满足Vendors.vend_id = Products.vend_id的元组(也就是该供应商没有提供产品)，这时候Vendors表中的这个元组放不放到输出中呢？对于上面的SQL，这样的元组不会放到输出中。</p>
+<p>上面使用的联结称为<strong>等值联结(equijoin)</strong>，它基于两个表之间的相等测试。这种联结也称为<strong>内连接(inner join)</strong>。其实，可以对这种联结使用稍微不同的语法，明确指定联结类型，就像下面这样:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> vend_name, prod_name,prod_price</span><br><span class="line"><span class="keyword">FROM</span> Vendors <span class="keyword">INNER</span> <span class="keyword">JOIN</span> Products</span><br><span class="line"><span class="keyword">ON</span> Vendors.vend_id = Products.vend_id;</span><br></pre></td></tr></table></figure>
+
+<p>这条SQL语句和前面的那条语句所起的作用是等价的。这里，两个表之间的关系是以<code>INNER JOIN</code>指定的部分<code>FROM</code>子句，在使用这种语法时，联结条件用特定的<code>ON</code>子句而不是<code>WHERE</code>子句给出，传递给<code>ON</code>的实际条件与传递给<code>WHERE</code>的相同。</p>
+<h2 id="联结多个表"><a href="#联结多个表" class="headerlink" title="联结多个表"></a>联结多个表</h2><p>SQL不限制一条SELECT语句中可以联结的表的数目，创建联结的基本规则也相同，首先列出所有表，然后定义表之间的关系，就像下面这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> prod_name,vend_name,prod_price,quantity</span><br><span class="line"><span class="keyword">FROM</span> OrderItems,Products,Vendors</span><br><span class="line"><span class="keyword">WHERE</span> Products.vend_id = Vendors.vend_id</span><br><span class="line"><span class="keyword">AND</span> OrderItems.prod_id = Products.prod_id</span><br><span class="line"><span class="keyword">AND</span> order_num = <span class="number">20007</span>;</span><br></pre></td></tr></table></figure>
+
+<p>上面我们使用的只是内联结(也叫等值联结)的简单联结，下面我们看其他联结：自联结(self-join)、外联结(outer join).</p>
+<h2 id="自联结"><a href="#自联结" class="headerlink" title="自联结"></a>自联结</h2><p>使用表别名能够在一个SELECT语句中不止一次的引用相同的表，我们可以使用利用表别名来完成同一个表的自联结。如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> c1.cust_id, c1.cust_name,c1.cust_contact</span><br><span class="line"><span class="keyword">FROM</span> Customers <span class="keyword">AS</span> c1,Customers <span class="keyword">AS</span> c2</span><br><span class="line"><span class="keyword">WHERE</span> c1.cust_name = c2.cust_name</span><br><span class="line"><span class="keyword">AND</span> c2.cust_contact = <span class="string">"Jim Jones"</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这条语句检索出的就是和Jim Jones在同一家公司工作的的雇员的信息。</p>
+<h2 id="外联结"><a href="#外联结" class="headerlink" title="外联结"></a>外联结</h2><p>内连接是将一个表中的行与另一个表中的行相关联，但有时候需要关联没有关联行的那些行。例如可能需要使用联结完成以下工作：<br>－　对每一个顾客下的订单数进行计数，包括那些至今尚未下订单的顾客；<br>－　列出所有产品以及订购数量，包括没有人订购的产品；<br>－　计算平均销售规模，包括那些至今尚未下订单的顾客。<br>在上述例子中，联结包含了那些在相关表中没有关联行的行。这种联结称为<strong>外联结</strong>。如下的例子：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> Customers.cust_id,Orders.order_num</span><br><span class="line"><span class="keyword">FROM</span> Customers <span class="keyword">LEFT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span> Orders</span><br><span class="line"><span class="keyword">ON</span> Customers.cust_id = Orders.cust_id;</span><br></pre></td></tr></table></figure>
+
+<p>这条SELECT语句使用了关键字<code>OUTER JOIN</code>来指定了联结类型。与内连接关联两个表中的行不同，外联结还包括没有关联的行。在使用<code>OUTER JOIN</code>语法时，必须使用RIGHT或者LEFT关键字指定包括其所有行的表(<code>RIGHT</code>指出的是<code>OUTER JOIN</code>右边的表，而<code>LEFT</code>指出的是<code>OUTER JOIN</code>左边的表)，上面的例子使用<code>LEFT OUTER JOIN</code>从<code>FROM</code>子句左边的表(Customers)中选择所有行。为了从右边的表中选择所有的行，需要使用<code>RIGHT OUTER JOIN</code>,如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> Customers.cust_id,Orders.order_num</span><br><span class="line"><span class="keyword">FROM</span> Customers　<span class="keyword">RIGHT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span> Orders</span><br><span class="line"><span class="keyword">ON</span> Customers.cust_id = Orders.cust_id;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用带聚集函数的联结"><a href="#使用带聚集函数的联结" class="headerlink" title="使用带聚集函数的联结"></a>使用带聚集函数的联结</h2><p>如下，按照顾客的id分组，查询每个顾客的订单数。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> Customers.cust_id,</span><br><span class="line">    <span class="keyword">COUNT</span>(Orders.order_num) <span class="keyword">AS</span> num_ord</span><br><span class="line"><span class="keyword">FROM</span> Customers <span class="keyword">INNER</span> <span class="keyword">JOIN</span> Orders </span><br><span class="line"><span class="keyword">ON</span> Customers.cust_id = Orders.cust_id</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> Customers.cust_id;</span><br></pre></td></tr></table></figure>
+
+<p>这里使用的是内联结，所以不会包含没有下订单的顾客分组。如果要包含他们就需要使用<code>LEFT OUTER JOIN</code>。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/SQL/" rel="tag"># SQL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/09/limiting-use/" rel="next" title="限制资源访问">
+                <i class="fa fa-chevron-left"></i> 限制资源访问
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/23/setup-kubernetes-cluster-with-kubeadm/" rel="prev" title="用Kubeadm搭建一个k8s 1.7.5的单节点集群">
+                用Kubeadm搭建一个k8s 1.7.5的单节点集群 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#分组数据"><span class="nav-number">1.</span> <span class="nav-text">分组数据</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据分组"><span class="nav-number">1.1.</span> <span class="nav-text">数据分组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过滤分组"><span class="nav-number">1.2.</span> <span class="nav-text">过滤分组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HAVING-VS-WHERE"><span class="nav-number">1.3.</span> <span class="nav-text">HAVING VS WHERE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SELECT子句顺序"><span class="nav-number">1.4.</span> <span class="nav-text">SELECT子句顺序</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#联结表"><span class="nav-number">2.</span> <span class="nav-text">联结表</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#内联结"><span class="nav-number">2.1.</span> <span class="nav-text">内联结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#联结多个表"><span class="nav-number">2.2.</span> <span class="nav-text">联结多个表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自联结"><span class="nav-number">2.3.</span> <span class="nav-text">自联结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#外联结"><span class="nav-number">2.4.</span> <span class="nav-text">外联结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用带聚集函数的联结"><span class="nav-number">2.5.</span> <span class="nav-text">使用带聚集函数的联结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

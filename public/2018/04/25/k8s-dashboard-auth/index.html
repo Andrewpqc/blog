@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="kubernetes,dashboard,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="上一篇文章中，我们成功配置安装了kubernetes-dashboard插件，但是这里似乎来了另外一个问题:我们怎样进入到dashboard? 如上图，kubernetes-dashboard提供了两种验证方式:kubeconfig、token。这两种验证方式都是怎么回事呢?诶，好像有一个skip,我们点击看看。直接点击skip,我们进入到了dashboard的界面，但是似乎我们什么都做不了，页面">
+<meta name="keywords" content="kubernetes,dashboard">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes-dashboard的身份认证">
+<meta property="og:url" content="http://andrewpqc.github.io/2018/04/25/k8s-dashboard-auth/index.html">
+<meta property="og:site_name" content="Andrew&#39;s Blog">
+<meta property="og:description" content="上一篇文章中，我们成功配置安装了kubernetes-dashboard插件，但是这里似乎来了另外一个问题:我们怎样进入到dashboard? 如上图，kubernetes-dashboard提供了两种验证方式:kubeconfig、token。这两种验证方式都是怎么回事呢?诶，好像有一个skip,我们点击看看。直接点击skip,我们进入到了dashboard的界面，但是似乎我们什么都做不了，页面">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/dashboard.login.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/rbac2.png">
+<meta property="og:updated_time" content="2018-04-28T15:24:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kubernetes-dashboard的身份认证">
+<meta name="twitter:description" content="上一篇文章中，我们成功配置安装了kubernetes-dashboard插件，但是这里似乎来了另外一个问题:我们怎样进入到dashboard? 如上图，kubernetes-dashboard提供了两种验证方式:kubeconfig、token。这两种验证方式都是怎么回事呢?诶，好像有一个skip,我们点击看看。直接点击skip,我们进入到了dashboard的界面，但是似乎我们什么都做不了，页面">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/dashboard.login.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://andrewpqc.github.io/2018/04/25/k8s-dashboard-auth/">
+
+
+
+
+
+  <title>Kubernetes-dashboard的身份认证 | Andrew's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Andrew's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://andrewpqc.github.io/2018/04/25/k8s-dashboard-auth/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Andrew">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Andrew's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kubernetes-dashboard的身份认证</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-25T21:24:02+08:00">
+                2018-04-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">Kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/04/25/k8s-dashboard-auth/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/04/25/k8s-dashboard-auth/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上一篇文章中，我们成功配置安装了kubernetes-dashboard插件，但是这里似乎来了另外一个问题:我们怎样进入到dashboard?</p>
+<p><img src="/images/dashboard.login.png" alt="login"><br>如上图，<code>kubernetes-dashboard</code>提供了两种验证方式:<code>kubeconfig</code>、<code>token</code>。这两种验证方式都是怎么回事呢?诶，好像有一个<code>skip</code>,我们点击看看。直接点击<code>skip</code>,我们进入到了dashboard的界面，但是似乎我们什么都做不了，页面给出了提醒，我们没有权限查看和操作集群里面的资源。该怎么办呢？下面就让我们一起来看看kubernetes里面的身份认证和权限管理吧!</p>
+<p>要了解k8s中的身份认证和权限管理我们就必须先来了解k8s中的RBAC(Role-based access control)授权模式。</p>
+<h1 id="RBAC-in-K8s"><a href="#RBAC-in-K8s" class="headerlink" title="RBAC in K8s"></a>RBAC in K8s</h1><p><code>RBAC Authorization</code>的基本概念是<code>Role</code>和<code>RoleBinding</code>。<code>Role</code>是一些<code>permission</code>的集合；而<code>RoleBinding</code>则是将<code>Role</code>授权给某些<code>User</code>、某些<code>Group</code>或某些<code>ServiceAccount</code>。K8s官方博客<a href="https://kubernetes.io/blog/2017/04/rbac-support-in-kubernetes" target="_blank" rel="noopener">RBAC Support in Kubernetes</a>一文的中的配图对此做了很生动的诠释：</p>
+<p><img src="/images/rbac2.png" alt="picture"><br>从上图中我们可以看到：<br>Role:<code>pod-reader</code> 拥有Pod的<code>get</code>和<code>list</code> permissions；<br>RoleBinding:<code>pod-reader</code>将<code>Role</code>:<code>pod-reader</code>授权给右边的<code>User</code>、<code>Group</code>和<code>ServiceAccount</code>。</p>
+<p>与<code>Role</code>和<code>RoleBinding</code>对应的是，K8s还有<code>ClusterRole</code>和<code>ClusterRoleBinding</code>的概念，它们不同之处在于：<code>ClusterRole</code>和<code>ClusterRoleBinding</code>是针对整个<code>Cluster</code>范围内有效的，无论用户或资源所在的<code>namespace</code>是什么；而<code>Role</code>和<code>RoleBinding</code>的作用范围是局限在某个k8s namespace中的。</p>
+<p>kubernetes在安装之初就已经生成了许多<code>role</code>、<code>rolebinding</code>、<code>clusterrole</code>和<code>clusterrolebinding</code>,它们也是属于kubernetes资源的一部分，所以可以通过<code>get</code>、<code>describe</code>等命令查看，如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@iZwz9f6pgul78p7die5tlzZ dashboard]<span class="comment"># kc get role -n kube-system</span></span><br><span class="line">NAME                                             AGE</span><br><span class="line">extension-apiserver-authentication-reader        5d</span><br><span class="line">kubernetes-dashboard-minimal                     2d</span><br><span class="line">system::leader-locking-kube-controller-manager   5d</span><br><span class="line">system::leader-locking-kube-scheduler            5d</span><br><span class="line">system:controller:bootstrap-signer               5d</span><br><span class="line">system:controller:cloud-provider                 5d</span><br><span class="line">system:controller:token-cleaner                  5d</span><br><span class="line">weave-net                                        5d</span><br><span class="line">[root@iZwz9f6pgul78p7die5tlzZ dashboard]<span class="comment"># kc describe role extension-apiserver-authentication-reader -n kube-system</span></span><br><span class="line">Name:		extension-apiserver-authentication-reader</span><br><span class="line">Labels:		kubernetes.io/bootstrapping=rbac-defaults</span><br><span class="line">Annotations:	rbac.authorization.kubernetes.io/autoupdate=<span class="literal">true</span></span><br><span class="line">PolicyRule:</span><br><span class="line">  Resources	Non-Resource URLs	Resource Names				Verbs</span><br><span class="line">  ---------	-----------------	--------------				-----</span><br><span class="line">  configmaps	[]			[extension-apiserver-authentication]	[get]</span><br></pre></td></tr></table></figure>
+
+<p>下面截取了<code>kubernetes-dashboard.yml</code>文件的一部分：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ------------------- Dashboard Service Account ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># ------------------- Dashboard Role &amp; Role Binding ------------------- #</span></span><br><span class="line"></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to create and watch for changes of 'kubernetes-dashboard-key-holder' secret.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["secrets"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["create",</span> <span class="string">"watch"</span><span class="string">]</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["secrets"]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to get, update and delete 'kubernetes-dashboard-key-holder' secret.</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["kubernetes-dashboard-key-holder",</span> <span class="string">"kubernetes-dashboard-certs"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"update"</span><span class="string">,</span> <span class="string">"delete"</span><span class="string">]</span></span><br><span class="line">  <span class="comment"># Allow Dashboard to get metrics from heapster.</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["services"]</span></span><br><span class="line"><span class="attr">  resourceNames:</span> <span class="string">["heapster"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["proxy"]</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard-minimal</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p>上面这个yml文件做了这么一件事情：在<code>kube-system</code>命名空间中创建了一个名为<code>kubernetes-dashboard</code>的<code>ServiceAccount</code>。同时，在<code>kube-system</code>命名空间中创建了一个名为<code>kubernetes-dashboard-minimal</code>的<code>Role</code>，并且定义了这个Role的权限.然后同样是在<code>kube-system</code>命名空间中创建了一个<code>RoleBinding</code>,将上面的<code>Role</code>与<code>ServiceAccount</code>绑定在一起了。这样<code>kubernetes-dashboard</code>就有了<code>kubernetes-dashboard-minimal</code>所定义的权限了。<strong>有一点需要注意：这里的<code>kubernetes-dashboard</code>这个ServiceAccount是当用户直接点击<code>skip</code>进入到<code>dashboard</code>时所使用的账户。</strong></p>
+<h1 id="测试环境中的认证"><a href="#测试环境中的认证" class="headerlink" title="测试环境中的认证"></a>测试环境中的认证</h1><p>如果是在测试环境中，我们图个简单，不考虑安全性的情况之下。可以考虑让外部用户直接点击<code>skip</code>进入到dashboard，并且拥有所有的权限。这一点可以通过将<code>cluster-admin</code>这个拥有全集群最高权限的<code>ClusterRole</code>绑定到默认使用的<code>ServiceAccount－－kubernetes-dashboard</code>，具体的做法是:<br>创建文件:<code>dashboard-admin.yml</code>,填写下列内容:</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">cluster-admin</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br></pre></td></tr></table></figure>
+
+<p>执行下面的命令来创建一个ClusterRoleBinding：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl create -f dashboard-admin.yml</span><br></pre></td></tr></table></figure>
+
+<p>这样，我们就可以直接点击<code>skip</code>进入dashboard,并且拥有全部的权限。</p>
+<h1 id="基于token的认证"><a href="#基于token的认证" class="headerlink" title="基于token的认证"></a>基于token的认证</h1><p>下面我们来说说token这种方式。点击选择:Token单选框，提示你输入token。token从哪里获取，我们从来没有生成过token？其实当前K8s中已经有了很多token：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">[root@iZwz9f6pgul78p7die5tlzZ dashboard]# kc get secret -n kube-system</span><br><span class="line">NAME                                     TYPE                                  DATA      AGE</span><br><span class="line">attachdetach-controller-token-vkm75      kubernetes.io/service-account-token   3         5d</span><br><span class="line">bootstrap-signer-token-k59x3             kubernetes.io/service-account-token   3         5d</span><br><span class="line">bootstrap-token-ff4535                   bootstrap.kubernetes.io/token         5         5d</span><br><span class="line">certificate-controller-token-z3qpm       kubernetes.io/service-account-token   3         5d</span><br><span class="line">daemon-set-controller-token-3lbtj        kubernetes.io/service-account-token   3         5d</span><br><span class="line">default-token-8372f                      kubernetes.io/service-account-token   3         5d</span><br><span class="line">deployment-controller-token-pb2wl        kubernetes.io/service-account-token   3         5d</span><br><span class="line">disruption-controller-token-jwjlt        kubernetes.io/service-account-token   3         5d</span><br><span class="line">endpoint-controller-token-t3h87          kubernetes.io/service-account-token   3         5d</span><br><span class="line">generic-garbage-collector-token-sm8lt    kubernetes.io/service-account-token   3         5d</span><br><span class="line">heapster-token-zqld8                     kubernetes.io/service-account-token   3         6h</span><br><span class="line">horizontal-pod-autoscaler-token-v6wjc    kubernetes.io/service-account-token   3         5d</span><br><span class="line">job-controller-token-hfl7h               kubernetes.io/service-account-token   3         5d</span><br><span class="line">kube-dns-token-rfkvx                     kubernetes.io/service-account-token   3         5d</span><br><span class="line">kube-proxy-token-r017j                   kubernetes.io/service-account-token   3         5d</span><br><span class="line">kubernetes-dashboard-certs               Opaque                                2         2d</span><br><span class="line">kubernetes-dashboard-key-holder          Opaque                                2         4d</span><br><span class="line">kubernetes-dashboard-token-jzx4v         kubernetes.io/service-account-token   3         2d</span><br><span class="line">namespace-controller-token-3j3sn         kubernetes.io/service-account-token   3         5d</span><br><span class="line">node-controller-token-cnjsn              kubernetes.io/service-account-token   3         5d</span><br><span class="line">persistent-volume-binder-token-p1cwr     kubernetes.io/service-account-token   3         5d</span><br><span class="line">pod-garbage-collector-token-rbw2m        kubernetes.io/service-account-token   3         5d</span><br><span class="line">replicaset-controller-token-pt682        kubernetes.io/service-account-token   3         5d</span><br><span class="line">replication-controller-token-s2kb7       kubernetes.io/service-account-token   3         5d</span><br><span class="line">resourcequota-controller-token-xlrrh     kubernetes.io/service-account-token   3         5d</span><br><span class="line">service-account-controller-token-zlcph   kubernetes.io/service-account-token   3         5d</span><br><span class="line">service-controller-token-0cqs6           kubernetes.io/service-account-token   3         5d</span><br><span class="line">statefulset-controller-token-0p29q       kubernetes.io/service-account-token   3         5d</span><br><span class="line">token-cleaner-token-cq9nk                kubernetes.io/service-account-token   3         5d</span><br><span class="line">ttl-controller-token-gndzv               kubernetes.io/service-account-token   3         5d</span><br><span class="line">weave-net-token-w6grc                    kubernetes.io/service-account-token   3         5d</span><br><span class="line">[root@iZwz9f6pgul78p7die5tlzZ dashboard]# kc describe secret attachdetach-controller-token-vkm75 -n kube-system</span><br><span class="line">Name:		attachdetach-controller-token-vkm75</span><br><span class="line">Namespace:	kube-system</span><br><span class="line">Labels:		&lt;none&gt;</span><br><span class="line">Annotations:	kubernetes.io/service-account.name=attachdetach-controller</span><br><span class="line">		kubernetes.io/service-account.uid=691cdfc2-4612-11e8-8dc4-00163e0a39da</span><br><span class="line"></span><br><span class="line">Type:	kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">ca.crt:		1025 bytes</span><br><span class="line">namespace:	11 bytes</span><br><span class="line">token:		eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhdHRhY2hkZXRhY2gtY29udHJvbGxlci10b2tlbi12a203NSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhdHRhY2hkZXRhY2gtY29udHJvbGxlciIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjY5MWNkZmMyLTQ2MTItMTFlOC04ZGM0LTAwMTYzZTBhMzlkYSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTphdHRhY2hkZXRhY2gtY29udHJvbGxlciJ9.ZBoh8-i6882nHH_oaEhtUw7L-M-2kGgrV3dRqAFw1bQUbenOYCK_xqQFeW0gTpEmYa_-k2cukfHKgqtyCF2U_hr1mXikc4aAZzJubnszQhNnASzHFihi5AkZfxBBiqYjd8WUaUSms1VbvImvmSg_Ndrw3-SSB0B0b-sWEH4dAwcXx1_hN2V3GBXZjjdFHT51U6ogvwzs-YJ_Uk5GqWIPxPNHhGMFQtQL3vVIHpxumtG6xdoVRuDitMl0gH71gugSgjabNLPMjIHmApbI3BIeH9bX9jO271OdTzNGvKaBOx2xLRJBTvrk4bSyZsSdqrLkWlUVgCTw7VNLKpmgfNTMDQ</span><br></pre></td></tr></table></figure>
+
+<p>如上，这里有很多的<code>secret</code>存在于系统之中，每个<code>secret</code>都对应了一个<code>token</code>,但是这些<code>token</code>所对应的权限都不相同,所以不一定会符合我们的要求。</p>
+<p>这里我们需要创建一个名为admin的ServiceAccount并绑定名为cluster-admin的ClusterRole角色(该角色拥有集群最高权限)，使用下面的yaml文件创建admin用户并赋予他管理员权限，然后可以通过token登陆dashbaord。这种认证方式本质上是通过ServiceAccount的身份认证加上Bearer token请求API server的方式实现。<br>admin-token.yml</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">kind: ClusterRoleBinding</span><br><span class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</span><br><span class="line">metadata:</span><br><span class="line">  name: admin</span><br><span class="line">  annotations:</span><br><span class="line">    rbac.authorization.kubernetes.io/autoupdate: &quot;true&quot;</span><br><span class="line">roleRef:</span><br><span class="line">  kind: ClusterRole</span><br><span class="line">  name: cluster-admin</span><br><span class="line">  apiGroup: rbac.authorization.k8s.io</span><br><span class="line">subjects:</span><br><span class="line">- kind: ServiceAccount</span><br><span class="line">  name: admin</span><br><span class="line">  namespace: kube-system</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ServiceAccount</span><br><span class="line">metadata:</span><br><span class="line">  name: admin</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    kubernetes.io/cluster-service: &quot;true&quot;</span><br><span class="line">    addonmanager.kubernetes.io/mode: Reconcile</span><br></pre></td></tr></table></figure>
+
+<p>运行下面的命令:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl create -f admin-token.yml</span><br></pre></td></tr></table></figure>
+
+<p>然后我们可以通过如下的命令来获取admin ServiceAccount的token：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@iZwz9f6pgul78p7die5tlzZ ~]# kc get secret -n kube-system | grep admin</span><br><span class="line">admin-token-whj4t                        kubernetes.io/service-account-token   3         1d</span><br><span class="line">[root@iZwz9f6pgul78p7die5tlzZ ~]# kc describe secret/admin-token-whj4t -n kube-system</span><br><span class="line">Name:		admin-token-whj4t</span><br><span class="line">Namespace:	kube-system</span><br><span class="line">Labels:		&lt;none&gt;</span><br><span class="line">Annotations:	kubernetes.io/service-account.name=admin</span><br><span class="line">		kubernetes.io/service-account.uid=f2e69a6e-4a03-11e8-8dc4-00163e0a39da</span><br><span class="line"></span><br><span class="line">Type:	kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">ca.crt:		1025 bytes</span><br><span class="line">namespace:	11 bytes</span><br><span class="line">token:		eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi10b2tlbi13aGo0dCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhZG1pbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImYyZTY5YTZlLTRhMDMtMTFlOC04ZGM0LTAwMTYzZTBhMzlkYSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTphZG1pbiJ9.Nq6N7E7xY09sITcqa0WP3OeNo6Sp_se69q9aH3oM-gWDx7Sp_sbRn1VIBE-op9yG4XRbkoam-KVYhyX7QVATesYCF1fZ0p0ENcctAhmO9aEoQ1GS5I6W3DWrUXgWgaZJSrNHt-czHC_WUB3ilggaDcOEAqPEb3gYqrezyEarclQPNQZfHo3UNWjhjCqmm2vOEweCbyn9o0t8QHTTT_Pp26Bq1ho2B4HqGEeM8RHa175mG18eJQ5aRYuMM70Yp0uNyyMQmXnPTNzX0uHvU9uq-dSxxDRlq5bRg_l5bravtCsr51I-VMU9FyWd3OJWK0z1hrO76X1JrWfsbmzY3rVCSg</span><br></pre></td></tr></table></figure>
+
+<p>如上，我们得到了该用户的token,<strong>注意：这里的token是进行base64编码后的结果，而我们需要的是解码之后的结果</strong>,直接获取解码之后的token可以通过下面的命令实现:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl -n kube-system get secret admin-token-whj4t -o jsonpath=&#123;.data.token&#125;|base64 -d</span><br></pre></td></tr></table></figure>
+
+<p>这样，我们将解码之后的token复制出来，填入dashboard认证表单中就可以进入dashboard并且获取全集群的最高权限。</p>
+<h1 id="基于kubeconfig的认证"><a href="#基于kubeconfig的认证" class="headerlink" title="基于kubeconfig的认证"></a>基于kubeconfig的认证</h1><p>如何生成kubeconfig文件请参考创建<a href="https://jimmysong.io/kubernetes-handbook/guide/kubectl-user-authentication-authorization.html" target="_blank" rel="noopener">用户认证授权的kubeconfig文件</a>。</p>
+<p>注意参考文章中生成的kubeconfig文件中没有token字段，如果我们要使用<code>kubeconfig</code>登录dashboard则需要手动添加该字段。</p>
+<p>对于访问<code>dashboard</code>时候使用的<code>kubeconfig</code>文件如<code>brand.kubeconfig</code>必须追到<code>token</code>字段，否则认证不会通过。而使用<code>kubectl</code>命令时的用的<code>kubeconfig</code>文件则不需要包含token字段。</p>
+<p>kubeconfig的认证可以让拥有该kubeconfig的用户只拥有一个或几个命名空间的操作权限，这相比与上面的token的方式更加的精确和安全。kubeconfig也可以针对<code>kubectl</code>:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cp -f brand.kubeconfig　~/.kube/config</span><br></pre></td></tr></table></figure>
+
+<p>这样，该用户就只具有brand.kubeconfig文件所确定的命名空间的操作权限了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          
+            <a href="/tags/dashboard/" rel="tag"># dashboard</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/24/setup-k8s-dashboard-on-cluster/" rel="next" title="为集群配置安装kubernetes-dashboard插件">
+                <i class="fa fa-chevron-left"></i> 为集群配置安装kubernetes-dashboard插件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/25/heapster-in-kubernetes/" rel="prev" title="在k8s-dashboard中集成heapster">
+                在k8s-dashboard中集成heapster <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Andrew</p>
+              <p class="site-description motion-element" itemprop="description">All In</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Andrewpqc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/Andrewpqc" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-twitter"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+            <div class="cc-license motion-element" itemprop="license">
+              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" target="_blank">
+                <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons">
+              </a>
+            </div>
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RBAC-in-K8s"><span class="nav-number">1.</span> <span class="nav-text">RBAC in K8s</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#测试环境中的认证"><span class="nav-number">2.</span> <span class="nav-text">测试环境中的认证</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基于token的认证"><span class="nav-number">3.</span> <span class="nav-text">基于token的认证</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基于kubeconfig的认证"><span class="nav-number">4.</span> <span class="nav-text">基于kubeconfig的认证</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Andrew</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'Andrewpqc',
+            repo: 'Andrewpqc.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '9818a8396dd5aaf98091709c9274940a6f328051',
+            
+                client_id: '029af9cf84c41d6be7ba'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>
