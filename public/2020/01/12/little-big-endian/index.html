@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="主机字节序在网络编程中涉及到的IP地址和端口号通常是多字节整数，多字节整数在不同的硬件结构上字节序可能不同。所谓字节序指的是对于存储需要多个字节（大于 1 字节）的整数来说，其每个字节在不同的机器内存中存储的顺序。这就是所谓的主机字节序，一般分为两类： 下图为ox1234567用不同的字节序存储时的示意图 大端序(big endian)内存地址从小到大，先存储多字节整数的最高有效位，称之为大端序。">
+<meta name="description" content="主机字节序在网络编程中涉及到的IP地址和端口号通常是多字节整数，多字节整数在不同的硬件结构上字节序可能不同。所谓字节序指的是对于存储需要多个字节（大于 1 字节）的整数来说，其每个字节在不同的机器内存中存储的顺序。这就是所谓的主机字节序，一般分为两类： 大端序(big endian)内存地址从小到大，先存储多字节整数的最高有效位，称之为大端序。 小端序(little endian)内存地址从小到大">
 <meta property="og:type" content="article">
 <meta property="og:title" content="网络字节序与主机字节序">
 <meta property="og:url" content="http://andrewpqc.github.io/2020/01/12/little-big-endian/index.html">
 <meta property="og:site_name" content="Andrew&#39;s Blog">
-<meta property="og:description" content="主机字节序在网络编程中涉及到的IP地址和端口号通常是多字节整数，多字节整数在不同的硬件结构上字节序可能不同。所谓字节序指的是对于存储需要多个字节（大于 1 字节）的整数来说，其每个字节在不同的机器内存中存储的顺序。这就是所谓的主机字节序，一般分为两类： 下图为ox1234567用不同的字节序存储时的示意图 大端序(big endian)内存地址从小到大，先存储多字节整数的最高有效位，称之为大端序。">
+<meta property="og:description" content="主机字节序在网络编程中涉及到的IP地址和端口号通常是多字节整数，多字节整数在不同的硬件结构上字节序可能不同。所谓字节序指的是对于存储需要多个字节（大于 1 字节）的整数来说，其每个字节在不同的机器内存中存储的顺序。这就是所谓的主机字节序，一般分为两类： 大端序(big endian)内存地址从小到大，先存储多字节整数的最高有效位，称之为大端序。 小端序(little endian)内存地址从小到大">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="http://andrewpqc.github.io/images/big-little-endian.gif">
 <meta property="og:updated_time" content="2020-01-12T06:48:02.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="网络字节序与主机字节序">
-<meta name="twitter:description" content="主机字节序在网络编程中涉及到的IP地址和端口号通常是多字节整数，多字节整数在不同的硬件结构上字节序可能不同。所谓字节序指的是对于存储需要多个字节（大于 1 字节）的整数来说，其每个字节在不同的机器内存中存储的顺序。这就是所谓的主机字节序，一般分为两类： 下图为ox1234567用不同的字节序存储时的示意图 大端序(big endian)内存地址从小到大，先存储多字节整数的最高有效位，称之为大端序。">
+<meta name="twitter:description" content="主机字节序在网络编程中涉及到的IP地址和端口号通常是多字节整数，多字节整数在不同的硬件结构上字节序可能不同。所谓字节序指的是对于存储需要多个字节（大于 1 字节）的整数来说，其每个字节在不同的机器内存中存储的顺序。这就是所谓的主机字节序，一般分为两类： 大端序(big endian)内存地址从小到大，先存储多字节整数的最高有效位，称之为大端序。 小端序(little endian)内存地址从小到大">
 <meta name="twitter:image" content="http://andrewpqc.github.io/images/big-little-endian.gif">
 
 
@@ -364,9 +364,9 @@
 
       
         <h1 id="主机字节序"><a href="#主机字节序" class="headerlink" title="主机字节序"></a>主机字节序</h1><p>在网络编程中涉及到的IP地址和端口号通常是多字节整数，多字节整数在不同的硬件结构上字节序可能不同。所谓字节序指的是对于存储需要多个字节（大于 1 字节）的整数来说，其每个字节在不同的机器内存中存储的顺序。这就是所谓的<code>主机字节序</code>，一般分为两类：</p>
-<p>下图为ox1234567用不同的字节序存储时的示意图<br><img src="/images/big-little-endian.gif" alt></p>
 <h2 id="大端序-big-endian"><a href="#大端序-big-endian" class="headerlink" title="大端序(big endian)"></a>大端序(big endian)</h2><p>内存地址从小到大，先存储多字节整数的最高有效位，称之为大端序。</p>
 <h2 id="小端序-little-endian"><a href="#小端序-little-endian" class="headerlink" title="小端序(little endian)"></a>小端序(little endian)</h2><p>内存地址从小到大，先存储多字节整数的最低有效位，称之为小端序。</p>
+<p>下图为ox1234567用不同的字节序存储时的示意图<br><img src="/images/big-little-endian.gif" alt></p>
 <h1 id="网络字节序"><a href="#网络字节序" class="headerlink" title="网络字节序"></a>网络字节序</h1><p>为了在信息传输时，屏蔽掉不同硬件结构上的字节序的差异，TCP/IP协议规定，所有在网络上传输的多字节整数都以大端序编码，所以大端序就是<code>网络字节序</code>.</p>
 <h1 id="主机字节序与网络字节序之间的转换"><a href="#主机字节序与网络字节序之间的转换" class="headerlink" title="主机字节序与网络字节序之间的转换"></a>主机字节序与网络字节序之间的转换</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="comment">//host to net long</span></span><br><span class="line"><span class="keyword">uint32_t</span> htonl(<span class="keyword">uint32_t</span> hostlong);</span><br><span class="line"><span class="comment">//host to net short</span></span><br><span class="line"><span class="keyword">uint16_t</span> htons(<span class="keyword">uint16_t</span> hostshort);</span><br><span class="line"></span><br><span class="line"><span class="comment">//net to host long</span></span><br><span class="line"><span class="keyword">uint32_t</span> ntohl(<span class="keyword">uint32_t</span> netlong);</span><br><span class="line"><span class="comment">//net to host short</span></span><br><span class="line"><span class="keyword">uint16_t</span> ntohs(<span class="keyword">uint16_t</span> netshort);</span><br></pre></td></tr></table></figure>
 
