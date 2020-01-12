@@ -79,17 +79,20 @@
 
 
 
-<meta name="description" content="All In">
+<meta name="description" content="CPU缓存与缓存行多核时代的到来使得并发编程愈来愈受到关注，这一节我们来了解一下号称多核并发编程中的性能刺客的伪共享(False Sharing)。要了解伪共享还得从CPU缓存讲起。 CPU缓存是位于CPU和主存之间的临时存储器，它的容量比主存小得多但是交换速度比主存快得多。CPU缓存的基本单位是缓存行(Cache Line),缓存行的大小通常是64字节。一个缓存行与一块连续的64字节大小的主存对">
 <meta property="og:type" content="article">
 <meta property="og:title" content="伪共享">
 <meta property="og:url" content="http://andrewpqc.github.io/2020/01/11/false-sharing/index.html">
 <meta property="og:site_name" content="Andrew&#39;s Blog">
-<meta property="og:description" content="All In">
+<meta property="og:description" content="CPU缓存与缓存行多核时代的到来使得并发编程愈来愈受到关注，这一节我们来了解一下号称多核并发编程中的性能刺客的伪共享(False Sharing)。要了解伪共享还得从CPU缓存讲起。 CPU缓存是位于CPU和主存之间的临时存储器，它的容量比主存小得多但是交换速度比主存快得多。CPU缓存的基本单位是缓存行(Cache Line),缓存行的大小通常是64字节。一个缓存行与一块连续的64字节大小的主存对">
 <meta property="og:locale" content="en">
+<meta property="og:image" content="http://andrewpqc.github.io/images/cpu_cache.png">
+<meta property="og:image" content="http://andrewpqc.github.io/images/cache-line-false-sharing.png">
 <meta property="og:updated_time" content="2020-01-11T13:34:41.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="伪共享">
-<meta name="twitter:description" content="All In">
+<meta name="twitter:description" content="CPU缓存与缓存行多核时代的到来使得并发编程愈来愈受到关注，这一节我们来了解一下号称多核并发编程中的性能刺客的伪共享(False Sharing)。要了解伪共享还得从CPU缓存讲起。 CPU缓存是位于CPU和主存之间的临时存储器，它的容量比主存小得多但是交换速度比主存快得多。CPU缓存的基本单位是缓存行(Cache Line),缓存行的大小通常是64字节。一个缓存行与一块连续的64字节大小的主存对">
+<meta name="twitter:image" content="http://andrewpqc.github.io/images/cpu_cache.png">
 
 
 
@@ -302,6 +305,28 @@
           </span>
 
           
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OS/" itemprop="url" rel="index">
+                    <span itemprop="name">OS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -339,7 +364,20 @@
       
 
       
-        
+        <h1 id="CPU缓存与缓存行"><a href="#CPU缓存与缓存行" class="headerlink" title="CPU缓存与缓存行"></a>CPU缓存与缓存行</h1><p>多核时代的到来使得并发编程愈来愈受到关注，这一节我们来了解一下号称多核并发编程中的性能刺客的伪共享(False Sharing)。要了解伪共享还得从CPU缓存讲起。<br><img src="/images/cpu_cache.png" alt></p>
+<p>CPU缓存是位于CPU和主存之间的临时存储器，它的容量比主存小得多但是交换速度比主存快得多。CPU缓存的基本单位是缓存行(Cache Line),缓存行的大小通常是64字节。一个缓存行与一块连续的64字节大小的主存对应。</p>
+<h1 id="伪共享"><a href="#伪共享" class="headerlink" title="伪共享"></a>伪共享</h1><p><img src="/images/cache-line-false-sharing.png" alt></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="keyword">struct</span> Test &#123;</span><br><span class="line">     X <span class="keyword">uint64</span></span><br><span class="line">     Y <span class="keyword">uint64</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上图所示,T变量的X,Y两个成员被缓存在了同一个Cache Line中，并且Core1和Core2都缓存了一份。一旦一个Core修改了成员X或者Y,就会触发缓存一致性协议，导致对方Core的缓存失效，从而对方Core需要从上一级缓存中重新加载Cache Line, 而这个开销是及其昂贵的。这里描述的不同core上的执行流并发写同一个变量，相互失效对方core的缓存行就是所谓的伪共享(False Sharing).</p>
+<h1 id="规避"><a href="#规避" class="headerlink" title="规避"></a>规避</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl -a | grep cache | grep size</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">fs.generic.nfs.server.reqcache_size: 64</span><br><span class="line">hw.l3cachesize: 3145728</span><br><span class="line">hw.l2cachesize: 262144</span><br><span class="line">hw.l1dcachesize: 32768</span><br><span class="line">hw.l1icachesize: 32768</span><br><span class="line">hw.cachelinesize: 64</span><br><span class="line">hw.cachesize: 8589934592 32768 262144 3145728 0 0 0 0 0 0</span><br><span class="line">machdep.cpu.cache.size: 256</span><br><span class="line">machdep.cpu.cache.linesize: 64</span><br></pre></td></tr></table></figure>
+
+<p>规避方法很简单，找到系统的cache line大小，在成员X,Y中间插入padding成员，将X,Y分到不同的缓冲行中即可。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="keyword">struct</span> Test &#123;</span><br><span class="line">     X <span class="keyword">uint64</span>    <span class="comment">// 8</span></span><br><span class="line">     p [<span class="number">7</span>]<span class="keyword">uint64</span> <span class="comment">// 56 padding   </span></span><br><span class="line">     Y <span class="keyword">uint64</span>    <span class="comment">// 8</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
       
     </div>
     
@@ -372,6 +410,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/01/12/little-big-endian/" rel="prev" title="网络字节序与主机字节序">
+                网络字节序与主机字节序 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -430,8 +472,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -446,7 +497,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -513,6 +564,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CPU缓存与缓存行"><span class="nav-number">1.</span> <span class="nav-text">CPU缓存与缓存行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#伪共享"><span class="nav-number">2.</span> <span class="nav-text">伪共享</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#规避"><span class="nav-number">3.</span> <span class="nav-text">规避</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
